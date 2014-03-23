@@ -24,7 +24,8 @@ from .Core import Coordinate
 from .Geo import MercatorProjection, deriveTransformation
 from .Providers import IMapProvider
 
-import random, Tiles
+import random
+from ModestMaps import Tiles
 
 class AbstractProvider(IMapProvider):
     def __init__(self):
