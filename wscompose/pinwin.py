@@ -15,8 +15,8 @@ import wscompose.dithering
 
 import re
 import urllib.request, urllib.parse, urllib.error
-import Image
-import ImageDraw
+from PIL import Image
+from PIL import ImageDraw
 import io
 import ModestMaps
 from . import validate

@@ -9,7 +9,7 @@ __copyright__  = "Copyright (c) 2007-2008 Aaron Straup Cope. BSD license : http:
 
 import urllib.request, urllib.parse, urllib.error
 import http.client
-import Image
+from PIL import Image
 import io
 import string
 import re

@@ -64,8 +64,6 @@
 
 __version__ = 'N.N.N'
 
-import sys
-import urllib.request, urllib.parse, urllib.error
 import http.client
 import urllib.parse
 import io
@@ -74,22 +72,13 @@ import _thread
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-try:
-    import Image
-except ImportError:
-    try:
-        import PIL.Image as Image
-    except ImportError:
-        # you need PIL to do any actual drawing, but
-        # maybe that's not what you're using MMaps for?
-        Image = None
+import PIL.Image as Image
 
 from . import Tiles
 from . import Providers
 from . import Core
 from . import Geo
 from . import Yahoo, Microsoft, BlueMarble, OpenStreetMap, CloudMade, MapQuest, Stamen
-import time
 
 # a handy list of possible providers, which isn't
 # to say that you can't go writing your own.

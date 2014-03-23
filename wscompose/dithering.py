@@ -8,7 +8,7 @@ __date__       = "$Date: 2008/01/04 06:23:46 $"
 __copyright__  = "Copyright (c) 2007-2008 Aaron Straup Cope. BSD license : http://www.modestmaps.com/license."
 
 import wscompose
-import Image
+from PIL import Image
 
 # DEPRECATED
 # TO BE REBLESSED AS A PROPER PROVIDER
