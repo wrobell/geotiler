@@ -72,6 +72,7 @@ import io
 import math
 import _thread
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 try:
     import Image
@@ -314,6 +315,12 @@ class TileRequest:
             if verbose:
                 printlocked(lock, 'Failed', urls, '- attempt no.', attempt, 'in thread', hex(_thread.get_ident()))
 
+            print(ex)
+            raise ex # FIXME: figure out better error handling strategy
+                     # before making another download attempt to avoid
+                     # unnecessary server request while dealing with
+                     # ModestMaps errors
+
             if attempt < TileRequest.MAX_ATTEMPTS:
                 time.sleep(1 * attempt)
                 return self.load(lock, verbose, cache, fatbits_ok, attempt+1, scale)
@@ -523,22 +530,13 @@ class Map:
     def render_tiles(self, tiles, img_width, img_height, verbose=False, fatbits_ok=False):
         
         lock = _thread.allocate_lock()
-        threads = 32
         cache = {}
-        
-        for off in range(0, len(tiles), threads):
-            pool = tiles[off:(off + threads)]
-            
-            for tile in pool:
-                # request all needed images
-                _thread.start_new_thread(tile.load, (lock, verbose, cache, fatbits_ok))
-                
-            # if it takes any longer than 20 sec overhead + 10 sec per tile, give up
-            due = time.time() + 20 + len(pool) * 10
-            
-            while time.time() < due and pool.pending():
-                # hang around until they are loaded or we run out of time...
-                time.sleep(1)
+
+        # if it takes any longer than 20 sec overhead + 10 sec per tile, give up
+        timeout = 20 + len(tiles) * 10
+        pool = ThreadPoolExecutor(max_workers=32)
+        pool.map(lambda tile: tile.load(lock, verbose, cache, fatbits_ok), tiles, timeout=timeout)
+        pool.shutdown()
 
         mapImg = Image.new('RGB', (img_width, img_height))
         
