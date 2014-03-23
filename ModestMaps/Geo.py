@@ -44,7 +44,7 @@
 """
 
 import math
-from Core import Point, Coordinate
+from .Core import Point, Coordinate
 
 class Location:
     def __init__(self, lat, lon):
@@ -92,7 +92,7 @@ def linearSolution(r1, s1, t1, r2, s2, t2, r3, s3, t3):
     """
 
     # make them all floats
-    r1, s1, t1, r2, s2, t2, r3, s3, t3 = map(float, (r1, s1, t1, r2, s2, t2, r3, s3, t3))
+    r1, s1, t1, r2, s2, t2, r3, s3, t3 = list(map(float, (r1, s1, t1, r2, s2, t2, r3, s3, t3)))
 
     a = (((t2 - t3) * (s1 - s2)) - ((t1 - t2) * (s2 - s3))) \
       / (((r2 - r3) * (s1 - s2)) - ((r1 - r2) * (s2 - s3)))

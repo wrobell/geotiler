@@ -140,7 +140,7 @@ microsoftToCorners = {'00': '0', '01': '1', '10': '2', '11': '3'}
 def fromMicrosoft(s):
     """ Return column, row, zoom for Microsoft tile string.
     """
-    row, col = map(fromBinaryString, zip(*[list(microsoftFromCorners[c]) for c in s]))
+    row, col = list(map(fromBinaryString, list(zip(*[list(microsoftFromCorners[c]) for c in s]))))
     zoom = len(s)
     return col, row, zoom
 

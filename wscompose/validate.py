@@ -8,7 +8,7 @@ __copyright__  = "Copyright (c) 2007-2008 Aaron Straup Cope. BSD license : http:
 
 import re
 import string
-import urlparse
+import urllib.parse
 
 class validate :
 
@@ -27,7 +27,7 @@ class validate :
     
     def regexp (self, label, string) :
 
-        if not self.re.has_key(label) :
+        if label not in self.re :
             return False
 
         return self.re[label].match(string)
@@ -38,8 +38,8 @@ class validate :
 
         for i in required :
 
-            if not args.has_key(i) :
-                raise Exception, "Required argument %s missing" % i
+            if i not in args :
+                raise Exception("Required argument %s missing" % i)
             
         return True
 
@@ -50,22 +50,22 @@ class validate :
         bbox = input.split(",")
         
         if len(bbox) != 4 :
-            raise Exception, "Missing or incomplete %s parameter" % 'bbox'
+            raise Exception("Missing or incomplete %s parameter" % 'bbox')
         
-        bbox = map(string.strip, bbox)
+        bbox = list(map(string.strip, bbox))
         
         for pt in bbox :
             if not self.regexp('coord', pt) :
-                raise Exception, "Not a valid lat/long : %s" % pt
+                raise Exception("Not a valid lat/long : %s" % pt)
             
-        return map(float, bbox)
+        return list(map(float, bbox))
 
     # ##########################################################
 
     def bbox_adjustment (self, input) :
 
         if not self.regexp('adjust', str(input)) :
-            raise Exception, "Not a valid adjustment %s " % input
+            raise Exception("Not a valid adjustment %s " % input)
 
         return float(input)
     
@@ -74,7 +74,7 @@ class validate :
     def latlon (self, input) :
 
         if not self.regexp('coord', input) :
-            raise Exception, "Not a valid lat/long : %s" % input
+            raise Exception("Not a valid lat/long : %s" % input)
 
         return float(input)
 
@@ -104,7 +104,7 @@ class validate :
         input = input.upper()
 
         if not self.regexp('provider', input) :
-            raise Exception, "Not a valid provider : %s" % input
+            raise Exception("Not a valid provider : %s" % input)
 
         return input
 
@@ -113,9 +113,9 @@ class validate :
     def marker_label (self, input) :
 
         if not self.regexp('label', input) :
-            raise Exception, "Not a valid marker label"
+            raise Exception("Not a valid marker label")
 
-        return unicode(input)
+        return str(input)
     
     # ##########################################################
 
@@ -128,10 +128,10 @@ class validate :
             marker_data = {'width':75, 'height':75, 'adjust_cone_height' : 0}
             
             details = pos.split(",")
-            details = map(string.strip, details)
+            details = list(map(string.strip, details))
             
             if len(details) < 3 :
-                raise Exception, "Missing or incomplete %s parameter : %s" % ('marker', pos)
+                raise Exception("Missing or incomplete %s parameter : %s" % ('marker', pos))
 
             #
             # Magic center/zoom markers
@@ -144,13 +144,13 @@ class validate :
                 
                 try : 
                     marker_data['provider'] = self.provider(details[1])
-                except Exception, e :
-                    raise Exception, e 
+                except Exception as e :
+                    raise Exception(e) 
 
                 try : 
                     marker_data['zoom'] = self.zoom(details[2])
-                except Exception, e :
-                    raise Exception, e 
+                except Exception as e :
+                    raise Exception(e) 
 
             #
             # Pinwin name/label
@@ -160,20 +160,20 @@ class validate :
             
                 try :
                     marker_data['label'] = self.marker_label(details[0])
-                except Exception, e :
-                    raise Exception, e
+                except Exception as e :
+                    raise Exception(e)
 
                 # Pinwin location
             
                 try :
                     marker_data['latitude'] = self.latlon(details[1])
-                except Exception, e :
-                    raise Exception, e
+                except Exception as e :
+                    raise Exception(e)
 
                 try :
                     marker_data['longitude'] = self.latlon(details[2])
-                except Exception, e :
-                    raise Exception, e
+                except Exception as e :
+                    raise Exception(e)
 
             #
             # Shared
@@ -186,29 +186,29 @@ class validate :
             if len(details) > 3 :
 
                 if len(details) < 4 :
-                    raise Exception, "Missing height parameter"
+                    raise Exception("Missing height parameter")
                 
                 try :
                     marker_data['width'] = self.dimension(details[3])
-                except Exception, e :
-                    raise Exception, e
+                except Exception as e :
+                    raise Exception(e)
                 
                 try : 
                     marker_data['height'] = self.dimension(details[4])
-                except Exception, e :
-                    raise Exception, e
+                except Exception as e :
+                    raise Exception(e)
             
             # URI for content to fill the pinwin with
             
             if len(details) > 5 :
 
                 try :
-                    parts = urlparse.urlparse(details[5])
-                except Exception, e :
-                    raise Exception, e
+                    parts = urllib.parse.urlparse(details[5])
+                except Exception as e :
+                    raise Exception(e)
 
                 if parts[1] == '' and parts[0] != 'file' :
-                    raise Exception, "Unknown URL"
+                    raise Exception("Unknown URL")
                 
                 marker_data['fill'] = details[5]
 
@@ -227,29 +227,29 @@ class validate :
         for pos in plots :
 
             details = pos.split(",")
-            details = map(string.strip, details)
+            details = list(map(string.strip, details))
             
             if len(details) < 3 :
-                raise Exception, "Missing or incomplete %s parameter : %s" % ('plot', pos)
+                raise Exception("Missing or incomplete %s parameter : %s" % ('plot', pos))
 
             data = {}
             
             try :
                 data['label'] = self.marker_label(details[0])
-            except Exception, e :
-                raise Exception, e
+            except Exception as e :
+                raise Exception(e)
 
             # Pinwin location
             
             try :
                 data['latitude'] = self.latlon(details[1])
-            except Exception, e :
-                raise Exception, e
+            except Exception as e :
+                raise Exception(e)
 
             try :
                 data['longitude'] = self.latlon(details[2])
-            except Exception, e :
-                raise Exception, e
+            except Exception as e :
+                raise Exception(e)
 
             valid.append(data)
 
@@ -264,38 +264,38 @@ class validate :
         for pos in dots :
 
             details = pos.split(",")
-            details = map(string.strip, details)
+            details = list(map(string.strip, details))
             cnt = len(details)
             
             if cnt < 3 :
-                raise Exception, "Missing or incomplete %s parameter : %s" % ('dot', pos)
+                raise Exception("Missing or incomplete %s parameter : %s" % ('dot', pos))
 
             data = {}
             
             try :
                 data['label'] = self.marker_label(details[0])
-            except Exception, e :
-                raise Exception, e
+            except Exception as e :
+                raise Exception(e)
 
             # Pinwin location
             
             try :
                 data['latitude'] = self.latlon(details[1])
-            except Exception, e :
-                raise Exception, e
+            except Exception as e :
+                raise Exception(e)
 
             try :
                 data['longitude'] = self.latlon(details[2])
-            except Exception, e :
-                raise Exception, e
+            except Exception as e :
+                raise Exception(e)
 
             #
             
             if cnt > 3 :
                 try :
                     data['radius'] = self.radius(details[3])
-                except Exception, e :
-                    raise Exception, e
+                except Exception as e :
+                    raise Exception(e)
 
             else :
                 data['radius'] = 18
@@ -329,9 +329,9 @@ class validate :
                 coord = pt.split(",")
 
                 if len(coord) != 2 :
-                    raise Exception, "Polyline coordinate missing data"
+                    raise Exception("Polyline coordinate missing data")
                 
-                (lat, lon) = map(string.strip, coord) 
+                (lat, lon) = list(map(string.strip, coord)) 
                 
                 lat = self.latlon(lat)
                 lon = self.latlon(lon)
@@ -351,7 +351,7 @@ class validate :
         for label in hulls :
             
             if not self.regexp('hull', label)  :
-                raise Exception, "Unknown marker type for convex hulls"
+                raise Exception("Unknown marker type for convex hulls")
 
             valid.append(label)
 
@@ -362,7 +362,7 @@ class validate :
     def json_callback(self, func) :
 
         if not self.re['label'].match(func) :
-            raise Exception, "Invalid JSON callback name"
+            raise Exception("Invalid JSON callback name")
         
         return func
     
@@ -371,7 +371,7 @@ class validate :
     def __num (self, input) :
 
         if not self.regexp('num', input) :
-            raise Exception, "Not a valid number : %s" % p
+            raise Exception("Not a valid number : %s" % p)
 
         return int(input)
 

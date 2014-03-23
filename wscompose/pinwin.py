@@ -8,18 +8,18 @@ __date__       = "$Date: 2008/01/04 06:23:46 $"
 __copyright__  = "Copyright (c) 2007-2008 Aaron Straup Cope. BSD license : http://www.modestmaps.com/license."
 
 import wscompose
-import convexhull
+from . import convexhull
 
 import wscompose.plotting
 import wscompose.dithering
 
 import re
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import Image
 import ImageDraw
-import StringIO
+import io
 import ModestMaps
-import validate
+from . import validate
 
 # TO DO (patches are welcome) :
 #
@@ -32,31 +32,31 @@ class handler (wscompose.plotting.handler, wscompose.dithering.handler) :
 
         img = wscompose.handler.draw_map(self)
 
-        if self.ctx.has_key('filter') and self.ctx['filter'] == 'atkinson' :
+        if 'filter' in self.ctx and self.ctx['filter'] == 'atkinson' :
             img = self.atkinson_dithering(img)
 
         #
 
-        if self.ctx.has_key('polylines') :
+        if 'polylines' in self.ctx :
             img = self.draw_polylines(img)
 
         #
 
-        if self.ctx.has_key('hulls') :
+        if 'hulls' in self.ctx :
             img = self.draw_convex_hulls(img)
             
         #
         
-        if self.ctx.has_key('dots') :
+        if 'dots' in self.ctx :
             img = self.draw_dots(img)
 
         #
         
-        if self.ctx.has_key('markers') :
+        if 'markers' in self.ctx :
 
             self.reposition_markers()
             
-            if self.ctx.has_key('bleed') :
+            if 'bleed' in self.ctx :
                 img = self.draw_markers_with_bleed(img)                
             else :
                 img = self.draw_markers(img)            
@@ -71,7 +71,7 @@ class handler (wscompose.plotting.handler, wscompose.dithering.handler) :
 
         wscompose.handler.send_x_headers(self, img)
         
-        if self.ctx.has_key('markers') :
+        if 'markers' in self.ctx :
             
             for mrk_data in self.ctx['markers'] :
             
@@ -85,7 +85,7 @@ class handler (wscompose.plotting.handler, wscompose.dithering.handler) :
                            mrk_data['x_fill'], mrk_data['y_fill'],
                            mrk_data['width'], mrk_data['height'])
                 
-                details = map(str, details)
+                details = list(map(str, details))
                 header = "X-wscompose-Marker-%s" % mrk_data['label']
                 sep = ","
                 
@@ -93,7 +93,7 @@ class handler (wscompose.plotting.handler, wscompose.dithering.handler) :
 
         #
 
-        if self.ctx.has_key('dots') :
+        if 'dots' in self.ctx :
             for data in self.ctx['dots'] :
 
                 pt = self.latlon_to_point(data['latitude'], data['longitude'])
@@ -299,7 +299,7 @@ class handler (wscompose.plotting.handler, wscompose.dithering.handler) :
         # center/zoom markers...
         #
         
-        if mrk_data.has_key('fill') and mrk_data['fill'] == 'center' :
+        if 'fill' in mrk_data and mrk_data['fill'] == 'center' :
             if self.ctx['method'] == 'center' :
                 mrk_data['latitude'] = self.ctx['latitude']
                 mrk_data['longitude'] = self.ctx['longitude']
@@ -316,21 +316,21 @@ class handler (wscompose.plotting.handler, wscompose.dithering.handler) :
         # Magic global fill in with a map hack
         #
         
-        if self.ctx.has_key('fill') :
+        if 'fill' in self.ctx :
             mrk_data['fill'] = 'center'
             mrk_data['provider'] = self.ctx['fill']
             mrk_data['zoom'] = self.ctx['fill_zoom']
 
         try :
             fill = self.fetch_marker_fill(mrk_data)
-        except Exception, e :
+        except Exception as e :
             return False
 
         #
         # Magic global fill in with a map hack
         #
 
-        if self.ctx.has_key('fill') :
+        if 'fill' in self.ctx :
             # add centering dot
             # (flickr pink)
         
@@ -386,7 +386,7 @@ class handler (wscompose.plotting.handler, wscompose.dithering.handler) :
     
     def fetch_marker_fill (self, mrk_data) :
         
-        if mrk_data.has_key('fill') and mrk_data['fill'] == 'center' :
+        if 'fill' in mrk_data and mrk_data['fill'] == 'center' :
                 
             args = {'height': mrk_data['height'],
                     'width' : mrk_data['width'],
@@ -401,7 +401,7 @@ class handler (wscompose.plotting.handler, wscompose.dithering.handler) :
             if host == '' :
                 host = "127.0.0.1"
                 
-            params = urllib.urlencode(args)
+            params = urllib.parse.urlencode(args)
             
             url = "http://%s:%s?%s" % (host, port, params)
             
@@ -410,8 +410,8 @@ class handler (wscompose.plotting.handler, wscompose.dithering.handler) :
             
         #
         
-        data = urllib.urlopen(url).read()
-        return Image.open(StringIO.StringIO(data)).convert('RGBA')        
+        data = urllib.request.urlopen(url).read()
+        return Image.open(io.StringIO(data)).convert('RGBA')        
     
     # ##########################################################
 
@@ -430,11 +430,11 @@ class handler (wscompose.plotting.handler, wscompose.dithering.handler) :
         # markers
         #
 
-        if params.has_key('marker') :
+        if 'marker' in params :
 
             try :
                 valid['markers'] = validator.markers(params['marker'])
-            except Exception, e :
+            except Exception as e :
                 self.error(141, e)
                 return False
 
@@ -442,7 +442,7 @@ class handler (wscompose.plotting.handler, wscompose.dithering.handler) :
         # magic!
         #
         
-        if params.has_key('fill') :
+        if 'fill' in params :
 
             re_provider = re.compile(r"^(YAHOO|MICROSOFT)_(ROAD|HYBRID|AERIAL)$")
             re_num = re.compile(r"^\d+$")
@@ -451,9 +451,9 @@ class handler (wscompose.plotting.handler, wscompose.dithering.handler) :
                 self.error(102, "Not a valid marker provider")
                 return False
 
-            valid['fill'] = unicode(params['fill'][0].upper())
+            valid['fill'] = str(params['fill'][0].upper())
 
-            if params.has_key('fill_accuracy') :
+            if 'fill_accuracy' in params :
                 
                 if not re_num.match(params['fill_accuracy'][0]) :
                     self.error(102, "Not a valid number %s" % 'accuracy')
@@ -466,12 +466,12 @@ class handler (wscompose.plotting.handler, wscompose.dithering.handler) :
 
         #
 
-        if params.has_key('bleed') :
+        if 'bleed' in params :
             valid['bleed'] = True
             
         #
 
-        if params.has_key('filter') :
+        if 'filter' in params :
 
             valid_filters = ('atkinson')
             
@@ -485,11 +485,11 @@ class handler (wscompose.plotting.handler, wscompose.dithering.handler) :
         # dots
         #
 
-        if params.has_key('dot') :
+        if 'dot' in params :
 
             try :
                 valid['dots'] = validator.dots(params['dot'])
-            except Exception, e :
+            except Exception as e :
                 self.error(141, e)
                 return False
 
@@ -497,11 +497,11 @@ class handler (wscompose.plotting.handler, wscompose.dithering.handler) :
         # polylines
         #
 
-        if params.has_key('polyline') :
+        if 'polyline' in params :
 
             try :
                 valid['polylines'] = validator.polylines(params['polyline'])
-            except Exception, e :
+            except Exception as e :
                 self.error(142, e)
                 return False
 
@@ -509,11 +509,11 @@ class handler (wscompose.plotting.handler, wscompose.dithering.handler) :
         #
         #
 
-        if params.has_key('convex') :
+        if 'convex' in params :
 
             try :
                 valid['hulls'] = validator.convex(params['convex'])
-            except Exception, e :
+            except Exception as e :
                 self.error(143, e)
                 return False
 
@@ -521,7 +521,7 @@ class handler (wscompose.plotting.handler, wscompose.dithering.handler) :
         # shadows
         #
 
-        if params.has_key('noshadow') :
+        if 'noshadow' in params :
             valid['shadows'] = False
         else :
             valid['shadows'] = True

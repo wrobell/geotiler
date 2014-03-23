@@ -45,7 +45,7 @@ parser.add_option('-d', '--dimensions', dest='dimensions', nargs=2,
                   action='store')
 
 parser.add_option('-p', '--provider', dest='provider',
-                  help='Map Provider, one of ' + ', '.join(ModestMaps.builtinProviders.keys()) + ' or URL template like "http://example.com/{Z}/{X}/{Y}.png".',
+                  help='Map Provider, one of ' + ', '.join(list(ModestMaps.builtinProviders.keys())) + ' or URL template like "http://example.com/{Z}/{X}/{Y}.png".',
                   action='store')
 
 parser.add_option('-k', '--apikey', dest='apikey',
@@ -123,15 +123,15 @@ if __name__ == '__main__':
         else:
             raise BadComposure("Error: not really sure what's going on.")
 
-    except BadComposure, e:
-        print >> sys.stderr, parser.usage
-        print >> sys.stderr, ''
-        print >> sys.stderr, '%s --help for possible options.' % __file__
-        print >> sys.stderr, ''
-        print >> sys.stderr, e
+    except BadComposure as e:
+        print(parser.usage, file=sys.stderr)
+        print('', file=sys.stderr)
+        print('%s --help for possible options.' % __file__, file=sys.stderr)
+        print('', file=sys.stderr)
+        print(e, file=sys.stderr)
         sys.exit(1)
 
     if options.verbose:
-        print map.coordinate, map.offset, '->', outfile, (map.dimensions.x, map.dimensions.y)
+        print(map.coordinate, map.offset, '->', outfile, (map.dimensions.x, map.dimensions.y))
 
     map.draw(options.verbose, options.fatbits).save(outfile)

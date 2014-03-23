@@ -20,7 +20,7 @@ class Common :
 
         sh = self.position_shadow(pw, sh)
         
-        for ctx in self.rendered.keys() :
+        for ctx in list(self.rendered.keys()) :
             mask = self.generate_mask(anchor, ctx)
         
             if ctx == 'pinwin' :
@@ -41,7 +41,7 @@ class Common :
 
         key = "%s-%s-%s" % (anchor, dot_ctx, str(args))
 
-        if self.pinwin_cache.has_key(key) :
+        if key in self.pinwin_cache :
             return self.pinwin_cache[key]
 
         #
@@ -70,7 +70,7 @@ class Common :
         if self.cartoon_shadows :
             key += "-cartoon"
 
-        if self.shadow_cache.has_key(key) :
+        if key in self.shadow_cache :
             return self.shadow_cache[key]
 
         #
@@ -229,7 +229,7 @@ class Common :
 
         key = "%s-%s" % (cnv_w, cnv_h)
 
-        if self.cartoon_anchor_cache.has_key(key) :
+        if key in self.cartoon_anchor_cache :
             return self.cartoon_anchor_cache[key]
         
         #
@@ -360,7 +360,7 @@ class Common :
     #
 
     def save (self, path, ctx='all') :
-        if not self.rendered.has_key(ctx) :
+        if ctx not in self.rendered :
             return None
         
         self.rendered[ctx].save(path)
@@ -368,7 +368,7 @@ class Common :
     # backwards compatibility with (ws-modestmaps/markers.py)
     
     def fh (self, ctx='all') :
-        if not self.rendered.has_key(ctx) :
+        if ctx not in self.rendered :
             return None
         
         return self.rendered[ctx]

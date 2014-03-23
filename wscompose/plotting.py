@@ -110,7 +110,7 @@ class handler (wscompose.handler) :
         count = len(self.ctx['markers'])
 
         # markers, accounting for 0-based index
-        indexes = range(0, count)
+        indexes = list(range(0, count))
 
         # start from the bottom
         indexes.reverse()
@@ -311,7 +311,7 @@ class handler (wscompose.handler) :
         if not valid :
             return False
 
-        if not params.has_key('marker') :
+        if 'marker' not in params :
             self.error(101, "Missing or incomplete parameter : %s" % 'marker')
             return False
             
@@ -323,7 +323,7 @@ class handler (wscompose.handler) :
 
         key = "%s-%s-%s" % (w, h, a)
         
-        if not self.__markers__.has_key(key) :
+        if key not in self.__markers__ :
             mrk = wscompose.pwmarker.PinwinMarker(w, h, a)
             mrk.draw()
             

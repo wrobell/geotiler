@@ -142,7 +142,7 @@ class PinwinMarker :
                         # skip private members
                         member = getattr(mixInClass, name)
                         if type(member) is types.MethodType:
-                            member = member.im_func
+                            member = member.__func__
                         setattr(pyClass, name, member)
 
         self.render_engine = 'pil'
@@ -150,28 +150,28 @@ class PinwinMarker :
         # Sharing is good...
         
         try :
-            import pwcommon
+            from . import pwcommon
             MixIn(PinwinMarker, pwcommon.Common, 0)
-        except Exception, e :
+        except Exception as e :
             raise e
 
         # Assume PIL, or cry
         
         try :
-            import pwpil
+            from . import pwpil
             MixIn(PinwinMarker, pwpil.PILMarker, 0)
-        except Exception, e :
+        except Exception as e :
             raise e
         
         # Add the Cairo love, if possible
         
         try : 
-            import pwcairo    
+            from . import pwcairo    
             MixIn(PinwinMarker, pwcairo.CairoMarker, 0)
             self.render_engine = 'cairo'
             self.using_cairo = True            
-        except Exception, e :
-            print "failed to load pycairo %s" % e
+        except Exception as e :
+            print("failed to load pycairo %s" % e)
             self.using_cairo = False            
             pass
         
@@ -234,13 +234,13 @@ if __name__ == '__main__' :
         # profit
         
         m.save(pl)
-        print "wrote combined layers to %s" % pl
+        print("wrote combined layers to %s" % pl)
         
         m.save(pw, "pinwin")
-        print "wrote pinwin layer to %s" % pw
+        print("wrote pinwin layer to %s" % pw)
         
         m.save(sh, "shadow")
-        print "wrote shadow layer to %s" % sh
+        print("wrote shadow layer to %s" % sh)
 
     # hey look, code to run!
     

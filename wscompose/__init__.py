@@ -6,33 +6,33 @@ __url__        = "http://www.aaronland.info/python/wscompose"
 __date__       = "$Date: 2008/01/04 06:23:46 $"
 __copyright__  = "Copyright (c) 2007-2008 Aaron Straup Cope. BSD license : http://www.modestmaps.com/license.txt"
 
-import signal, thread, threading, time, sys
-import BaseHTTPServer, SocketServer, mimetypes
+import signal, _thread, threading, time, sys
+import http.server, socketserver, mimetypes
 import ModestMaps
 
-from urlparse import urlparse
+from urllib.parse import urlparse
 from cgi import parse_qs, escape
 from math import sin, cos, acos, radians, degrees
 import tempfile
 import textwrap
 import string
-import StringIO
+import io
 import types
 
-import validate
+from . import validate
 
 # TO DO :
 #
 # - update to use wsgi
 
-class handler(BaseHTTPServer.BaseHTTPRequestHandler):
+class handler(http.server.BaseHTTPRequestHandler):
 
     # ##########################################################
     
     def __init__ (self, request, client_address, server) :
         self.ctx = {}
         self.points = {}
-        BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, request, client_address, server)
+        http.server.BaseHTTPRequestHandler.__init__(self, request, client_address, server)
         
     # ##########################################################
     
@@ -96,7 +96,7 @@ class handler(BaseHTTPServer.BaseHTTPRequestHandler):
             else :
                 return self.draw_map_centered()
             
-        except Exception, e :
+        except Exception as e :
             self.error(200, "composer error : %s" % e)
             return False
 
@@ -104,7 +104,7 @@ class handler(BaseHTTPServer.BaseHTTPRequestHandler):
     
     def draw_map_extentified (self) :
 
-        if self.ctx.has_key('adjust') :
+        if 'adjust' in self.ctx :
             self.ctx['bbox'] = self.__adjust_bbox(self.ctx['bbox'], self.ctx['adjust'])
             
         #
@@ -143,7 +143,7 @@ class handler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def draw_map_bbox (self) :
 
-        if self.ctx.has_key('adjust') :
+        if 'adjust' in self.ctx :
             self.ctx['bbox'] = self.__adjust_bbox(self.ctx['bbox'], self.ctx['adjust'])
         
         #
@@ -207,7 +207,7 @@ class handler(BaseHTTPServer.BaseHTTPRequestHandler):
         
         format = self.ctx.get('output', 'png')
         
-        fh = StringIO.StringIO()
+        fh = io.StringIO()
         img.save(fh, format.upper())
         
         self.send_response(200, "OK")
@@ -242,7 +242,7 @@ class handler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         import base64
         
-        fh = StringIO.StringIO()
+        fh = io.StringIO()
         img.save(fh, "PNG")
 
         # this probably means it's time to
@@ -254,7 +254,7 @@ class handler(BaseHTTPServer.BaseHTTPRequestHandler):
         js += "\"X-wscompose-Image-Width\":\"%s\"," % img.size[0]
         js += "\"X-wscompose-Map-Zoom\":\"%s\"," % self.ctx['zoom']
 
-        if self.ctx.has_key('plots') :
+        if 'plots' in self.ctx :
             for data in self.ctx['plots'] :
 
                 pt = self.latlon_to_point(data['latitude'], data['longitude'])
@@ -267,7 +267,7 @@ class handler(BaseHTTPServer.BaseHTTPRequestHandler):
         js += "\"data\":\"%s\"" % base64.b64encode(fh.getvalue())
         js += "}"
 
-        if self.ctx.has_key('json_callback') :
+        if 'json_callback' in self.ctx :
             js = "%s(%s)" % (self.ctx['json_callback'], js)
 
         return js
@@ -279,7 +279,7 @@ class handler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_header("X-wscompose-Image-Width", img.size[0])        
         self.send_header("X-wscompose-Map-Zoom", self.ctx['zoom'])
 
-        if self.ctx.has_key('plots') :
+        if 'plots' in self.ctx :
             for data in self.ctx['plots'] :
 
                 pt = self.latlon_to_point(data['latitude'], data['longitude'])
@@ -295,7 +295,7 @@ class handler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         key = "%s-%s" % (lat, lon)
 
-        if not self.points.has_key(key) :
+        if key not in self.points :
             loc = ModestMaps.Geo.Location(lat, lon)
             pt = self.ctx['map'].locationPoint(loc)
             self.points[key] = pt
@@ -319,7 +319,7 @@ class handler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         validator = validate.validate()
         
-        if len(params.keys()) == 0 :
+        if len(list(params.keys())) == 0 :
             self.help()
             return False
 
@@ -333,7 +333,7 @@ class handler(BaseHTTPServer.BaseHTTPRequestHandler):
         # La la la - I can't hear you
         #
         
-        if not params.has_key('method') :
+        if 'method' not in params :
             params['method'] = ['center']
             
 
@@ -343,13 +343,13 @@ class handler(BaseHTTPServer.BaseHTTPRequestHandler):
         
         try :
             validator.ensure_args(params, ('provider',))
-        except Exception, e :
+        except Exception as e :
             self.error(101, e)
             return False
 
         try :
             valid['provider'] = validator.provider(params['provider'][0])
-        except Exception, e :
+        except Exception as e :
             self.error(101, e)
             return False
         
@@ -361,13 +361,13 @@ class handler(BaseHTTPServer.BaseHTTPRequestHandler):
 
             try :
                 validator.ensure_args(params, ('bbox', 'height', 'width'))
-            except Exception, e :
+            except Exception as e :
                 self.error(111, e)
                 return False
 
             try :
                 valid['bbox'] = validator.bbox(params['bbox'][0])
-            except Exception, e :
+            except Exception as e :
                 self.error(112, e)
                 return False
 
@@ -375,21 +375,21 @@ class handler(BaseHTTPServer.BaseHTTPRequestHandler):
 
                 try :
                     valid[p] = validator.dimension(params[p][0])
-                except Exception, e :
+                except Exception as e :
                     self.error(113, e)
                     return False
 
-            if params.has_key('adjust') :
+            if 'adjust' in params :
 
                 try :
                     valid['adjust'] = validator.bbox_adjustment(params['adjust'][0])
-                except Exception, e :
+                except Exception as e :
                     self.error(124, e)
                     return False
 
             # you can blame migurski for this
             
-            if params.has_key('zoom') :
+            if 'zoom' in params :
                 self.error(125, "'zoom' is not a valid argument when method is 'extent'")
                 return False
                 
@@ -397,34 +397,34 @@ class handler(BaseHTTPServer.BaseHTTPRequestHandler):
 
             try :
                 validator.ensure_args(params, ('bbox', 'zoom'))
-            except Exception, e :
+            except Exception as e :
                 self.error(121, e)
                 return False
 
             try :
                 valid['bbox'] = validator.bbox(params['bbox'][0])
-            except Exception, e :
+            except Exception as e :
                 self.error(122, e)
                 return False
 
             try :
                 valid['zoom'] = validator.zoom(params['zoom'][0])
-            except Exception, e :
+            except Exception as e :
                 self.error(123, e)
                 return False
 
-            if params.has_key('adjust') :
+            if 'adjust' in params :
 
                 try :
                     valid['adjust'] = validator.bbox_adjustment(params['adjust'][0])
-                except Exception, e :
+                except Exception as e :
                     self.error(124, e)
                     return False
 
             # you can blame migurski for this
             
             for p in ('height', 'width') :
-                if params.has_key(p) :
+                if p in params :
                     self.error(125, "'%s' is not a valid argument when method is 'bbox'" % p)
                     return False
                 
@@ -434,7 +434,7 @@ class handler(BaseHTTPServer.BaseHTTPRequestHandler):
 
             try :
                 validator.ensure_args(params, ('latitude', 'longitude', 'zoom', 'height', 'width'))
-            except Exception, e :
+            except Exception as e :
                 self.error(131, e)
                 return False
 
@@ -442,13 +442,13 @@ class handler(BaseHTTPServer.BaseHTTPRequestHandler):
         
                 try :
                     valid[p] = validator.latlon(params[p][0])
-                except Exception, e :
+                except Exception as e :
                     self.error(132, e)
                     return False
 
             try :
                 valid['zoom'] = validator.zoom(params['zoom'][0])
-            except Exception, e :
+            except Exception as e :
                 self.error(133, e)
                 return False
 
@@ -456,7 +456,7 @@ class handler(BaseHTTPServer.BaseHTTPRequestHandler):
 
                 try :
                     valid[p] = validator.dimension(params[p][0])
-                except Exception, e :
+                except Exception as e :
                     self.error(134, e)
                     return False
             
@@ -465,11 +465,11 @@ class handler(BaseHTTPServer.BaseHTTPRequestHandler):
         # plotting or "headless" markers
         #
 
-        if params.has_key('plot') :
+        if 'plot' in params :
 
             try :
                 valid['plots'] = validator.plots(params['plot'])
-            except Exception, e :
+            except Exception as e :
                 self.error(141, e)
                 return False
 
@@ -477,7 +477,7 @@ class handler(BaseHTTPServer.BaseHTTPRequestHandler):
         # json ?
         #
 
-        if params.has_key('output') :
+        if 'output' in params :
 
             out = params['output'][0].lower()
             
@@ -485,13 +485,13 @@ class handler(BaseHTTPServer.BaseHTTPRequestHandler):
                 valid['output'] = 'json'                
 
             elif out == 'javascript' :
-                if not params.has_key('callback') :
+                if 'callback' not in params :
                     self.error(142, 'Missing JSON callback')
                     return False
             
                 try :
                     valid['json_callback'] = validator.json_callback(params['callback'][0])
-                except Exception, e:
+                except Exception as e:
                     self.error(143, e)
                     return False
 
@@ -679,7 +679,7 @@ class handler(BaseHTTPServer.BaseHTTPRequestHandler):
         err_code = self.sanitize(err_code)
         err_msg  = self.sanitize(err_msg)
 
-        print "[%s] %s" % (err_code, err_msg)
+        print("[%s] %s" % (err_code, err_msg))
         
         self.send_response(500, "Server Error")
         self.send_header("Content-Type", "application/xml") 
@@ -691,9 +691,9 @@ class handler(BaseHTTPServer.BaseHTTPRequestHandler):
     # ##########################################################
     
     def sanitize (self, str) :
-        return escape(unicode(str))
+        return escape(str(str))
 
-class _wwwserver(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
+class _wwwserver(socketserver.ThreadingMixIn, http.server.HTTPServer):
     pass
 
 class server :
@@ -709,7 +709,7 @@ class server :
         
     def serve (self) :    
             signal.signal(signal.SIGINT, self.terminate)
-            thread.start_new_thread(self.__server__.serve_forever,())
+            _thread.start_new_thread(self.__server__.serve_forever,())
     
             while not self.__done__:
                 try:
@@ -725,8 +725,8 @@ class server :
     def loop (self):
 
         url = "http://127.0.0.1:%s" % self.__port__
-        print "ws-compose derived server running on port %s" % self.__port__
-        print "documentation and usage is available at %s/\n\n" % url
+        print("ws-compose derived server running on port %s" % self.__port__)
+        print("documentation and usage is available at %s/\n\n" % url)
 
         self.serve()
 

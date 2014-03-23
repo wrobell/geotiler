@@ -7,10 +7,10 @@ __url__        = "http://www.aaronland.info/python/wscompose"
 __date__       = "$Date: 2008/01/04 06:23:46 $"
 __copyright__  = "Copyright (c) 2007-2008 Aaron Straup Cope. BSD license : http://www.modestmaps.com/license.txt"
 
-import urllib
-import httplib
+import urllib.request, urllib.parse, urllib.error
+import http.client
 import Image
-import StringIO
+import io
 import string
 import re
 
@@ -27,26 +27,26 @@ class httpclient :
         img = None
         meta = {}
 
-        params = urllib.urlencode(args)
+        params = urllib.parse.urlencode(args)
         url = "%s:%s" % (self.__host__, self.__port__)
         endpoint = "/?%s" % params
 
         # maybe always POST or at least add it as an option...
         
         try :
-            conn = httplib.HTTPConnection(url)
+            conn = http.client.HTTPConnection(url)
             conn.request("GET", endpoint)
             res = conn.getresponse()
-        except Exception, e :
+        except Exception as e :
             raise e
 
         if res.status != 200 :
 
             if res.status == 500 :
                 errmsg = "(%s) %s" % (res.getheader('x-errorcode'), res.getheader('x-errormessage'))
-                raise Exception, errmsg
+                raise Exception(errmsg)
             else :
-                raise Exception, res.message   
+                raise Exception(res.message)   
 
         # fu.PYTHON ...
         re_xheader = re.compile(r"^x-wscompose-", re.IGNORECASE)
@@ -56,12 +56,12 @@ class httpclient :
             if re_xheader.match(key) :
 
                 parts = key.split("-")
-                parts = map(string.lower, parts)
+                parts = list(map(string.lower, parts))
 
                 major = parts[2]
                 minor = parts[3]
                 
-                if not meta.has_key(major) :
+                if major not in meta :
                     meta[major] = {}
 
                 meta[major][minor] = value
@@ -70,8 +70,8 @@ class httpclient :
         conn.close()
 
         try : 
-            img = Image.open(StringIO.StringIO(data))
-        except Exception, e :
+            img = Image.open(io.StringIO(data))
+        except Exception as e :
             raise e
         
         return (img, meta)
