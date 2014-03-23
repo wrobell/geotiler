@@ -278,7 +278,8 @@ class TileRequest:
                     status = str(response.status)
                     
                     if status.startswith('2'):
-                        img = Image.open(io.StringIO(response.read())).convert('RGBA')
+                        data = io.BytesIO(response.read())
+                        img = Image.open(data).convert('RGBA')
                         imgs.append(img)
     
                         if lock.acquire():
