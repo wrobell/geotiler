@@ -210,7 +210,6 @@ def calculateMapExtent(provider, width, height, *args):
 
 @lru_cache()
 def fetch(netloc, path, query):
-    logger.debug('xx {}'.format(path))
     img = None
 
     conn = http.client.HTTPConnection(netloc)
