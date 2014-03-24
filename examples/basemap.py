@@ -30,8 +30,8 @@ mm = ModestMaps.mapByExtent(provider, loc1, loc2, dimensions)
 # or
 #   mm = ModestMaps.mapByExtentZoom(provider, loc1, loc2, 18)
 
-img = mm.draw() # or simply save in tile cache, i.e. in
-                            # <tile> file, see below for `imread` also
+img = mm.draw() # or simply save in tile cache, i.e. in <tile> file, see below
+                # for `imread` also
 
 # recalculate bbox, which can change i.e. due to mapByExtent call
 p1, p2 = mm.extent
