@@ -208,6 +208,23 @@ def calculateMapExtent(provider, width, height, *args):
     return calculateMapCenter(provider, centerCoord)
     
 
+@lru_cache()
+def fetch(netloc, path, query):
+    logger.debug('xx {}'.format(path))
+    img = None
+
+    conn = http.client.HTTPConnection(netloc)
+    conn.request('GET', path + ('?' + query).rstrip('?'), headers={'User-Agent': 'Modest Maps python branch (http://modestmaps.com)'})
+    response = conn.getresponse()
+    status = str(response.status)
+
+    if status.startswith('2'):
+        data = io.BytesIO(response.read())
+        img = Image.open(data).convert('RGBA')
+
+    return img
+
+
 class TileRequest:
     
     # how many times to retry a failing tile
@@ -224,21 +241,6 @@ class TileRequest:
     
     def images(self):
         return self.imgs
-    
-    @lru_cache()
-    def fetch(self, netloc, path, query):
-        img = None
-
-        conn = http.client.HTTPConnection(netloc)
-        conn.request('GET', path + ('?' + query).rstrip('?'), headers={'User-Agent': 'Modest Maps python branch (http://modestmaps.com)'})
-        response = conn.getresponse()
-        status = str(response.status)
-
-        if status.startswith('2'):
-            data = io.BytesIO(response.read())
-            img = Image.open(data).convert('RGBA')
-
-        return img
 
 
     def load(self):
@@ -259,7 +261,7 @@ class TileRequest:
                 if scheme in ('file', ''):
                     img = Image.open(path).convert('RGBA')
                 elif scheme == 'http':
-                    img = self.fetch(netloc, path, query)
+                    img = fetch(netloc, path, query)
                 imgs.append(img)
                 self.done = True
 
