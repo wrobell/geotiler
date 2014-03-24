@@ -71,6 +71,7 @@ import math
 import _thread
 import time
 from concurrent.futures import ThreadPoolExecutor
+from functools import lru_cache
 
 import PIL.Image as Image
 
@@ -205,12 +206,11 @@ def calculateMapExtent(provider, width, height, *args):
     
     return calculateMapCenter(provider, centerCoord)
     
-def printlocked(lock, *stuff):
+def printlocked(*stuff):
     """
     """
-    if lock.acquire():
-        print(' '.join([str(thing) for thing in stuff]))
-        lock.release()
+    print(' '.join([str(thing) for thing in stuff]))
+
 
 class TileRequest:
     
@@ -229,7 +229,23 @@ class TileRequest:
     def images(self):
         return self.imgs
     
-    def load(self, lock, verbose, cache, fatbits_ok, attempt=1, scale=1):
+    @lru_cache()
+    def fetch(self, netloc, path, query):
+        img = None
+
+        conn = http.client.HTTPConnection(netloc)
+        conn.request('GET', path + ('?' + query).rstrip('?'), headers={'User-Agent': 'Modest Maps python branch (http://modestmaps.com)'})
+        response = conn.getresponse()
+        status = str(response.status)
+
+        if status.startswith('2'):
+            data = io.BytesIO(response.read())
+            img = Image.open(data).convert('RGBA')
+
+        return img
+
+
+    def load(self, verbose):
         if self.done:
             # don't bother?
             return
@@ -237,94 +253,36 @@ class TileRequest:
         urls = self.provider.getTileUrls(self.coord)
         
         if verbose:
-            printlocked(lock, 'Requesting', urls, '- attempt no.', attempt, 'in thread', hex(_thread.get_ident()))
+            printlocked('Requesting', urls, 'in thread', hex(_thread.get_ident()))
 
         # this is the time-consuming part
         try:
             imgs = []
         
             for (scheme, netloc, path, params, query, fragment) in map(urllib.parse.urlparse, urls):
-                if (netloc, path, query) in cache:
-                    if lock.acquire():
-                        img = cache[(netloc, path, query)].copy()
-                        lock.release()
-
-                    if verbose:
-                        printlocked(lock, 'Found', urllib.parse.urlunparse(('http', netloc, path, '', query, '')), 'in cache')
-            
-                elif scheme in ('file', ''):
+                if scheme in ('file', ''):
                     img = Image.open(path).convert('RGBA')
-                    imgs.append(img)
-
-                    if lock.acquire():
-                        cache[(netloc, path, query)] = img
-                        lock.release()
-                
                 elif scheme == 'http':
-                    conn = http.client.HTTPConnection(netloc)
-                    conn.request('GET', path + ('?' + query).rstrip('?'), headers={'User-Agent': 'Modest Maps python branch (http://modestmaps.com)'})
-                    response = conn.getresponse()
-                    status = str(response.status)
-                    
-                    if status.startswith('2'):
-                        data = io.BytesIO(response.read())
-                        img = Image.open(data).convert('RGBA')
-                        imgs.append(img)
-    
-                        if lock.acquire():
-                            cache[(netloc, path, query)] = img
-                            lock.release()
-                    
-                    elif status == '404' and fatbits_ok:
-                        #
-                        # We're probably never going to see this tile.
-                        # Try the next lower zoom level for a pixellated output?
-                        #
-                        neighbor = self.coord.zoomBy(-1)
-                        parent = neighbor.container()
-                        
-                        col_shift = 2 * (neighbor.column - parent.column)
-                        row_shift = 2 * (neighbor.row - parent.row)
-                        
-                        # sleep for a second or two, helps prime the image cache
-                        time.sleep(col_shift + row_shift/2)
-                        
-                        x_shift = scale * self.provider.tileWidth() * col_shift
-                        y_shift = scale * self.provider.tileHeight() * row_shift
-                        
-                        self.offset.x -= int(x_shift)
-                        self.offset.y -= int(y_shift)
-                        self.coord = parent
-    
-                        return self.load(lock, verbose, cache, fatbits_ok, attempt+1, scale*2)
+                    img = self.fetch(netloc, path, query)
+                imgs.append(img)
+                self.done = True
 
-            if scale > 1:
-                imgs = [img.resize((img.size[0] * scale, img.size[1] * scale)) for img in imgs]
-                
-        except:
+        except Exception as ex:
             if verbose:
-                printlocked(lock, 'Failed', urls, '- attempt no.', attempt, 'in thread', hex(_thread.get_ident()))
+                printlocked('Failed', urls, 'in thread', hex(_thread.get_ident()))
 
+            imgs = [None for url in urls]
             print(ex)
             raise ex # FIXME: figure out better error handling strategy
                      # before making another download attempt to avoid
                      # unnecessary server request while dealing with
                      # ModestMaps errors
 
-            if attempt < TileRequest.MAX_ATTEMPTS:
-                time.sleep(1 * attempt)
-                return self.load(lock, verbose, cache, fatbits_ok, attempt+1, scale)
-            else:
-                imgs = [None for url in urls]
-
         else:
             if verbose:
-                printlocked(lock, 'Received', urls, '- attempt no.', attempt, 'in thread', hex(_thread.get_ident()))
+                printlocked('Received', urls, 'in thread', hex(_thread.get_ident()))
 
-        if lock.acquire():
-            self.imgs = imgs
-            self.done = True
-            lock.release()
+        self.imgs = imgs
 
 
 class Map:
@@ -506,15 +464,40 @@ class Map:
     #
     
     def render_tiles(self, tiles, img_width, img_height, verbose=False, fatbits_ok=False):
-        
-        lock = _thread.allocate_lock()
-        cache = {}
+        tp = tiles[:]
+        for k in range(TileRequest.MAX_ATTEMPTS):
+            pool = ThreadPoolExecutor(max_workers=32)
+            pool.map(lambda tile: tile.load(verbose), tiles, timeout=5)
+            pool.shutdown()
+            tp = [t for t in tp if not t.done]
+            if not tp:
+                break
 
-        # if it takes any longer than 20 sec overhead + 10 sec per tile, give up
-        timeout = 20 + len(tiles) * 10
-        pool = ThreadPoolExecutor(max_workers=32)
-        pool.map(lambda tile: tile.load(lock, verbose, cache, fatbits_ok), tiles, timeout=timeout)
-        pool.shutdown()
+        # FIXME: reimplement
+        ###if tp and fatbits_ok:
+        ###    #
+        ###    # We're probably never going to see this tile.
+        ###    # Try the next lower zoom level for a pixellated output?
+        ###    #
+        ###    neighbor = self.coord.zoomBy(-1)
+        ###    parent = neighbor.container()
+        ###    
+        ###    col_shift = 2 * (neighbor.column - parent.column)
+        ###    row_shift = 2 * (neighbor.row - parent.row)
+        ###    
+        ###    # sleep for a second or two, helps prime the image cache
+        ###    time.sleep(col_shift + row_shift/2)
+        ###    
+        ###    x_shift = scale * self.provider.tileWidth() * col_shift
+        ###    y_shift = scale * self.provider.tileHeight() * row_shift
+        ###    
+        ###    self.offset.x -= int(x_shift)
+        ###    self.offset.y -= int(y_shift)
+        ###    self.coord = parent
+
+        ###    return self.load(lock, verbose, cache, fatbits_ok, attempt+1, scale*2)
+        ###    imgs = [img.resize((img.size[0] * scale, img.size[1] * scale)) for img in imgs]
+                
 
         mapImg = Image.new('RGB', (img_width, img_height))
         
