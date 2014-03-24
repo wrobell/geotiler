@@ -70,6 +70,7 @@ import io
 import math
 import _thread
 import time
+import logging
 from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 
@@ -80,6 +81,8 @@ from . import Providers
 from . import Core
 from . import Geo
 from . import Yahoo, Microsoft, BlueMarble, OpenStreetMap, CloudMade, MapQuest, Stamen
+
+logger = logging.getLogger(__name__)
 
 # a handy list of possible providers, which isn't
 # to say that you can't go writing your own.
@@ -206,11 +209,6 @@ def calculateMapExtent(provider, width, height, *args):
     
     return calculateMapCenter(provider, centerCoord)
     
-def printlocked(*stuff):
-    """
-    """
-    print(' '.join([str(thing) for thing in stuff]))
-
 
 class TileRequest:
     
@@ -245,15 +243,15 @@ class TileRequest:
         return img
 
 
-    def load(self, verbose):
+    def load(self):
         if self.done:
             # don't bother?
             return
 
         urls = self.provider.getTileUrls(self.coord)
         
-        if verbose:
-            printlocked('Requesting', urls, 'in thread', hex(_thread.get_ident()))
+        if __debug__:
+            logger.debug('Requesting {}'.format(urls))
 
         # this is the time-consuming part
         try:
@@ -267,20 +265,18 @@ class TileRequest:
                 imgs.append(img)
                 self.done = True
 
+            if __debug__:
+                logger.debug('Received {}'.format(urls))
+
         except Exception as ex:
-            if verbose:
-                printlocked('Failed', urls, 'in thread', hex(_thread.get_ident()))
+            logger.warn('Failed {}'.format(urls))
+            logger.exception(ex)
 
             imgs = [None for url in urls]
-            print(ex)
             raise ex # FIXME: figure out better error handling strategy
                      # before making another download attempt to avoid
                      # unnecessary server request while dealing with
                      # ModestMaps errors
-
-        else:
-            if verbose:
-                printlocked('Received', urls, 'in thread', hex(_thread.get_ident()))
 
         self.imgs = imgs
 
@@ -459,15 +455,15 @@ class Map:
                 tileCoord = tileCoord.right()
             rowCoord = rowCoord.down()
 
-        return self.render_tiles(tiles, self.dimensions.x, self.dimensions.y, verbose, fatbits_ok)
+        return self.render_tiles(tiles, self.dimensions.x, self.dimensions.y, fatbits_ok)
 
     #
     
-    def render_tiles(self, tiles, img_width, img_height, verbose=False, fatbits_ok=False):
+    def render_tiles(self, tiles, img_width, img_height, fatbits_ok=False):
         tp = tiles[:]
         for k in range(TileRequest.MAX_ATTEMPTS):
             pool = ThreadPoolExecutor(max_workers=32)
-            pool.map(lambda tile: tile.load(verbose), tiles, timeout=5)
+            pool.map(lambda tile: tile.load(), tiles, timeout=5)
             pool.shutdown()
             tp = [t for t in tp if not t.done]
             if not tp:

@@ -1,6 +1,7 @@
 # vim:et sts=4 sw=4:
 
 import sys, math, optparse, ModestMaps
+import logging
 
 class BadComposure(Exception):
     pass
@@ -132,6 +133,8 @@ if __name__ == '__main__':
         sys.exit(1)
 
     if options.verbose:
-        print(map.coordinate, map.offset, '->', outfile, (map.dimensions.x, map.dimensions.y))
+        logging.basicConfig(level=logging.DEBUG)
+        logger = logging.getLogger(__name__)
+        logger.debug('{} {} -> {} {}'.format(map.coordinate, map.offset, outfile, map.dimensions))
 
-    map.draw(options.verbose, options.fatbits).save(outfile)
+    map.draw(options.fatbits).save(outfile)

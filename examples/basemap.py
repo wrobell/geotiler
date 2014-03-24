@@ -3,6 +3,9 @@
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 import ModestMaps
 
 # background map dimensions
