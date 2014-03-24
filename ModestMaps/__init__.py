@@ -375,6 +375,17 @@ class Map:
     def __str__(self):
         return 'Map(%(provider)s, %(dimensions)s, %(coordinate)s, %(offset)s)' % self.__dict__
 
+
+    @property
+    def extent(self):
+        """
+        Calculate current map extents.
+        """
+        p1 = self.pointLocation(Geo.Point(0, self.dimensions.y))
+        p2 = self.pointLocation(Geo.Point(self.dimensions.x, 0))
+        return p1, p2
+
+
     def locationPoint(self, location):
         """ Return an x, y point on the map image for a given geographical location.
         """
