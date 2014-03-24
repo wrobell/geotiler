@@ -326,24 +326,6 @@ class TileRequest:
             self.done = True
             lock.release()
 
-class TileQueue(list):
-    """ List of TileRequest objects, that's sensitive to when they're loaded.
-    """
-
-    def __getslice__(self, i, j):
-        """ Return a TileQueue when a list slice is called-for.
-        
-            Python docs say that __getslice__ is deprecated, but its
-            replacement __getitem__ doesn't seem to be doing anything.
-        """
-        other = TileQueue()
-        
-        for t in range(i, j):
-            if t < len(self):
-                other.append(self[t])
-
-        return other
-
 
 class Map:
 
@@ -438,7 +420,7 @@ class Map:
 
         #
 
-        tiles = TileQueue()
+        tiles = []
 
         cur_lon = sw.lon
         cur_lat = ne.lat        
@@ -509,7 +491,7 @@ class Map:
             corner.y -= self.provider.tileHeight()
             coord = coord.up()
         
-        tiles = TileQueue()
+        tiles = []
         
         rowCoord = coord.copy()
         for y in range(corner.y, self.dimensions.y, self.provider.tileHeight()):
