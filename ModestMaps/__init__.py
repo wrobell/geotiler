@@ -361,7 +361,7 @@ class Map:
 
     #
     
-    def draw_bbox(self, bbox, zoom=16, verbose=False) :
+    def draw_bbox(self, bbox, zoom=16):
 
         sw = Geo.Location(bbox[0], bbox[1])
         ne = Geo.Location(bbox[2], bbox[3])
@@ -429,7 +429,7 @@ class Map:
     
     #
     
-    def draw(self, verbose=False, fatbits_ok=False):
+    def draw(self, fatbits_ok=False):
         """ Draw map out to a PIL.Image and return it.
         """
         coord = self.coordinate.copy()
