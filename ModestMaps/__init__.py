@@ -68,8 +68,6 @@ import http.client
 import urllib.parse
 import io
 import math
-import _thread
-import time
 import logging
 from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
