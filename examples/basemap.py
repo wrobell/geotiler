@@ -10,7 +10,6 @@ WIDTH = 512
 HEIGHT = 512
 
 bbox = 11.78560, 46.48083, 11.79067, 46.48283
-xc, yc = (bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2
 
 fig = plt.figure(figsize=(10, 10))
 ax = plt.subplot(111)
@@ -24,10 +23,16 @@ loc2 = ModestMaps.Geo.Location(bbox[3], bbox[2])
 
 cls = ModestMaps.builtinProviders['OPENSTREETMAP']
 provider = cls()
-#map = ModestMaps.mapByExtent(provider, loc1, loc2, dimensions) # TODO: make it work properly
-map = ModestMaps.mapByExtentZoom(provider, loc1, loc2, 18)
-img = map.draw(True, False) # or simply save in tile cache, i.e. in
+mm = ModestMaps.mapByExtent(provider, loc1, loc2, dimensions)
+# or
+#   mm = ModestMaps.mapByExtentZoom(provider, loc1, loc2, 18)
+
+img = mm.draw(True, False) # or simply save in tile cache, i.e. in
                             # <tile> file, see below for `imread` also
+
+# recalculate bbox, which can change i.e. due to mapByExtent call
+p1, p2 = mm.extent
+bbox = p1.lon, p1.lat, p2.lon, p2.lat
 
 #
 # create basemap
@@ -35,8 +40,7 @@ img = map.draw(True, False) # or simply save in tile cache, i.e. in
 map = Basemap(
     llcrnrlon=bbox[0], llcrnrlat=bbox[1],
     urcrnrlon=bbox[2], urcrnrlat=bbox[3],
-    lon_0=xc, lat_0=yc, projection='merc',
-    ax=ax
+    projection='merc', ax=ax
 )
 
 # or optionally, read from tile cache: im = plt.imread(<tile>)
