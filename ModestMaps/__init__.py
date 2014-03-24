@@ -344,11 +344,6 @@ class TileQueue(list):
 
         return other
 
-    def pending(self):
-        """ True if any contained tile is still loading.
-        """
-        remaining = [tile for tile in self if not tile.loaded()]
-        return len(remaining) > 0
 
 class Map:
 
