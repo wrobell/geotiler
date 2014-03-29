@@ -11,11 +11,11 @@ class Transformation:
         self.ay = ay
         self.by = by
         self.cy = cy
-    
+
     def transform(self, point):
         return Point(self.ax*point.x + self.bx*point.y + self.cx,
                      self.ay*point.x + self.by*point.y + self.cy)
-                         
+
     def untransform(self, point):
         return Point((point.x*self.by - point.y*self.bx - self.cx*self.by + self.cy*self.bx) / (self.ax*self.by - self.ay*self.bx),
                      (point.x*self.ay - point.y*self.ax - self.cx*self.ay + self.cy*self.ax) / (self.bx*self.ay - self.by*self.ax))
@@ -25,7 +25,7 @@ def deriveTransformation(a1x, a1y, a2x, a2y, b1x, b1y, b2x, b2y, c1x, c1y, c2x, 
     """
     ax, bx, cx = linearSolution(a1x, a1y, a2x, b1x, b1y, b2x, c1x, c1y, c2x)
     ay, by, cy = linearSolution(a1x, a1y, a2y, b1x, b1y, b2y, c1x, c1y, c2y)
-    
+
     return Transformation(ax, bx, cx, ay, by, cy)
 
 def linearSolution(r1, s1, t1, r2, s2, t2, r3, s3, t3):
@@ -50,17 +50,17 @@ def linearSolution(r1, s1, t1, r2, s2, t2, r3, s3, t3):
       / (((s2 - s3) * (r1 - r2)) - ((s1 - s2) * (r2 - r3)))
 
     c = t1 - (r1 * a) - (s1 * b)
-    
+
     return a, b, c
 
 class IProjection:
     def __init__(self, zoom, transformation=Transformation(1, 0, 0, 0, 1, 0)):
         self.zoom = zoom
         self.transformation = transformation
-        
+
     def rawProject(self, point):
         raise NotImplementedError("Abstract method not implemented by subclass.")
-        
+
     def rawUnproject(self, point):
         raise NotImplementedError("Abstract method not implemented by subclass.")
 
@@ -69,13 +69,13 @@ class IProjection:
         if(self.transformation):
             point = self.transformation.transform(point)
         return point
-    
+
     def unproject(self, point):
         if(self.transformation):
             point = self.transformation.untransform(point)
         point = self.rawUnproject(point)
         return point
-        
+
     def locationCoordinate(self, location):
         point = Point(math.pi * location.x / 180.0, math.pi * location.y / 180.0)
         point = self.project(point)

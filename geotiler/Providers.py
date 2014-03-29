@@ -12,7 +12,7 @@ ids = ('MICROSOFT_ROAD', 'MICROSOFT_AERIAL', 'MICROSOFT_HYBRID',
 class IMapProvider:
     def __init__(self):
         raise NotImplementedError("Abstract method not implemented by subclass.")
-        
+
     def getTileUrls(self, coordinate):
         raise NotImplementedError("Abstract method not implemented by subclass.")
 
@@ -21,10 +21,10 @@ class IMapProvider:
 
     def tileWidth(self):
         raise NotImplementedError("Abstract method not implemented by subclass.")
-    
+
     def tileHeight(self):
         raise NotImplementedError("Abstract method not implemented by subclass.")
-    
+
     def locationCoordinate(self, location):
         return self.projection.locationCoordinate(location)
 
@@ -36,10 +36,10 @@ class IMapProvider:
 
     def sourceCoordinate(self, coordinate):
         wrappedColumn = coordinate.column % pow(2, coordinate.zoom)
-        
+
         while wrappedColumn < 0:
             wrappedColumn += pow(2, coordinate.zoom)
-            
+
         return Coordinate(coordinate.row, wrappedColumn, coordinate.zoom)
 
 class TemplatedMercatorProvider(IMapProvider):
@@ -50,13 +50,13 @@ class TemplatedMercatorProvider(IMapProvider):
         # the spherical mercator world tile covers (-π, -π) to (π, π)
         t = deriveTransformation(-pi, pi, 0, 0, pi, pi, 1, 0, -pi, -pi, 0, 1)
         self.projection = MercatorProjection(0, t)
-        
+
         self.templates = []
-        
+
         while template:
             match = re.match(r'^((http|https|file)://\S+?)(,(http|https|file)://\S+)?$', template)
             first = match.group(1)
-            
+
             if match:
                 self.templates.append(first)
                 template = template[len(first):].lstrip(',')

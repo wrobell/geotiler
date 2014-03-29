@@ -31,22 +31,22 @@ class Coordinate:
         self.row = row
         self.column = column
         self.zoom = zoom
-    
+
     def __repr__(self):
         return '(%(row).3f, %(column).3f @%(zoom).3f)' % self.__dict__
-        
+
     def __eq__(self, other):
         return self.zoom == other.zoom and self.row == other.row and self.column == other.column
-        
+
     def __cmp__(self, other):
         return cmp((self.zoom, self.row, self.column), (other.zoom, other.row, other.column))
 
     def __hash__(self):
         return hash(('Coordinate', self.row, self.column, self.zoom))
-        
+
     def copy(self):
         return self.__class__(self.row, self.column, self.zoom)
-        
+
     def container(self):
         return self.__class__(math.floor(self.row), math.floor(self.column), self.zoom)
 
@@ -54,7 +54,7 @@ class Coordinate:
         return self.__class__(self.row * math.pow(2, destination - self.zoom),
                               self.column * math.pow(2, destination - self.zoom),
                               destination)
-    
+
     def zoomBy(self, distance):
         return self.__class__(self.row * math.pow(2, distance),
                               self.column * math.pow(2, distance),
