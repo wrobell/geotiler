@@ -2,6 +2,7 @@
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
+from shapely.geometry import Point
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -20,22 +21,16 @@ ax = plt.subplot(111)
 #
 # download background map using OpenStreetMap
 #
-dimensions = ModestMaps.Core.Point(WIDTH, HEIGHT)
-loc1 = ModestMaps.Geo.Location(bbox[1], bbox[0])
-loc2 = ModestMaps.Geo.Location(bbox[3], bbox[2])
+provider = geotiler.find_provider('OPENSTREETMAP')
+mm = geotiler.Map(provider, WIDTH, HEIGHT)
+mm.extent = bbox
+#mm.zoom = 18
+#mm = ModestMaps.mapByExtent(provider, loc1, loc2, dimensions)
+#mm = ModestMaps.mapByExtentZoom(provider, loc1, loc2, 18)
 
-cls = ModestMaps.builtinProviders['OPENSTREETMAP']
-provider = cls()
-mm = ModestMaps.mapByExtent(provider, loc1, loc2, dimensions)
-# or
-#   mm = ModestMaps.mapByExtentZoom(provider, loc1, loc2, 18)
-
-img = mm.draw() # or simply save in tile cache, i.e. in <tile> file, see below
-                # for `imread` also
-
-# recalculate bbox, which can change i.e. due to mapByExtent call
-p1, p2 = mm.extent
-bbox = p1.lon, p1.lat, p2.lon, p2.lat
+img = mm.draw()
+mm._on_size_change()
+bbox = mm.extent # recalculate bbox, which can change due to requested dimensions
 
 #
 # create basemap

@@ -109,21 +109,8 @@ builtinProviders = {
     'STAMEN_WATERCOLOR': Stamen.WatercolorProvider,
     }
 
-def mapByCenterZoom(provider, center, zoom, dimensions):
-    """ Return map instance given a provider, center location, zoom value, and dimensions point.
-    """
-    centerCoord = provider.locationCoordinate(center).zoomTo(zoom)
-    mapCoord, mapOffset = calculateMapCenter(provider, centerCoord)
 
-    return Map(provider, dimensions, mapCoord, mapOffset)
 
-def mapByExtent(provider, locationA, locationB, dimensions):
-    """ Return map instance given a provider, two corner locations, and dimensions point.
-    """
-    mapCoord, mapOffset = calculateMapExtent(provider, dimensions.x, dimensions.y, locationA, locationB)
-
-    return Map(provider, dimensions, mapCoord, mapOffset)
-    
 def mapByExtentZoom(provider, locationA, locationB, zoom):
     """ Return map instance given a provider, two corner locations, and zoom value.
     """
@@ -134,15 +121,17 @@ def mapByExtentZoom(provider, locationA, locationB, zoom):
     # precise width and height in pixels
     width = abs(coordA.column - coordB.column) * provider.tileWidth()
     height = abs(coordA.row - coordB.row) * provider.tileHeight()
-    
+
     # nearest pixel actually
     dimensions = Point(int(width), int(height))
-    
+
     # projected center of the map
-    centerCoord = Core.Coordinate((coordA.row + coordB.row) / 2,
-                                  (coordA.column + coordB.column) / 2,
-                                  zoom)
-    
+    centerCoord = Core.Coordinate(
+        (coordA.row + coordB.row) / 2,
+        (coordA.column + coordB.column) / 2,
+        zoom
+    )
+
     mapCoord, mapOffset = calculateMapCenter(provider, centerCoord)
 
     return Map(provider, dimensions, mapCoord, mapOffset)
@@ -158,7 +147,7 @@ def calculateMapCenter(provider, centerCoord):
     initX = (initTileCoord.column - centerCoord.column) * provider.tileWidth()
     initY = (initTileCoord.row - centerCoord.row) * provider.tileHeight()
     initPoint = Point(round(initX), round(initY))
-    
+
     return initTileCoord, initPoint
 
 def calculateMapExtent(provider, width, height, *args):
@@ -167,7 +156,7 @@ def calculateMapExtent(provider, width, height, *args):
         relative to the map center.
     """
     coordinates = list(map(provider.locationCoordinate, args))
-    
+
     TL = Core.Coordinate(min([c.row for c in coordinates]),
                          min([c.column for c in coordinates]),
                          min([c.zoom for c in coordinates]))
@@ -175,25 +164,25 @@ def calculateMapExtent(provider, width, height, *args):
     BR = Core.Coordinate(max([c.row for c in coordinates]),
                          max([c.column for c in coordinates]),
                          max([c.zoom for c in coordinates]))
-                    
+
     # multiplication factor between horizontal span and map width
     hFactor = (BR.column - TL.column) / (float(width) / provider.tileWidth())
 
     # multiplication factor expressed as base-2 logarithm, for zoom difference
     hZoomDiff = math.log(hFactor) / math.log(2)
-        
+
     # possible horizontal zoom to fit geographical extent in map width
     hPossibleZoom = TL.zoom - math.ceil(hZoomDiff)
-        
+
     # multiplication factor between vertical span and map height
     vFactor = (BR.row - TL.row) / (float(height) / provider.tileHeight())
-        
+
     # multiplication factor expressed as base-2 logarithm, for zoom difference
     vZoomDiff = math.log(vFactor) / math.log(2)
-        
+
     # possible vertical zoom to fit geographical extent in map height
     vPossibleZoom = TL.zoom - math.ceil(vZoomDiff)
-        
+
     # initial zoom to fit extent vertically and horizontally
     initZoom = min(hPossibleZoom, vPossibleZoom)
 
@@ -206,9 +195,9 @@ def calculateMapExtent(provider, width, height, *args):
     centerColumn = (TL.column + BR.column) / 2
     centerZoom = (TL.zoom + BR.zoom) / 2
     centerCoord = Core.Coordinate(centerRow, centerColumn, centerZoom).zoomTo(initZoom)
-    
+
     return calculateMapCenter(provider, centerCoord)
-    
+
 
 @lru_cache()
 def fetch(netloc, path, query):
@@ -227,7 +216,7 @@ def fetch(netloc, path, query):
 
 
 class TileRequest:
-    
+
     # how many times to retry a failing tile
     MAX_ATTEMPTS = 5
 
@@ -236,10 +225,10 @@ class TileRequest:
         self.provider = provider
         self.coord = coord
         self.offset = offset
-        
+
     def loaded(self):
         return self.done
-    
+
     def images(self):
         return self.imgs
 
@@ -250,14 +239,14 @@ class TileRequest:
             return
 
         urls = self.provider.getTileUrls(self.coord)
-        
+
         if __debug__:
             logger.debug('Requesting {}'.format(urls))
 
         # this is the time-consuming part
         try:
             imgs = []
-        
+
             for (scheme, netloc, path, params, query, fragment) in map(urllib.parse.urlparse, urls):
                 if scheme in ('file', ''):
                     img = Image.open(path).convert('RGBA')
@@ -282,40 +271,109 @@ class TileRequest:
         self.imgs = imgs
 
 
-class Map:
+class Map(object):
 
-    def __init__(self, provider, dimensions, coordinate, offset):
+    def __init__(self, provider, width, height): #, coordinate, offset):
         """ Instance of a map intended for drawing to an image.
-        
+
             provider
                 Instance of IMapProvider
-                
+
             dimensions
                 Size of output image, instance of Point
-                
+
             coordinate
                 Base tile, instance of Coordinate
-                
+
             offset
                 Position of base tile relative to map center, instance of Point
         """
+        super().__init__()
         self.provider = provider
-        self.dimensions = dimensions
-        self.coordinate = coordinate
-        self.offset = offset
-        
-    def __str__(self):
-        return 'Map(%(provider)s, %(dimensions)s, %(coordinate)s, %(offset)s)' % self.__dict__
+        self.dimensions = width, height
+        self.coordinate = None
+        self.offset = None
+
+        self._center = None
+        self._extent = None
+
+
+    @property
+    def zoom(self):
+        return self._zoom
+
+
+    @zoom.setter
+    def zoom(self, zoom):
+        self._zoom = zoom
+        self._on_change_zoom()
 
 
     @property
     def extent(self):
+        return self._extent
+
+
+    @extent.setter
+    def extent(self, extent):
+        self._extent = extent
+        self._on_change_extent()
+
+
+    def _on_change_zoom(self):
+        """ Return map instance given a provider, center location, zoom value, and dimensions point.
         """
-        Calculate current map extents.
+        center_coord = provider.locationCoordinate(self._center).zoomTo(self._zoom)
+        map_coord, map_offset = calculateMapCenter(self.provider, center_coord)
+        self.coordinate = map_coord
+        self.offset = map_offset
+        #return Map(provider, dimensions, mapCoord, mapOffset)
+
+
+    def _on_change_extent(self):
+        """ Return map instance given a provider, two corner locations, and dimensions point.
         """
-        p1 = self.pointLocation(Geo.Point(0, self.dimensions.y))
-        p2 = self.pointLocation(Geo.Point(self.dimensions.x, 0))
-        return p1, p2
+        width, height = self.dimensions
+        p1 = Point(*self._extent[:2])
+        p2 = Point(*self._extent[2:])
+        map_coord, map_offset = calculateMapExtent(self.provider, width, height, p1, p2)
+        self.coordinate = map_coord
+        self.offset = map_offset
+
+
+    def _on_size_change(self):
+        w, h = self.dimensions
+        p1 = self.pointLocation(Point(0, h))
+        p2 = self.pointLocation(Point(w, 0))
+        self._extent = p1.x, p1.y, p2.x, p2.y
+
+
+    def _on_change_extent_zoom(provider, locationA, locationB, zoom): # mapByExtentZoom
+        """ Return map instance given a provider, two corner locations, and zoom value.
+        """
+        # a coordinate per corner
+        coordA = provider.locationCoordinate(locationA).zoomTo(zoom)
+        coordB = provider.locationCoordinate(locationB).zoomTo(zoom)
+
+        # precise width and height in pixels
+        width = abs(coordA.column - coordB.column) * provider.tileWidth()
+        height = abs(coordA.row - coordB.row) * provider.tileHeight()
+
+        # nearest pixel actually
+        dimensions = Point(int(width), int(height))
+
+        # projected center of the map
+        centerCoord = Core.Coordinate((coordA.row + coordB.row) / 2,
+                                      (coordA.column + coordB.column) / 2,
+                                      zoom)
+
+        mapCoord, mapOffset = calculateMapCenter(provider, centerCoord)
+
+        return Map(provider, dimensions, mapCoord, mapOffset)
+
+
+    def __str__(self):
+        return 'Map(%(provider)s, %(dimensions)s, %(coordinate)s, %(offset)s)' % self.__dict__
 
 
     def locationPoint(self, location):
@@ -323,54 +381,55 @@ class Map:
         """
         point = Point(self.offset.x, self.offset.y)
         coord = self.provider.locationCoordinate(location).zoomTo(self.coordinate.zoom)
-        
+
         # distance from the known coordinate offset
         point.x += self.provider.tileWidth() * (coord.column - self.coordinate.column)
         point.y += self.provider.tileHeight() * (coord.row - self.coordinate.row)
-        
+
         # because of the center/corner business
         point.x += self.dimensions.x/2
         point.y += self.dimensions.y/2
-        
+
         return point
-        
+
     def pointLocation(self, point):
         """ Return a geographical location on the map image for a given x, y point.
         """
         hizoomCoord = self.coordinate.zoomTo(Core.Coordinate.MAX_ZOOM)
-        
+
+        w, h = self.dimensions
+
         # because of the center/corner business
-        point = Point(point.x - self.dimensions.x/2,
-                           point.y - self.dimensions.y/2)
-        
+        point = Point(point.x - w / 2, point.y - h / 2)
+
         # distance in tile widths from reference tile to point
         xTiles = (point.x - self.offset.x) / self.provider.tileWidth();
         yTiles = (point.y - self.offset.y) / self.provider.tileHeight();
-        
+
         # distance in rows & columns at maximum zoom
         xDistance = xTiles * math.pow(2, (Core.Coordinate.MAX_ZOOM - self.coordinate.zoom));
         yDistance = yTiles * math.pow(2, (Core.Coordinate.MAX_ZOOM - self.coordinate.zoom));
-        
+
         # new point coordinate reflecting that distance
         coord = Core.Coordinate(round(hizoomCoord.row + yDistance),
                                 round(hizoomCoord.column + xDistance),
                                 hizoomCoord.zoom)
 
         coord = coord.zoomTo(self.coordinate.zoom)
-        
+
         location = self.provider.coordinateLocation(coord)
-        
+
         return location
 
     #
-    
+
     def draw_bbox(self, bbox, zoom=16):
 
         sw = Point(bbox[0], bbox[1])
         ne = Point(bbox[2], bbox[3])
-        nw = Point(ne.lat, sw.lon)
-        se = Point(sw.lat, ne.lon)
-        
+        nw = Point(ne.lon, sw.lat)
+        se = Point(sw.lon, ne.lat)
+
         TL = self.provider.locationCoordinate(nw).zoomTo(zoom)
 
         #
@@ -378,36 +437,36 @@ class Map:
         tiles = []
 
         cur_lon = sw.lon
-        cur_lat = ne.lat        
+        cur_lat = ne.lat
         max_lon = ne.lon
         max_lat = sw.lat
-        
+
         x_off = 0
         y_off = 0
         tile_x = 0
         tile_y = 0
-        
+
         tileCoord = TL.copy()
 
         while cur_lon < max_lon :
 
             y_off = 0
             tile_y = 0
-            
+
             while cur_lat > max_lat :
-                
+
                 tiles.append(TileRequest(self.provider, tileCoord, Point(x_off, y_off)))
                 y_off += self.provider.tileHeight()
-                
+
                 tileCoord = tileCoord.down()
                 loc = self.provider.coordinateLocation(tileCoord)
                 cur_lat = loc.lat
 
                 tile_y += 1
-                
-            x_off += self.provider.tileWidth()            
+
+            x_off += self.provider.tileWidth()
             cur_lat = ne.lat
-            
+
             tile_x += 1
             tileCoord = TL.copy().right(tile_x)
 
@@ -429,37 +488,38 @@ class Map:
         self.dimensions = Point(width, height)
 
         return self.draw()
-    
+
     #
-    
+
     def draw(self, fatbits_ok=False):
         """ Draw map out to a PIL.Image and return it.
         """
         coord = self.coordinate.copy()
-        corner = Point(int(self.offset.x + self.dimensions.x/2), int(self.offset.y + self.dimensions.y/2))
+        w, h = self.dimensions
+        corner = Point(int(self.offset.x + w / 2), int(self.offset.y + h / 2))
 
         while corner.x > 0:
-            corner.x -= self.provider.tileWidth()
+            corner = Point(corner.x - self.provider.tileWidth(), corner.y)
             coord = coord.left()
-        
+
         while corner.y > 0:
-            corner.y -= self.provider.tileHeight()
+            corner = Point(corner.x, corner.y - self.provider.tileHeight())
             coord = coord.up()
-        
+
         tiles = []
-        
+
         rowCoord = coord.copy()
-        for y in range(corner.y, self.dimensions.y, self.provider.tileHeight()):
+        for y in range(int(corner.y), h, self.provider.tileHeight()):
             tileCoord = rowCoord.copy()
-            for x in range(corner.x, self.dimensions.x, self.provider.tileWidth()):
+            for x in range(int(corner.x), w, self.provider.tileWidth()):
                 tiles.append(TileRequest(self.provider, tileCoord, Point(x, y)))
                 tileCoord = tileCoord.right()
             rowCoord = rowCoord.down()
 
-        return self.render_tiles(tiles, self.dimensions.x, self.dimensions.y, fatbits_ok)
+        return self.render_tiles(tiles, w, h, fatbits_ok)
 
     #
-    
+
     def render_tiles(self, tiles, img_width, img_height, fatbits_ok=False):
         tp = tiles[:]
         for k in range(TileRequest.MAX_ATTEMPTS):
@@ -478,35 +538,43 @@ class Map:
         ###    #
         ###    neighbor = self.coord.zoomBy(-1)
         ###    parent = neighbor.container()
-        ###    
+        ###
         ###    col_shift = 2 * (neighbor.column - parent.column)
         ###    row_shift = 2 * (neighbor.row - parent.row)
-        ###    
+        ###
         ###    # sleep for a second or two, helps prime the image cache
         ###    time.sleep(col_shift + row_shift/2)
-        ###    
+        ###
         ###    x_shift = scale * self.provider.tileWidth() * col_shift
         ###    y_shift = scale * self.provider.tileHeight() * row_shift
-        ###    
+        ###
         ###    self.offset.x -= int(x_shift)
         ###    self.offset.y -= int(y_shift)
         ###    self.coord = parent
 
         ###    return self.load(lock, verbose, cache, fatbits_ok, attempt+1, scale*2)
         ###    imgs = [img.resize((img.size[0] * scale, img.size[1] * scale)) for img in imgs]
-                
+
 
         mapImg = Image.new('RGB', (img_width, img_height))
-        
+
+        c = 1
         for tile in tiles:
             try:
                 for img in tile.images():
-                    mapImg.paste(img, (tile.offset.x, tile.offset.y), img)
+                    mapImg.paste(img, (int(tile.offset.x), int(tile.offset.y)), img)
+
             except:
                 # something failed to paste, so we ignore it
                 pass
 
+        mapImg.save('qqq.png')
         return mapImg
+
+
+def find_provider(id):
+    cls = builtinProviders[id]
+    return cls()
 
 if __name__ == '__main__':
     import doctest

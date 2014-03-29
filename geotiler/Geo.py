@@ -1,48 +1,3 @@
-"""
->>> t = Transformation(1, 0, 0, 0, 1, 0)
->>> p = Point(1, 1)
->>> p
-(1.000, 1.000)
->>> p_ = t.transform(p)
->>> p_
-(1.000, 1.000)
->>> p__ = t.untransform(p_)
->>> p__
-(1.000, 1.000)
-
->>> t = Transformation(0, 1, 0, 1, 0, 0)
->>> p = Point(0, 1)
->>> p
-(0.000, 1.000)
->>> p_ = t.transform(p)
->>> p_
-(1.000, 0.000)
->>> p__ = t.untransform(p_)
->>> p__
-(0.000, 1.000)
-
->>> t = Transformation(1, 0, 1, 0, 1, 1)
->>> p = Point(0, 0)
->>> p
-(0.000, 0.000)
->>> p_ = t.transform(p)
->>> p_
-(1.000, 1.000)
->>> p__ = t.untransform(p_)
->>> p__
-(0.000, 0.000)
-
->>> m = MercatorProjection(10)
->>> m.locationCoordinate(Point(0, 0))
-(-0.000, 0.000 @10.000)
->>> m.coordinateLocation(Coordinate(0, 0, 10))
-(0.000, 0.000)
->>> m.locationCoordinate(Point(37, -122))
-(0.696, -2.129 @10.000)
->>> m.coordinateLocation(Coordinate(0.696, -2.129, 10.000))
-(37.001, -121.983)
-"""
-
 import math
 from shapely.geometry import Point
 from .Core import Coordinate
@@ -122,7 +77,7 @@ class IProjection:
         return point
         
     def locationCoordinate(self, location):
-        point = Point(math.pi * location.lon / 180.0, math.pi * location.lat / 180.0)
+        point = Point(math.pi * location.x / 180.0, math.pi * location.y / 180.0)
         point = self.project(point)
         return Coordinate(point.y, point.x, self.zoom)
 
@@ -130,7 +85,7 @@ class IProjection:
         coordinate = coordinate.zoomTo(self.zoom)
         point = Point(coordinate.column, coordinate.row)
         point = self.unproject(point)
-        return Point(180.0 * point.y / math.pi, 180.0 * point.x / math.pi)
+        return Point(180.0 * point.x / math.pi, 180.0 * point.y / math.pi)
 
 class LinearProjection(IProjection):
     def rawProject(self, point):
