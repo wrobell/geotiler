@@ -6,7 +6,7 @@ from mpl_toolkits.basemap import Basemap
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-import ModestMaps
+import geotiler
 
 # background map dimensions
 WIDTH = 512

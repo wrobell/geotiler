@@ -44,7 +44,8 @@
 """
 
 import math
-from .Core import Point, Coordinate
+from shapely.geometry import Point
+from .Core import Coordinate
 
 class Location:
     def __init__(self, lat, lon):

@@ -1,12 +1,4 @@
 """
->>> p = Point(0, 1)
->>> p
-(0.000, 1.000)
->>> p.x
-0
->>> p.y
-1
-
 >>> c = Coordinate(0, 1, 2)
 >>> c
 (0.000, 1.000 @2.000)
@@ -32,14 +24,6 @@
 
 import math
 
-class Point:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-    
-    def __repr__(self):
-        return '(%(x).3f, %(y).3f)' % self.__dict__
-    
 class Coordinate:
     MAX_ZOOM = 25
 

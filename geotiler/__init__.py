@@ -1,5 +1,5 @@
 """
->>> m = Map(Microsoft.RoadProvider(), Core.Point(600, 600), Core.Coordinate(3165, 1313, 13), Core.Point(-144, -94))
+>>> m = Map(Microsoft.RoadProvider(), Point(600, 600), Core.Coordinate(3165, 1313, 13), Point(-144, -94))
 >>> p = m.locationPoint(Geo.Location(37.804274, -122.262940))
 >>> p
 (370.724, 342.549)
@@ -8,7 +8,7 @@
 
 >>> c = Geo.Location(37.804274, -122.262940)
 >>> z = 12
->>> d = Core.Point(800, 600)
+>>> d = Point(800, 600)
 >>> m = mapByCenterZoom(Microsoft.RoadProvider(), c, z, d)
 >>> m.dimensions
 (800.000, 600.000)
@@ -19,7 +19,7 @@
 
 >>> sw = Geo.Location(36.893326, -123.533554)
 >>> ne = Geo.Location(38.864246, -121.208153)
->>> d = Core.Point(800, 600)
+>>> d = Point(800, 600)
 >>> m = mapByExtent(Microsoft.RoadProvider(), sw, ne, d)
 >>> m.dimensions
 (800.000, 600.000)
@@ -30,7 +30,7 @@
 
 >>> se = Geo.Location(36.893326, -121.208153)
 >>> nw = Geo.Location(38.864246, -123.533554)
->>> d = Core.Point(1600, 1200)
+>>> d = Point(1600, 1200)
 >>> m = mapByExtent(Microsoft.RoadProvider(), se, nw, d)
 >>> m.dimensions
 (1600.000, 1200.000)
@@ -71,6 +71,8 @@ import math
 import logging
 from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
+
+from shapely.geometry import Point
 
 import PIL.Image as Image
 
@@ -134,7 +136,7 @@ def mapByExtentZoom(provider, locationA, locationB, zoom):
     height = abs(coordA.row - coordB.row) * provider.tileHeight()
     
     # nearest pixel actually
-    dimensions = Core.Point(int(width), int(height))
+    dimensions = Point(int(width), int(height))
     
     # projected center of the map
     centerCoord = Core.Coordinate((coordA.row + coordB.row) / 2,
@@ -155,7 +157,7 @@ def calculateMapCenter(provider, centerCoord):
     # initial tile position, assuming centered tile well in grid
     initX = (initTileCoord.column - centerCoord.column) * provider.tileWidth()
     initY = (initTileCoord.row - centerCoord.row) * provider.tileHeight()
-    initPoint = Core.Point(round(initX), round(initY))
+    initPoint = Point(round(initX), round(initY))
     
     return initTileCoord, initPoint
 
@@ -319,7 +321,7 @@ class Map:
     def locationPoint(self, location):
         """ Return an x, y point on the map image for a given geographical location.
         """
-        point = Core.Point(self.offset.x, self.offset.y)
+        point = Point(self.offset.x, self.offset.y)
         coord = self.provider.locationCoordinate(location).zoomTo(self.coordinate.zoom)
         
         # distance from the known coordinate offset
@@ -338,7 +340,7 @@ class Map:
         hizoomCoord = self.coordinate.zoomTo(Core.Coordinate.MAX_ZOOM)
         
         # because of the center/corner business
-        point = Core.Point(point.x - self.dimensions.x/2,
+        point = Point(point.x - self.dimensions.x/2,
                            point.y - self.dimensions.y/2)
         
         # distance in tile widths from reference tile to point
@@ -394,7 +396,7 @@ class Map:
             
             while cur_lat > max_lat :
                 
-                tiles.append(TileRequest(self.provider, tileCoord, Core.Point(x_off, y_off)))
+                tiles.append(TileRequest(self.provider, tileCoord, Point(x_off, y_off)))
                 y_off += self.provider.tileHeight()
                 
                 tileCoord = tileCoord.down()
@@ -424,7 +426,7 @@ class Map:
 
         self.offset = offset
         self.coordinates = coord
-        self.dimensions = Core.Point(width, height)
+        self.dimensions = Point(width, height)
 
         return self.draw()
     
@@ -434,7 +436,7 @@ class Map:
         """ Draw map out to a PIL.Image and return it.
         """
         coord = self.coordinate.copy()
-        corner = Core.Point(int(self.offset.x + self.dimensions.x/2), int(self.offset.y + self.dimensions.y/2))
+        corner = Point(int(self.offset.x + self.dimensions.x/2), int(self.offset.y + self.dimensions.y/2))
 
         while corner.x > 0:
             corner.x -= self.provider.tileWidth()
@@ -450,7 +452,7 @@ class Map:
         for y in range(corner.y, self.dimensions.y, self.provider.tileHeight()):
             tileCoord = rowCoord.copy()
             for x in range(corner.x, self.dimensions.x, self.provider.tileWidth()):
-                tiles.append(TileRequest(self.provider, tileCoord, Core.Point(x, y)))
+                tiles.append(TileRequest(self.provider, tileCoord, Point(x, y)))
                 tileCoord = tileCoord.right()
             rowCoord = rowCoord.down()
 
