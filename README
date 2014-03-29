@@ -1,8 +1,8 @@
 GeoTiler is a library to create maps using tiles from a map provider.
 
-The code is based on Python port of Modest Maps project, which is licensed
-under BSD license (it seems). All subsequent changes are licensed under
-GPL v3 license.
+The code is based on Python port of Modest Maps project [1][2], which is
+licensed under BSD license (it seems). All subsequent changes are licensed
+under GPL v3 license.
 
 The main goal of the library is to enable a programmer to create maps
 using tiles downloaded from a map provider like OpenStreetMap, Yahoo or
