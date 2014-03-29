@@ -1,12 +1,12 @@
 """
 >>> m = Map(Microsoft.RoadProvider(), Point(600, 600), Core.Coordinate(3165, 1313, 13), Point(-144, -94))
->>> p = m.locationPoint(Geo.Location(37.804274, -122.262940))
+>>> p = m.locationPoint(Point(37.804274, -122.262940))
 >>> p
 (370.724, 342.549)
 >>> m.pointLocation(p)
 (37.804, -122.263)
 
->>> c = Geo.Location(37.804274, -122.262940)
+>>> c = Point(37.804274, -122.262940)
 >>> z = 12
 >>> d = Point(800, 600)
 >>> m = mapByCenterZoom(Microsoft.RoadProvider(), c, z, d)
@@ -17,8 +17,8 @@
 >>> m.offset
 (-235.000, -196.000)
 
->>> sw = Geo.Location(36.893326, -123.533554)
->>> ne = Geo.Location(38.864246, -121.208153)
+>>> sw = Point(36.893326, -123.533554)
+>>> ne = Point(38.864246, -121.208153)
 >>> d = Point(800, 600)
 >>> m = mapByExtent(Microsoft.RoadProvider(), sw, ne, d)
 >>> m.dimensions
@@ -28,8 +28,8 @@
 >>> m.offset
 (-251.000, -218.000)
 
->>> se = Geo.Location(36.893326, -121.208153)
->>> nw = Geo.Location(38.864246, -123.533554)
+>>> se = Point(36.893326, -121.208153)
+>>> nw = Point(38.864246, -123.533554)
 >>> d = Point(1600, 1200)
 >>> m = mapByExtent(Microsoft.RoadProvider(), se, nw, d)
 >>> m.dimensions
@@ -39,8 +39,8 @@
 >>> m.offset
 (-246.000, -179.000)
 
->>> sw = Geo.Location(36.893326, -123.533554)
->>> ne = Geo.Location(38.864246, -121.208153)
+>>> sw = Point(36.893326, -123.533554)
+>>> ne = Point(38.864246, -121.208153)
 >>> z = 10
 >>> m = mapByExtentZoom(Microsoft.RoadProvider(), sw, ne, z)
 >>> m.dimensions
@@ -50,8 +50,8 @@
 >>> m.offset
 (-236.000, -102.000)
 
->>> se = Geo.Location(36.893326, -121.208153)
->>> nw = Geo.Location(38.864246, -123.533554)
+>>> se = Point(36.893326, -121.208153)
+>>> nw = Point(38.864246, -123.533554)
 >>> z = 9
 >>> m = mapByExtentZoom(Microsoft.RoadProvider(), se, nw, z)
 >>> m.dimensions
@@ -366,10 +366,10 @@ class Map:
     
     def draw_bbox(self, bbox, zoom=16):
 
-        sw = Geo.Location(bbox[0], bbox[1])
-        ne = Geo.Location(bbox[2], bbox[3])
-        nw = Geo.Location(ne.lat, sw.lon)
-        se = Geo.Location(sw.lat, ne.lon)
+        sw = Point(bbox[0], bbox[1])
+        ne = Point(bbox[2], bbox[3])
+        nw = Point(ne.lat, sw.lon)
+        se = Point(sw.lat, ne.lon)
         
         TL = self.provider.locationCoordinate(nw).zoomTo(zoom)
 
@@ -421,8 +421,8 @@ class Map:
 
         coord, offset = calculateMapExtent(self.provider,
                                            width, height,
-                                           Geo.Location(bbox[0], bbox[1]),
-                                           Geo.Location(bbox[2], bbox[3]))
+                                           Point(bbox[0], bbox[1]),
+                                           Point(bbox[2], bbox[3]))
 
         self.offset = offset
         self.coordinates = coord

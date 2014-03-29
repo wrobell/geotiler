@@ -33,11 +33,11 @@
 (0.000, 0.000)
 
 >>> m = MercatorProjection(10)
->>> m.locationCoordinate(Location(0, 0))
+>>> m.locationCoordinate(Point(0, 0))
 (-0.000, 0.000 @10.000)
 >>> m.coordinateLocation(Coordinate(0, 0, 10))
 (0.000, 0.000)
->>> m.locationCoordinate(Location(37, -122))
+>>> m.locationCoordinate(Point(37, -122))
 (0.696, -2.129 @10.000)
 >>> m.coordinateLocation(Coordinate(0.696, -2.129, 10.000))
 (37.001, -121.983)
@@ -47,13 +47,6 @@ import math
 from shapely.geometry import Point
 from .Core import Coordinate
 
-class Location:
-    def __init__(self, lat, lon):
-        self.lat = lat
-        self.lon = lon
-        
-    def __repr__(self):
-        return '(%(lat).3f, %(lon).3f)' % self.__dict__
 
 class Transformation:
     def __init__(self, ax, bx, cx, ay, by, cy):
@@ -137,7 +130,7 @@ class IProjection:
         coordinate = coordinate.zoomTo(self.zoom)
         point = Point(coordinate.column, coordinate.row)
         point = self.unproject(point)
-        return Location(180.0 * point.y / math.pi, 180.0 * point.x / math.pi)
+        return Point(180.0 * point.y / math.pi, 180.0 * point.x / math.pi)
 
 class LinearProjection(IProjection):
     def rawProject(self, point):
