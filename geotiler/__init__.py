@@ -110,31 +110,9 @@ builtinProviders = {
     }
 
 
+default_provider = builtinProviders['OPENSTREETMAP']()
 
-def mapByExtentZoom(provider, locationA, locationB, zoom):
-    """ Return map instance given a provider, two corner locations, and zoom value.
-    """
-    # a coordinate per corner
-    coordA = provider.locationCoordinate(locationA).zoomTo(zoom)
-    coordB = provider.locationCoordinate(locationB).zoomTo(zoom)
 
-    # precise width and height in pixels
-    width = abs(coordA.column - coordB.column) * provider.tileWidth()
-    height = abs(coordA.row - coordB.row) * provider.tileHeight()
-
-    # nearest pixel actually
-    dimensions = Point(int(width), int(height))
-
-    # projected center of the map
-    centerCoord = Core.Coordinate(
-        (coordA.row + coordB.row) / 2,
-        (coordA.column + coordB.column) / 2,
-        zoom
-    )
-
-    mapCoord, mapOffset = calculateMapCenter(provider, centerCoord)
-
-    return Map(provider, dimensions, mapCoord, mapOffset)
 
 def calculateMapCenter(provider, centerCoord):
     """ Based on a provider and center coordinate, returns the coordinate
@@ -272,30 +250,47 @@ class TileRequest:
 
 
 class Map(object):
+    """
+    Map created from tiles and to be drawn as an image.
 
-    def __init__(self, provider, width, height): #, coordinate, offset):
-        """ Instance of a map intended for drawing to an image.
+    The initial map instance is created using geographical extent and zoom.
+    This calculates center of the map and size of the image.
 
-            provider
-                Instance of IMapProvider
+    The extent, zoom, center and image size can be changed at any time with
+    appropriate properties.
 
-            dimensions
-                Size of output image, instance of Point
+    *NOTE:* Changing image size recalculates map extent.
 
-            coordinate
-                Base tile, instance of Coordinate
+    :var provider: Map tiles provider (default OpenStreetMap).
+    :var _extent: Map geographical extent.
+    :var _center: Map geographical center.
+    :var _zoom: Map zoom.
+    :var _size: Image size.
+    :var _offset: Position of base tile relative to map center.
+    """
+    def __init__(self, extent, zoom, provider=default_provider):
+        """
+        Create map.
 
-            offset
-                Position of base tile relative to map center, instance of Point
+        :param extent: Map geographical extent.
+        :param zoom: Map zoom.
+        :param provider: Map tiles provider.
         """
         super().__init__()
         self.provider = provider
-        self.dimensions = width, height
+        self.dimensions = None
         self.coordinate = None
         self.offset = None
 
+        self._extent = extent
         self._center = None
-        self._extent = None
+        self._zoom = zoom
+
+        self._on_change_extent_zoom()
+        #assert self._center is not None
+        assert self.coordinate is not None
+        assert self.dimensions is not None
+        assert self.offset is not None
 
 
     @property
@@ -348,28 +343,32 @@ class Map(object):
         self._extent = p1.x, p1.y, p2.x, p2.y
 
 
-    def _on_change_extent_zoom(provider, locationA, locationB, zoom): # mapByExtentZoom
+    def _on_change_extent_zoom(self):
         """ Return map instance given a provider, two corner locations, and zoom value.
         """
         # a coordinate per corner
-        coordA = provider.locationCoordinate(locationA).zoomTo(zoom)
-        coordB = provider.locationCoordinate(locationB).zoomTo(zoom)
+        x1, y1, x2, y2 = self._extent
+        p1 = Point(x1, y1)
+        p2 = Point(x2, y2)
+        coord_a = self.provider.locationCoordinate(p1).zoomTo(self._zoom)
+        coord_b = self.provider.locationCoordinate(p2).zoomTo(self._zoom)
 
         # precise width and height in pixels
-        width = abs(coordA.column - coordB.column) * provider.tileWidth()
-        height = abs(coordA.row - coordB.row) * provider.tileHeight()
-
-        # nearest pixel actually
-        dimensions = Point(int(width), int(height))
+        width = abs(coord_a.column - coord_b.column) * self.provider.tileWidth()
+        height = abs(coord_a.row - coord_b.row) * self.provider.tileHeight()
 
         # projected center of the map
-        centerCoord = Core.Coordinate((coordA.row + coordB.row) / 2,
-                                      (coordA.column + coordB.column) / 2,
-                                      zoom)
+        center_coord = Core.Coordinate(
+            (coord_a.row + coord_b.row) / 2,
+            (coord_a.column + coord_b.column) / 2,
+            self._zoom
+        )
 
-        mapCoord, mapOffset = calculateMapCenter(provider, centerCoord)
+        map_coord, map_offset = calculateMapCenter(self.provider, center_coord)
 
-        return Map(provider, dimensions, mapCoord, mapOffset)
+        self.coordinate = map_coord
+        self.offset = map_offset
+        self.dimensions = int(width), int(height)
 
 
     def __str__(self):

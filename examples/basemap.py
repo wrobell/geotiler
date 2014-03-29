@@ -21,16 +21,13 @@ ax = plt.subplot(111)
 #
 # download background map using OpenStreetMap
 #
-provider = geotiler.find_provider('OPENSTREETMAP')
-mm = geotiler.Map(provider, WIDTH, HEIGHT)
-mm.extent = bbox
-#mm.zoom = 18
+mm = geotiler.Map(bbox, 18)
 #mm = ModestMaps.mapByExtent(provider, loc1, loc2, dimensions)
 #mm = ModestMaps.mapByExtentZoom(provider, loc1, loc2, 18)
 
 img = mm.draw()
-mm._on_size_change()
-bbox = mm.extent # recalculate bbox, which can change due to requested dimensions
+bbox = mm.extent  # recalculate bbox, which can change due to requested
+                  # image size
 
 #
 # create basemap
