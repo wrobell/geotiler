@@ -285,23 +285,13 @@ class Map(object):
         self._extent = extent
         self._center = None
         self._zoom = zoom
+        #self._size = None
 
         self._on_change_extent_zoom()
         #assert self._center is not None
         assert self.coordinate is not None
         assert self.dimensions is not None
         assert self.offset is not None
-
-
-    @property
-    def zoom(self):
-        return self._zoom
-
-
-    @zoom.setter
-    def zoom(self, zoom):
-        self._zoom = zoom
-        self._on_change_zoom()
 
 
     @property
@@ -315,10 +305,44 @@ class Map(object):
         self._on_change_extent()
 
 
+    @property
+    def zoom(self):
+        """
+        Map zoom value.
+
+        Setting zoom value changes map offset.
+        """
+        return self._zoom
+
+
+    @zoom.setter
+    def zoom(self, zoom):
+        self._zoom = zoom
+        self._on_change_zoom()
+
+
+    @property
+    def size(self):
+        """
+        Size of the image containing map.
+
+        It is a tuple (width, height).
+
+        Setting size of the image changes map extent.
+        """
+        return self.dimensions
+
+
+    @size.setter
+    def size(self, size):
+        self.dimensions = size
+        self._on_size_change()
+
+
     def _on_change_zoom(self):
         """ Return map instance given a provider, center location, zoom value, and dimensions point.
         """
-        center_coord = provider.locationCoordinate(self._center).zoomTo(self._zoom)
+        center_coord = self.provider.locationCoordinate(self._center).zoomTo(self._zoom)
         map_coord, map_offset = calculateMapCenter(self.provider, center_coord)
         self.coordinate = map_coord
         self.offset = map_offset
