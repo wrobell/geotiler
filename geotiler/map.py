@@ -196,12 +196,14 @@ class Map(object):
         coord = self.provider.locationCoordinate(location).zoomTo(self.coordinate.zoom)
 
         # distance from the known coordinate offset
-        point.x += self.provider.tileWidth() * (coord.column - self.coordinate.column)
-        point.y += self.provider.tileHeight() * (coord.row - self.coordinate.row)
+        point = Point(
+            point.x + self.provider.tileWidth() * (coord.column - self.coordinate.column),
+            point.y + self.provider.tileHeight() * (coord.row - self.coordinate.row)
+        )
 
         # because of the center/corner business
-        point.x += self.dimensions.x/2
-        point.y += self.dimensions.y/2
+        w, h = self.dimensions
+        point = Point(point.x + w / 2, point.y + h / 2)
 
         return point
 
