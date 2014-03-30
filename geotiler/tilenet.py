@@ -34,10 +34,10 @@ HEADERS = {
 }
 
 @lru_cache()
-def fetch(netloc, path, query):
+def fetch(host, path, query):
     img = None
 
-    conn = http.client.HTTPConnection(netloc)
+    conn = http.client.HTTPConnection(host)
     conn.request('GET', path + ('?' + query).rstrip('?'), headers=HEADERS)
     response = conn.getresponse()
     status = str(response.status)
@@ -81,11 +81,11 @@ class TileRequest:
         try:
             imgs = []
 
-            for (scheme, netloc, path, params, query, fragment) in map(urllib.parse.urlparse, urls):
+            for (scheme, host, path, params, query, fragment) in map(urllib.parse.urlparse, urls):
                 if scheme in ('file', ''):
                     img = Image.open(path).convert('RGBA')
                 elif scheme == 'http':
-                    img = fetch(netloc, path, query)
+                    img = fetch(host, path, query)
                 imgs.append(img)
                 self.done = True
 
