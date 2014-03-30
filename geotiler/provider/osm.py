@@ -11,7 +11,6 @@ from math import pi
 from ..Core import Coordinate
 from ..Geo import MercatorProjection, deriveTransformation
 from .base import IMapProvider
-from .. import Tiles
 
 
 class Base(IMapProvider):
@@ -22,13 +21,15 @@ class Base(IMapProvider):
         t = deriveTransformation(-pi, pi, 0, 0, pi, pi, 1, 0, -pi, -pi, 0, 1)
         self.projection = MercatorProjection(0, t)
 
-    def tileWidth(self):
+    @property
+    def tile_width(self):
         return 256
 
-    def tileHeight(self):
+    @property
+    def tile_height(self):
         return 256
 
-    def getTileUrls(self, coordinate):
+    def get_tile_urls(self, coordinate):
         url = self.FMT_URL.format(
             x=coordinate.column,
             y=coordinate.row,

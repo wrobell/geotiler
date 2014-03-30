@@ -166,8 +166,8 @@ class Map(object):
         coord_b = self.provider.locationCoordinate(p2).zoomTo(self._zoom)
 
         # precise width and height in pixels
-        width = abs(coord_a.column - coord_b.column) * self.provider.tileWidth()
-        height = abs(coord_a.row - coord_b.row) * self.provider.tileHeight()
+        width = abs(coord_a.column - coord_b.column) * self.provider.tile_width
+        height = abs(coord_a.row - coord_b.row) * self.provider.tile_height
 
         # projected center of the map
         center_coord = Core.Coordinate(
@@ -195,8 +195,8 @@ class Map(object):
 
         # distance from the known coordinate offset
         point = Point(
-            point.x + self.provider.tileWidth() * (coord.column - self.coordinate.column),
-            point.y + self.provider.tileHeight() * (coord.row - self.coordinate.row)
+            point.x + self.provider.tile_width * (coord.column - self.coordinate.column),
+            point.y + self.provider.tile_height * (coord.row - self.coordinate.row)
         )
 
         # because of the center/corner business
@@ -216,12 +216,12 @@ class Map(object):
         point = Point(point.x - w / 2, point.y - h / 2)
 
         # distance in tile widths from reference tile to point
-        xTiles = (point.x - self.offset.x) / self.provider.tileWidth();
-        yTiles = (point.y - self.offset.y) / self.provider.tileHeight();
+        xTiles = (point.x - self.offset.x) / self.provider.tile_width
+        yTiles = (point.y - self.offset.y) / self.provider.tile_height
 
         # distance in rows & columns at maximum zoom
-        xDistance = xTiles * math.pow(2, (Core.Coordinate.MAX_ZOOM - self.coordinate.zoom));
-        yDistance = yTiles * math.pow(2, (Core.Coordinate.MAX_ZOOM - self.coordinate.zoom));
+        xDistance = xTiles * math.pow(2, (Core.Coordinate.MAX_ZOOM - self.coordinate.zoom))
+        yDistance = yTiles * math.pow(2, (Core.Coordinate.MAX_ZOOM - self.coordinate.zoom))
 
         # new point coordinate reflecting that distance
         coord = Core.Coordinate(round(hizoomCoord.row + yDistance),
@@ -252,19 +252,19 @@ def render_map(map, downloader=None):
     corner = Point(int(map.offset.x + w / 2), int(map.offset.y + h / 2))
 
     while corner.x > 0:
-        corner = Point(corner.x - map.provider.tileWidth(), corner.y)
+        corner = Point(corner.x - map.provider.tile_width, corner.y)
         coord = coord.left()
 
     while corner.y > 0:
-        corner = Point(corner.x, corner.y - map.provider.tileHeight())
+        corner = Point(corner.x, corner.y - map.provider.tile_height)
         coord = coord.up()
 
     tiles = []
 
     rowCoord = coord.copy()
-    for y in range(int(corner.y), h, map.provider.tileHeight()):
+    for y in range(int(corner.y), h, map.provider.tile_height):
         tileCoord = rowCoord.copy()
-        for x in range(int(corner.x), w, map.provider.tileWidth()):
+        for x in range(int(corner.x), w, map.provider.tile_width):
             tiles.append(TileRequest(map.provider, tileCoord, Point(x, y)))
             tileCoord = tileCoord.right()
         rowCoord = rowCoord.down()
@@ -280,8 +280,8 @@ def calculateMapCenter(provider, centerCoord):
     initTileCoord = centerCoord.container()
 
     # initial tile position, assuming centered tile well in grid
-    initX = (initTileCoord.column - centerCoord.column) * provider.tileWidth()
-    initY = (initTileCoord.row - centerCoord.row) * provider.tileHeight()
+    initX = (initTileCoord.column - centerCoord.column) * provider.tile_width
+    initY = (initTileCoord.row - centerCoord.row) * provider.tile_height
     initPoint = Point(round(initX), round(initY))
 
     return initTileCoord, initPoint
@@ -302,7 +302,7 @@ def calculateMapExtent(provider, width, height, *args):
                          max([c.zoom for c in coordinates]))
 
     # multiplication factor between horizontal span and map width
-    hFactor = (BR.column - TL.column) / (float(width) / provider.tileWidth())
+    hFactor = (BR.column - TL.column) / (float(width) / provider.tile_width)
 
     # multiplication factor expressed as base-2 logarithm, for zoom difference
     hZoomDiff = math.log(hFactor) / math.log(2)
@@ -311,7 +311,7 @@ def calculateMapExtent(provider, width, height, *args):
     hPossibleZoom = TL.zoom - math.ceil(hZoomDiff)
 
     # multiplication factor between vertical span and map height
-    vFactor = (BR.row - TL.row) / (float(height) / provider.tileHeight())
+    vFactor = (BR.row - TL.row) / (float(height) / provider.tile_height)
 
     # multiplication factor expressed as base-2 logarithm, for zoom difference
     vZoomDiff = math.log(vFactor) / math.log(2)

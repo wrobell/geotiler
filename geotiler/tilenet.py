@@ -83,7 +83,7 @@ class TileDownloader(object):
             # don't bother?
             return
 
-        urls = tile.provider.getTileUrls(tile.coord)
+        urls = tile.provider.get_tile_urls(tile.coord)
 
         if __debug__:
             logger.debug('Requesting {}'.format(urls))

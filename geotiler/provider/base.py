@@ -9,20 +9,19 @@ ids = (
     'YAHOO_AERIAL', 'YAHOO_HYBRID', 'BLUE_MARBLE', 'OPEN_STREET_MAP'
 )
 
-class IMapProvider:
+class IMapProvider(object):
     def __init__(self):
         raise NotImplementedError("Abstract method not implemented by subclass.")
 
-    def getTileUrls(self, coordinate):
+    def get_tile_urls(self, coordinate):
         raise NotImplementedError("Abstract method not implemented by subclass.")
 
-    def getTileUrls(self, coordinate):
+    @property
+    def tile_width(self):
         raise NotImplementedError("Abstract method not implemented by subclass.")
 
-    def tileWidth(self):
-        raise NotImplementedError("Abstract method not implemented by subclass.")
-
-    def tileHeight(self):
+    @property
+    def tile_height(self):
         raise NotImplementedError("Abstract method not implemented by subclass.")
 
     def locationCoordinate(self, location):

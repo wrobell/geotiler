@@ -36,22 +36,24 @@ class AbstractProvider(IMapProvider):
     def getZoomString(self, coordinate):
         return Tiles.toMicrosoft(int(coordinate.column), int(coordinate.row), int(coordinate.zoom))
 
-    def tileWidth(self):
+    @property
+    def tile_width(self):
         return 256
 
-    def tileHeight(self):
+    @property
+    def tile_height(self):
         return 256
 
 class RoadProvider(AbstractProvider):
-    def getTileUrls(self, coordinate):
+    def get_tile_urls(self, coordinate):
         return ('http://r%d.ortho.tiles.virtualearth.net/tiles/r%s.png?g=90&shading=hill' % (random.randint(0, 3), self.getZoomString(self.sourceCoordinate(coordinate))),)
 
 class AerialProvider(AbstractProvider):
-    def getTileUrls(self, coordinate):
+    def get_tile_urls(self, coordinate):
         return ('http://a%d.ortho.tiles.virtualearth.net/tiles/a%s.jpeg?g=90' % (random.randint(0, 3), self.getZoomString(self.sourceCoordinate(coordinate))),)
 
 class HybridProvider(AbstractProvider):
-    def getTileUrls(self, coordinate):
+    def get_tile_urls(self, coordinate):
         return ('http://h%d.ortho.tiles.virtualearth.net/tiles/h%s.jpeg?g=90' % (random.randint(0, 3), self.getZoomString(self.sourceCoordinate(coordinate))),)
 
 if __name__ == '__main__':

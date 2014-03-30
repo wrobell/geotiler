@@ -39,22 +39,24 @@ class AbstractProvider(IMapProvider):
     def getZoomString(self, coordinate):
         return 'x=%d&y=%d&z=%d' % Tiles.toYahoo(int(coordinate.column), int(coordinate.row), int(coordinate.zoom))
 
-    def tileWidth(self):
+    @property
+    def tile_width(self):
         return 256
 
-    def tileHeight(self):
+    @property
+    def tile_height(self):
         return 256
 
 class RoadProvider(AbstractProvider):
-    def getTileUrls(self, coordinate):
+    def get_tile_urls(self, coordinate):
         return ('http://us.maps2.yimg.com/us.png.maps.yimg.com/png?v=%s&t=m&%s' % (ROAD_VERSION, self.getZoomString(self.sourceCoordinate(coordinate))),)
 
 class AerialProvider(AbstractProvider):
-    def getTileUrls(self, coordinate):
+    def get_tile_urls(self, coordinate):
         return ('http://us.maps3.yimg.com/aerial.maps.yimg.com/tile?v=%s&t=a&%s' % (AERIAL_VERSION, self.getZoomString(self.sourceCoordinate(coordinate))),)
 
 class HybridProvider(AbstractProvider):
-    def getTileUrls(self, coordinate):
+    def get_tile_urls(self, coordinate):
         under = AerialProvider().getTileUrls(coordinate)[0]
         over = 'http://us.maps3.yimg.com/aerial.maps.yimg.com/png?v=%s&t=h&%s' % (HYBRID_VERSION, self.getZoomString(self.sourceCoordinate(coordinate)))
         return (under, over)
