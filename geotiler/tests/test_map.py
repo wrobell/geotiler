@@ -22,7 +22,7 @@
 from shapely.geometry import Point
 
 from geotiler.map import Map
-from geotiler import Microsoft
+from geotiler.provider import ms
 from geotiler.core import Coordinate
 
 import unittest
@@ -33,7 +33,7 @@ class MapTestCase(unittest.TestCase):
     Map unit tests.
     """
     def test_1(self):
-        provider = Microsoft.RoadProvider()
+        provider = ms.RoadProvider()
         m = Map((0, 0, 0, 0), 13, provider=provider)
         m.coordinate = Coordinate(3165, 1313, 13)
         m.offset = Point(-144, -94)
@@ -54,7 +54,7 @@ class MapTestCase(unittest.TestCase):
         """
         center = Point(-122.262940, 37.804274)
         size = 800, 600
-        provider = Microsoft.RoadProvider()
+        provider = ms.RoadProvider()
         m = Map((0, 0, 0, 0), 12, provider=provider)
         m.size = size
         m.center = center
@@ -73,7 +73,7 @@ class MapTestCase(unittest.TestCase):
         """
         extent = -123.533554, 36.893326, -121.208153, 38.864246
         size = 800, 600
-        provider = Microsoft.RoadProvider()
+        provider = ms.RoadProvider()
         m = Map(extent, 8, provider=provider)
         m.size = size
 
@@ -91,7 +91,7 @@ class MapTestCase(unittest.TestCase):
         """
         extent = -121.208153, 36.893326, -123.533554, 38.864246
         size = 1600, 1200
-        provider = Microsoft.RoadProvider()
+        provider = ms.RoadProvider()
 
         m = Map(extent, 10, provider=provider)
         m.size = size
@@ -107,7 +107,7 @@ class MapTestCase(unittest.TestCase):
     def test_5(self):
         extent = -123.533554, 36.893326, -121.208153, 38.864246
         zoom = 10
-        provider = Microsoft.RoadProvider()
+        provider = ms.RoadProvider()
 
         m = Map(extent, zoom, provider=provider)
 
@@ -122,7 +122,7 @@ class MapTestCase(unittest.TestCase):
     def test_6(self):
         extent = -121.208153, 36.893326, -123.533554, 38.864246
         zoom = 9
-        provider = Microsoft.RoadProvider()
+        provider = ms.RoadProvider()
         m = Map(extent, zoom, provider=provider)
 
         self.assertEquals((846.000, 909.000), m.dimensions)
