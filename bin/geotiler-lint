@@ -1,13 +1,16 @@
-# vim:et sts=4 sw=4:
+#!/usr/bin/env python
 
-import sys, math, optparse, ModestMaps
+import sys
+import argparse
 import logging
+
+import geotiler
 
 class BadComposure(Exception):
     pass
 
-parser = optparse.OptionParser(usage="""compose.py [options] file
-
+parser = argparse.ArgumentParser()
+usage = """
 There are three ways to set a map coverage area.
 
 1) Center, zoom, and dimensions: create a map of the specified size,
@@ -23,118 +26,93 @@ There are three ways to set a map coverage area.
 3) Extent and zoom: create a map at the given zoom level that covers
    the precise geographical extent, at whatever pixel size is necessary:
    
-   python compose.py -p BLUE_MARBLE -e 36.9 -123.5 38.9 -121.2 -z 9 out.jpg""")
+   python compose.py -p BLUE_MARBLE -e 36.9 -123.5 38.9 -121.2 -z 9 out.jpg
+"""
 
-parser.add_option('-v', '--verbose', dest='verbose',
-                  help='Make a bunch of noise',
-                  action='store_true')
+parser.add_argument(
+    '-v', '--verbose', dest='verbose', help='Make a bunch of noise',
+    action='store_true'
+)
 
-parser.add_option('-c', '--center', dest='center', nargs=2,
-                  help='Center. lat, lon, e.g.: 37.804 -122.263', type='float',
-                  action='store')
+parser.add_argument(
+    '-c', '--center', dest='center', nargs=2,
+    help='Center of the map (lon, lat), e.g.: -122.263 37.804', type=float
+)
 
-parser.add_option('-e', '--extent', dest='extent', nargs=4,
-                  help='Geographical extent. Two lat, lon pairs', type='float',
-                  action='store')
+parser.add_argument(
+    '-e', '--extent', dest='extent', nargs=4,
+    help='Geographical map extent. Two lat, lon pairs', type=float
+)
 
-parser.add_option('-z', '--zoom', dest='zoom',
-                  help='Zoom level', type='int',
-                  action='store')
+parser.add_argument('-z', '--zoom', dest='zoom', help='Zoom level', type=int)
 
-parser.add_option('-d', '--dimensions', dest='dimensions', nargs=2,
-                  help='Pixel dimensions of image', type='int',
-                  action='store')
+parser.add_argument(
+    '-d', '--dimensions', dest='dimensions', nargs=2,
+    help='Pixel dimensions of image', type=int
+)
 
-parser.add_option('-p', '--provider', dest='provider',
-                  help='Map Provider, one of ' + ', '.join(list(ModestMaps.builtinProviders.keys())) + ' or URL template like "http://example.com/{Z}/{X}/{Y}.png".',
-                  action='store')
+providers = list(sorted(geotiler.provider.conf.PROVIDERS.keys()))
+parser.add_argument(
+    'provider', choices=providers,
+    help='Map provider or URL template like "http://example.com/{z}/{x}/{y}.png".'
+)
 
-parser.add_option('-k', '--apikey', dest='apikey',
-                  help='API key for map providers that need one, e.g. CloudMade', type='str',
-                  action='store')
+parser.add_argument('-k', '--apikey', dest='apikey')
+parser.add_argument('output', help='Output file')
 
-parser.add_option('-f', '--fat-bits', dest='fatbits',
-                  help='Optionally look to lower zoom levels if tiles at the requested level are unavailable',
-                  action='store_true')
+args = parser.parse_args()
+outfile = args.output
 
-if __name__ == '__main__':
+try:
+    if args.provider.startswith('cloudmade_'):
+        if not options.apikey:
+            raise BadComposure("Error: Cloudmade provider requires an API key. Register at http://developers.cloudmade.com/")
 
-    (options, args) = parser.parse_args()
+        provider = ModestMaps.builtinProviders[args.provider](args.apikey)
+    elif args.provider.startswith('http://'):
+        provider = ModestMaps.Providers.TemplatedMercatorProvider(args.provider)
+    elif args.provider.startswith('https://'):
+        provider = ModestMaps.Providers.TemplatedMercatorProvider(args.provider)
+    elif args.provider.startswith('file://'):
+        args = ModestMaps.Providers.TemplatedMercatorProvider(args.provider)
+    else:
+        provider = geotiler.find_provider(args.provider)
+except KeyError:
+    raise BadComposure('Error: bad provider "%s".' % args.provider)
+
+if args.center and args.extent:
+    raise BadComposure("Error: bad map coverage, center and extent can't both be set.")
+
+elif args.extent and args.dimensions and args.zoom:
+    raise BadComposure("Error: bad map coverage, dimensions and zoom can't be set together with extent.")
+
+elif args.center and args.zoom and args.dimensions:
+    lat, lon = args.center[0], args.center[1]
+    width, height = args.dimensions[0], args.dimensions[1]
+
+    dimensions = ModestMaps.Core.Point(width, height)
+    center = ModestMaps.Geo.Location(lat, lon)
+    zoom = args.zoom
+
+    map = ModestMaps.mapByCenterZoom(provider, center, zoom, dimensions)
     
-    try:
-        try:
-            outfile = args[0]
-        except IndexError:
-            raise BadComposure('Error: Missing output file.')
-        
-        try:
-            if options.provider.startswith('CLOUDMADE_'):
-                if not options.apikey:
-                    raise BadComposure("Error: Cloudmade provider requires an API key. Register at http://developers.cloudmade.com/")
+elif args.extent and args.dimensions:
+    map = geotiler.Map(args.extent, 0, provider=provider)
+    map.size = args.dimensions
 
-                provider = ModestMaps.builtinProviders[options.provider](options.apikey)
-            elif options.provider.startswith('http://'):
-                provider = ModestMaps.Providers.TemplatedMercatorProvider(options.provider)
-            elif options.provider.startswith('https://'):
-                provider = ModestMaps.Providers.TemplatedMercatorProvider(options.provider)
-            elif options.provider.startswith('file://'):
-                provider = ModestMaps.Providers.TemplatedMercatorProvider(options.provider)
-            else:
-                provider = ModestMaps.builtinProviders[options.provider]()
-        except KeyError:
-            raise BadComposure('Error: bad provider "%s".' % options.provider)
-    
-        if options.center and options.extent:
-            raise BadComposure("Error: bad map coverage, center and extent can't both be set.")
-        
-        elif options.extent and options.dimensions and options.zoom:
-            raise BadComposure("Error: bad map coverage, dimensions and zoom can't be set together with extent.")
-        
-        elif options.center and options.zoom and options.dimensions:
-            lat, lon = options.center[0], options.center[1]
-            width, height = options.dimensions[0], options.dimensions[1]
+elif args.extent and args.zoom:
+    map = geotiler.Map(args.extent, args.zoom, provider=provider)
 
-            dimensions = ModestMaps.Core.Point(width, height)
-            center = ModestMaps.Geo.Location(lat, lon)
-            zoom = options.zoom
+else:
+    raise BadComposure("Error: not really sure what's going on.")
 
-            map = ModestMaps.mapByCenterZoom(provider, center, zoom, dimensions)
-            
-        elif options.extent and options.dimensions:
-            latA, lonA = options.extent[0], options.extent[1]
-            latB, lonB = options.extent[2], options.extent[3]
-            width, height = options.dimensions[0], options.dimensions[1]
 
-            dimensions = ModestMaps.Core.Point(width, height)
-            locationA = ModestMaps.Geo.Location(latA, lonA)
-            locationB = ModestMaps.Geo.Location(latB, lonB)
+if args.verbose:
+    logging.basicConfig(level=logging.DEBUG)
+    logger = logging.getLogger(__name__)
+    logger.debug('{} {} -> {} {}'.format(map.coordinate, map.offset, outfile, map.dimensions))
 
-            map = ModestMaps.mapByExtent(provider, locationA, locationB, dimensions)
-    
-        elif options.extent and options.zoom:
-            latA, lonA = options.extent[0], options.extent[1]
-            latB, lonB = options.extent[2], options.extent[3]
+img = geotiler.render_map(map)
+img.save(outfile)
 
-            locationA = ModestMaps.Geo.Location(latA, lonA)
-            locationB = ModestMaps.Geo.Location(latB, lonB)
-            zoom = options.zoom
-
-            map = ModestMaps.mapByExtentZoom(provider, locationA, locationB, zoom)
-    
-        else:
-            raise BadComposure("Error: not really sure what's going on.")
-
-    except BadComposure as e:
-        print(parser.usage, file=sys.stderr)
-        print('', file=sys.stderr)
-        print('%s --help for possible options.' % __file__, file=sys.stderr)
-        print('', file=sys.stderr)
-        print(e, file=sys.stderr)
-        sys.exit(1)
-
-    if options.verbose:
-        logging.basicConfig(level=logging.DEBUG)
-        logger = logging.getLogger(__name__)
-        logger.debug('{} {} -> {} {}'.format(map.coordinate, map.offset, outfile, map.dimensions))
-
-    map.draw(options.fatbits).save(outfile)
+# vim:et sts=4 sw=4:
