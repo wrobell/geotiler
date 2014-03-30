@@ -66,12 +66,22 @@ class TileRequest:
         return self.imgs
 
 
-    def load(self):
-        if self.done:
+
+class TileDownloader(object):
+    """
+    Tile downloader abstract class.
+    """
+    def load(self, tile):
+        """
+        Download tile.
+
+        :param tile: Tile to download.
+        """
+        if tile.done:
             # don't bother?
             return
 
-        urls = self.provider.getTileUrls(self.coord)
+        urls = tile.provider.getTileUrls(tile.coord)
 
         if __debug__:
             logger.debug('Requesting {}'.format(urls))
@@ -86,7 +96,7 @@ class TileRequest:
                 elif scheme == 'http':
                     img = fetch(host, path, query)
                 imgs.append(img)
-                self.done = True
+                tile.done = True
 
             if __debug__:
                 logger.debug('Received {}'.format(urls))
@@ -101,10 +111,15 @@ class TileRequest:
                      # unnecessary server request while dealing with
                      # ModestMaps errors
 
-        self.imgs = imgs
+        tile.imgs = imgs
 
 
-class TileThreadDownloader(object):
+    def fetch(self, tiles):
+        raise NotImplementedError()
+
+
+
+class TileThreadDownloader(TileDownloader):
     """
     Tile downloader based on thead pool executor.
     """
@@ -115,8 +130,9 @@ class TileThreadDownloader(object):
         :param tiles: List of tile requests.
         """
         pool = ThreadPoolExecutor(max_workers=32)
-        pool.map(lambda tile: tile.load(), tiles, timeout=5)
+        pool.map(self.load, tiles, timeout=5)
         pool.shutdown()
+
 
 
 
