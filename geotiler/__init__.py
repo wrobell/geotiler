@@ -296,6 +296,9 @@ class Map(object):
 
     @property
     def extent(self):
+        """
+        Map geographical extent.
+        """
         return self._extent
 
 
@@ -336,21 +339,22 @@ class Map(object):
     @size.setter
     def size(self, size):
         self.dimensions = size
-        self._on_size_change()
+        self._on_change_size()
 
 
     def _on_change_zoom(self):
-        """ Return map instance given a provider, center location, zoom value, and dimensions point.
+        """
+        Update map center after map zoom change.
         """
         center_coord = self.provider.locationCoordinate(self._center).zoomTo(self._zoom)
         map_coord, map_offset = calculateMapCenter(self.provider, center_coord)
         self.coordinate = map_coord
         self.offset = map_offset
-        #return Map(provider, dimensions, mapCoord, mapOffset)
 
 
     def _on_change_extent(self):
-        """ Return map instance given a provider, two corner locations, and dimensions point.
+        """
+        Update map center after map extent change.
         """
         width, height = self.dimensions
         p1 = Point(*self._extent[:2])
@@ -360,7 +364,10 @@ class Map(object):
         self.offset = map_offset
 
 
-    def _on_size_change(self):
+    def _on_change_size(self):
+        """
+        Update map extent after map image size change.
+        """
         w, h = self.dimensions
         p1 = self.pointLocation(Point(0, h))
         p2 = self.pointLocation(Point(w, 0))
