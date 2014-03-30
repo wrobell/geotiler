@@ -127,6 +127,11 @@ class TileDownloader(object):
 
 
     def fetch(self, tiles):
+        """
+        Execute all tile requests.
+
+        :param tiles: List of tile requests.
+        """
         raise NotImplementedError()
 
 
