@@ -234,75 +234,7 @@ class Map(object):
 
         return location
 
-    #
 
-    def draw_bbox(self, bbox, zoom=16):
-
-        sw = Point(bbox[0], bbox[1])
-        ne = Point(bbox[2], bbox[3])
-        nw = Point(ne.lon, sw.lat)
-        se = Point(sw.lon, ne.lat)
-
-        TL = self.provider.locationCoordinate(nw).zoomTo(zoom)
-
-        #
-
-        tiles = []
-
-        cur_lon = sw.lon
-        cur_lat = ne.lat
-        max_lon = ne.lon
-        max_lat = sw.lat
-
-        x_off = 0
-        y_off = 0
-        tile_x = 0
-        tile_y = 0
-
-        tileCoord = TL.copy()
-
-        while cur_lon < max_lon :
-
-            y_off = 0
-            tile_y = 0
-
-            while cur_lat > max_lat :
-
-                tiles.append(TileRequest(self.provider, tileCoord, Point(x_off, y_off)))
-                y_off += self.provider.tileHeight()
-
-                tileCoord = tileCoord.down()
-                loc = self.provider.coordinateLocation(tileCoord)
-                cur_lat = loc.lat
-
-                tile_y += 1
-
-            x_off += self.provider.tileWidth()
-            cur_lat = ne.lat
-
-            tile_x += 1
-            tileCoord = TL.copy().right(tile_x)
-
-            loc = self.provider.coordinateLocation(tileCoord)
-            cur_lon = loc.lon
-
-        width = int(self.provider.tileWidth() * tile_x)
-        height = int(self.provider.tileHeight() * tile_y)
-
-        # Quick, look over there!
-
-        coord, offset = calculateMapExtent(self.provider,
-                                           width, height,
-                                           Point(bbox[0], bbox[1]),
-                                           Point(bbox[2], bbox[3]))
-
-        self.offset = offset
-        self.coordinates = coord
-        self.dimensions = Point(width, height)
-
-        return self.draw()
-
-    #
 
     def draw(self, fatbits_ok=False):
         """ Draw map out to a PIL.Image and return it.
