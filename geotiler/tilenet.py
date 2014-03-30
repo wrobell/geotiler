@@ -60,8 +60,6 @@ class TileRequest:
         self.coord = coord
         self.offset = offset
 
-    def loaded(self):
-        return self.done
 
     def images(self):
         return self.imgs
