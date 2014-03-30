@@ -2,14 +2,17 @@
 
 from distutils.core import setup
 
-version = open('VERSION', 'r').read().strip()
+import geotiler
 
-setup(name='ModestMaps',
-      version=version,
-      description='Modest Maps python port',
-      author='Michal Migurski',
-      url='http://modestmaps.com',
-      requires=['PIL'],
-      packages=['ModestMaps'],
-      download_url='http://py.modestmaps.com/dist/ModestMaps-%(version)s.tar.gz' % locals(),
-      license='BSD')
+version = geotiler.__version__
+
+setup(
+    name='GeoTiler',
+    version=version,
+    description='GeoTiler',
+    requires=['PIL'],
+    packages=['geotiler'],
+    license='GPL'
+)
+
+# vim: sw=4:et:ai
