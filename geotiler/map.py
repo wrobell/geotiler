@@ -25,7 +25,7 @@ import logging
 from shapely.geometry import Point
 import PIL.Image as Image
 
-from .provider.conf import default_provider
+from .provider.conf import DEFAULT_PROVIDER
 from . import Core
 from .tilenet import TileRequest, render_tiles
 
@@ -50,7 +50,7 @@ class Map(object):
     :var _size: Image size.
     :var _offset: Position of base tile relative to map center.
     """
-    def __init__(self, extent, zoom, provider=default_provider):
+    def __init__(self, extent, zoom, provider=DEFAULT_PROVIDER):
         """
         Create map.
 

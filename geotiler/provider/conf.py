@@ -19,37 +19,45 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+"""
+List of builtin map tiles providers.
+"""
+
 from . import yahoo, ms, bluemarble, osm, cloudmade, mapquest, stamen
 
-# a handy list of possible providers, which isn't
-# to say that you can't go writing your own.
-builtinProviders = {
-    'OPENSTREETMAP': osm.Provider,
-    'BLUE_MARBLE': bluemarble.Provider,
-    'MAPQUEST_ROAD': mapquest.RoadProvider,
-    'MAPQUEST_AERIAL': mapquest.AerialProvider,
-    'MICROSOFT_ROAD': ms.RoadProvider,
-    'MICROSOFT_AERIAL': ms.AerialProvider,
-    'MICROSOFT_HYBRID': ms.HybridProvider,
-    'YAHOO_ROAD': yahoo.RoadProvider,
-    'YAHOO_AERIAL': yahoo.AerialProvider,
-    'YAHOO_HYBRID': yahoo.HybridProvider,
-    'CLOUDMADE_ORIGINAL': cloudmade.OriginalProvider,
-    'CLOUDMADE_FINELINE': cloudmade.FineLineProvider,
-    'CLOUDMADE_TOURIST': cloudmade.TouristProvider,
-    'CLOUDMADE_FRESH': cloudmade.FreshProvider,
-    'CLOUDMADE_PALEDAWN': cloudmade.PaleDawnProvider,
-    'CLOUDMADE_MIDNIGHTCOMMANDER': cloudmade.MidnightCommanderProvider,
-    'STAMEN_TONER': stamen.TonerProvider,
-    'STAMEN_TERRAIN': stamen.TerrainProvider,
-    'STAMEN_WATERCOLOR': stamen.WatercolorProvider,
+PROVIDERS = {
+    'osm': osm.Provider,
+    'bluemarble': bluemarble.Provider,
+    'mapquest_road': mapquest.RoadProvider,
+    'mapquest_aerial': mapquest.AerialProvider,
+    'ms_road': ms.RoadProvider,
+    'ms_aerial': ms.AerialProvider,
+    'ms_hybrid': ms.HybridProvider,
+    'yahoo_road': yahoo.RoadProvider,
+    'yahoo_aerial': yahoo.AerialProvider,
+    'yahoo_hybrid': yahoo.HybridProvider,
+    'cloudmade_original': cloudmade.OriginalProvider,
+    'cloudmade_fineline': cloudmade.FineLineProvider,
+    'cloudmade_tourist': cloudmade.TouristProvider,
+    'cloudmade_fresh': cloudmade.FreshProvider,
+    'cloudmade_paledawn': cloudmade.PaleDawnProvider,
+    'cloudmade_midnightcommander': cloudmade.MidnightCommanderProvider,
+    'stamen_toner': stamen.TonerProvider,
+    'stamen_terrain': stamen.TerrainProvider,
+    'stamen_watercolor': stamen.WatercolorProvider,
 }
 
+DEFAULT_PROVIDER = PROVIDERS['osm']()
 
-default_provider = builtinProviders['OPENSTREETMAP']()
 
-def find_provider(id):
-    cls = builtinProviders[id]
+def find_provider(key):
+    """
+    Find map tiles provider.
+
+    :param key: Map provider string id.
+    """
+    cls = PROVIDERS[key]
     return cls()
+
 
 # vim: sw=4:et:ai
