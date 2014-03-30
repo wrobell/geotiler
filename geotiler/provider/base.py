@@ -63,12 +63,20 @@ class TemplatedMercatorProvider(IMapProvider):
             else:
                 break
 
-    def tileWidth(self):
+
+    @property
+    def tile_width(self):
         return 256
 
-    def tileHeight(self):
+
+    @property
+    def tile_height(self):
         return 256
 
-    def getTileUrls(self, coordinate):
+
+    def get_tile_urls(self, coordinate):
         x, y, z = str(int(coordinate.column)), str(int(coordinate.row)), str(int(coordinate.zoom))
         return [t.replace('{X}', x).replace('{Y}', y).replace('{Z}', z) for t in self.templates]
+
+
+# vim: sw=4:et:ai
