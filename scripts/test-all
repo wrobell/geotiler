@@ -3,8 +3,9 @@
 PROVIDERS="osm osm-cycle"
 EXTENT="11.78560 46.48083 11.79067 46.48283"
 ZOOM=18
+GEOTILER='./bin/geotiler-lint -v'
 
 for p in $PROVIDERS; do
-    ./bin/geotiler-lint -e $EXTENT -z $ZOOM $p test-all-$p.png
-    ./bin/geotiler-lint -e $EXTENT -d 800 800 $p test-all-size-$p.png
+    $GEOTILER -e $EXTENT -z $ZOOM $p test-all-$p.png
+    $GEOTILER -e $EXTENT -s 800 800 $p test-all-size-$p.png
 done

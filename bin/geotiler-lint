@@ -13,12 +13,12 @@ parser = argparse.ArgumentParser()
 usage = """
 There are three ways to set a map coverage area.
 
-1) Center, zoom, and dimensions: create a map of the specified size,
+1) Center, zoom, and size: create a map of the specified size,
    centered on a given geographical point at a given zoom level:
 
    python compose.py -p OPENSTREETMAP -d 800 800 -c 37.8 -122.3 -z 11 out.jpg
 
-2) Extent and dimensions: create a map of the specified size that
+2) Extent and size: create a map of the specified size that
    adequately covers the given geographical extent:
 
    python compose.py -p MICROSOFT_ROAD -d 800 800 -e 36.9 -123.5 38.9 -121.2 out.png
@@ -35,20 +35,20 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    '-c', '--center', dest='center', nargs=2,
-    help='Center of the map (lon, lat), e.g.: -122.263 37.804', type=float
+    '-c', '--center', dest='center', nargs=2, type=float,
+    help='Center of the map (lon, lat), e.g.: -122.263 37.804'
 )
 
 parser.add_argument(
-    '-e', '--extent', dest='extent', nargs=4,
-    help='Geographical map extent. Two lat, lon pairs', type=float
+    '-e', '--extent', dest='extent', nargs=4, type=float,
+    help='Geographical map extent. Two lat, lon pairs'
 )
 
-parser.add_argument('-z', '--zoom', dest='zoom', help='Zoom level', type=int)
+parser.add_argument('-z', '--zoom', dest='zoom', type=int, help='Zoom level')
 
 parser.add_argument(
-    '-d', '--dimensions', dest='dimensions', nargs=2,
-    help='Pixel dimensions of image', type=int
+    '-s', '--size', dest='size', nargs=2, type=int,
+    help='Size of map image'
 )
 
 providers = list(sorted(geotiler.provider.conf.PROVIDERS.keys()))
@@ -82,27 +82,17 @@ except KeyError:
 
 if args.center and args.extent:
     raise BadComposure("Error: bad map coverage, center and extent can't both be set.")
-
-elif args.extent and args.dimensions and args.zoom:
-    raise BadComposure("Error: bad map coverage, dimensions and zoom can't be set together with extent.")
-
-elif args.center and args.zoom and args.dimensions:
-    lat, lon = args.center[0], args.center[1]
-    width, height = args.dimensions[0], args.dimensions[1]
-
-    dimensions = ModestMaps.Core.Point(width, height)
-    center = ModestMaps.Geo.Location(lat, lon)
-    zoom = args.zoom
-
-    map = ModestMaps.mapByCenterZoom(provider, center, zoom, dimensions)
-    
-elif args.extent and args.dimensions:
+elif args.extent and args.size and args.zoom:
+    raise BadComposure("Error: bad map coverage, size and zoom can't be set together with extent.")
+elif args.center and args.zoom and args.size:
+    map = geotiler.Map((0, 0, 0, 0), args.zoom, provider=provider)
+    map.size = args.size
+    map.center = args.center
+elif args.extent and args.size:
     map = geotiler.Map(args.extent, 0, provider=provider)
-    map.size = args.dimensions
-
+    map.size = args.size
 elif args.extent and args.zoom:
     map = geotiler.Map(args.extent, args.zoom, provider=provider)
-
 else:
     raise BadComposure("Error: not really sure what's going on.")
 
@@ -110,7 +100,7 @@ else:
 if args.verbose:
     logging.basicConfig(level=logging.DEBUG)
     logger = logging.getLogger(__name__)
-    logger.debug('{} {} -> {} {}'.format(map.coordinate, map.offset, outfile, map.dimensions))
+    logger.debug('{} {} -> {} {}'.format(map.coordinate, map.offset, outfile, map.size))
 
 img = geotiler.render_map(map)
 img.save(outfile)
