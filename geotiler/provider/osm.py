@@ -29,17 +29,22 @@ class Base(IMapProvider):
         return 256
 
     def getTileUrls(self, coordinate):
-        return (self.FMT_URL % (coordinate.zoom, coordinate.column, coordinate.row),)
+        url = self.FMT_URL.format(
+            x=coordinate.column,
+            y=coordinate.row,
+            z=coordinate.zoom
+        )
+        return (url,)
 
 
 
 class Provider(Base):
-    FMT_URL = 'http://tile.openstreetmap.org/%d/%d/%d.png'
+    FMT_URL = 'http://tile.openstreetmap.org/{z}/{x}/{y}.png'
 
 
 
 class CycleProvider(Base):
-    FMT_URL = 'http://tile.opencyclemap.org/cycle/%d/%d/%d.png'
+    FMT_URL = 'http://tile.opencyclemap.org/cycle/{z}/{x}/{y}.png'
 
 
 
