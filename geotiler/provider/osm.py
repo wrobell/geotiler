@@ -8,10 +8,10 @@
 
 from math import pi
 
-from .Core import Coordinate
-from .Geo import MercatorProjection, deriveTransformation
-from .Providers import IMapProvider
-from . import Tiles
+from ..Core import Coordinate
+from ..Geo import MercatorProjection, deriveTransformation
+from .base import IMapProvider
+from .. import Tiles
 
 FMT_MAP = 'http://tile.openstreetmap.org/%d/%d/%d.png'
 FMT_CYCLE = 'http://tile.opencyclemap.org/cycle/%d/%d/%d.png'

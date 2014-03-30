@@ -30,12 +30,10 @@
 
 from math import pi
 
-from .Core import Coordinate
-from .Geo import MercatorProjection, deriveTransformation
-from .Providers import IMapProvider
-
-import random
-from ModestMaps import Tiles
+from ..Core import Coordinate
+from ..Geo import MercatorProjection, deriveTransformation
+from .base import IMapProvider
+from .. import Tiles
 
 class BaseProvider(IMapProvider):
     def __init__(self, apikey, style=None):
