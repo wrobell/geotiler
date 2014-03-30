@@ -34,21 +34,6 @@ HEADERS = {
     'User-Agent': 'GeoTiler/0.1.0',
 }
 
-@lru_cache()
-def fetch(host, path, query):
-    img = None
-
-    conn = http.client.HTTPConnection(host)
-    conn.request('GET', path + ('?' + query).rstrip('?'), headers=HEADERS)
-    response = conn.getresponse()
-    status = str(response.status)
-
-    if status.startswith('2'):
-        data = io.BytesIO(response.read())
-        img = PIL.Image.open(data).convert('RGBA')
-
-    return img
-
 
 class TileRequest:
 
@@ -71,9 +56,11 @@ class TileDownloader(object):
     """
     Tile downloader abstract class.
     """
-    def load(self, tile):
+    def fetch_tile(self, tile):
         """
-        Download tile.
+        Download tile images.
+
+        The method returns list of images, each being instance of PIL image.
 
         :param tile: Tile to download.
         """
@@ -94,7 +81,7 @@ class TileDownloader(object):
                 if scheme in ('file', ''):
                     img = PIL.Image.open(path).convert('RGBA')
                 elif scheme == 'http':
-                    img = fetch(host, path, query)
+                    img = self.fetch_image(host, path, query)
                 imgs.append(img)
                 tile.done = True
 
@@ -114,6 +101,31 @@ class TileDownloader(object):
         tile.imgs = imgs
 
 
+    @lru_cache()
+    def fetch_image(self, host, path, query):
+        """
+        Fetch an image using HTTP connection.
+
+        The method returns instance of PIL image.
+
+        :param host: HTTP server.
+        :param path: HTTP path.
+        :param query: HTTP query.
+        """
+        img = None
+
+        conn = http.client.HTTPConnection(host)
+        conn.request('GET', path + ('?' + query).rstrip('?'), headers=HEADERS)
+        response = conn.getresponse()
+        status = str(response.status)
+
+        if status.startswith('2'):
+            data = io.BytesIO(response.read())
+            img = PIL.Image.open(data).convert('RGBA')
+
+        return img
+
+
     def fetch(self, tiles):
         raise NotImplementedError()
 
@@ -130,7 +142,7 @@ class TileThreadDownloader(TileDownloader):
         :param tiles: List of tile requests.
         """
         pool = ThreadPoolExecutor(max_workers=32)
-        pool.map(self.load, tiles, timeout=5)
+        pool.map(self.fetch_tile, tiles, timeout=5)
         pool.shutdown()
 
 
