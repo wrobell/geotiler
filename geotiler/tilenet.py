@@ -34,21 +34,25 @@ HEADERS = {
     'User-Agent': 'GeoTiler/0.1.0',
 }
 
+MAX_ATTEMPTS = 5 # how many times to retry a failing tile
 
-class TileRequest:
 
-    # how many times to retry a failing tile
-    MAX_ATTEMPTS = 5
+class TileRequest(object):
+    """
+    Tile request information.
 
+    :param provider: Map tile provider.
+    :param coord: Tile coordinates.
+    :param offset: Tile offset.
+    :param images: List of downloaded tile images.
+    :param done: Downloaded if true.
+    """
     def __init__(self, provider, coord, offset):
-        self.done = False
         self.provider = provider
         self.coord = coord
         self.offset = offset
-
-
-    def images(self):
-        return self.imgs
+        self.images = []
+        self.done = False
 
 
 
@@ -75,14 +79,14 @@ class TileDownloader(object):
 
         # this is the time-consuming part
         try:
-            imgs = []
+            images = []
 
             for (scheme, host, path, params, query, fragment) in map(urllib.parse.urlparse, urls):
                 if scheme in ('file', ''):
                     img = PIL.Image.open(path).convert('RGBA')
                 elif scheme == 'http':
                     img = self.fetch_image(host, path, query)
-                imgs.append(img)
+                images.append(img)
                 tile.done = True
 
             if __debug__:
@@ -92,13 +96,13 @@ class TileDownloader(object):
             logger.warn('Failed {}'.format(urls))
             logger.exception(ex)
 
-            imgs = [None for url in urls]
+            images = [None for url in urls]
             raise ex # FIXME: figure out better error handling strategy
                      # before making another download attempt to avoid
                      # unnecessary server request while dealing with
                      # ModestMaps errors
 
-        tile.imgs = imgs
+        tile.images = images
 
 
     @lru_cache()
@@ -167,7 +171,7 @@ def render_tiles(tiles, size, downloader=None):
         downloader = TileThreadDownloader()
 
     tp = tiles[:]
-    for k in range(TileRequest.MAX_ATTEMPTS):
+    for k in range(MAX_ATTEMPTS):
         downloader.fetch(tiles)
         tp = [t for t in tp if not t.done]
         if not tp:
@@ -177,7 +181,7 @@ def render_tiles(tiles, size, downloader=None):
 
     for tile in tiles:
         try:
-            for img in tile.images():
+            for img in tile.images:
                 image.paste(img, (int(tile.offset.x), int(tile.offset.y)), img)
         except Exception as ex:
             logger.warn('tile rendering error')
