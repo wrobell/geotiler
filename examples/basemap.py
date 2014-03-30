@@ -27,7 +27,7 @@ mm.size = WIDTH, HEIGHT
 #mm = ModestMaps.mapByExtent(provider, loc1, loc2, dimensions)
 #mm = ModestMaps.mapByExtentZoom(provider, loc1, loc2, 18)
 
-img = mm.draw()
+img = geotiler.render_map(mm)
 bbox = mm.extent  # recalculate bbox, which can change due to requested
                   # image size
 

@@ -237,34 +237,40 @@ class Map(object):
 
 
 
-    def draw(self):
-        """ Draw map out to a PIL.Image and return it.
-        """
-        coord = self.coordinate.copy()
-        w, h = self.dimensions
-        corner = Point(int(self.offset.x + w / 2), int(self.offset.y + h / 2))
+def render_map(map, downloader=None):
+    """
+    Render map image.
 
-        while corner.x > 0:
-            corner = Point(corner.x - self.provider.tileWidth(), corner.y)
-            coord = coord.left()
+    If `downloader` is null, then default map tiles downloader is used.
 
-        while corner.y > 0:
-            corner = Point(corner.x, corner.y - self.provider.tileHeight())
-            coord = coord.up()
+    The function returns an image (instance of PIL.Image class).
 
-        tiles = []
+    :param map: Map instance.
+    :param downloader: Map tiles downloader.
+    """
+    coord = map.coordinate.copy()
+    w, h = map.dimensions
+    corner = Point(int(map.offset.x + w / 2), int(map.offset.y + h / 2))
 
-        rowCoord = coord.copy()
-        for y in range(int(corner.y), h, self.provider.tileHeight()):
-            tileCoord = rowCoord.copy()
-            for x in range(int(corner.x), w, self.provider.tileWidth()):
-                tiles.append(TileRequest(self.provider, tileCoord, Point(x, y)))
-                tileCoord = tileCoord.right()
-            rowCoord = rowCoord.down()
+    while corner.x > 0:
+        corner = Point(corner.x - map.provider.tileWidth(), corner.y)
+        coord = coord.left()
 
-        return render_tiles(tiles, self.dimensions)
+    while corner.y > 0:
+        corner = Point(corner.x, corner.y - map.provider.tileHeight())
+        coord = coord.up()
 
+    tiles = []
 
+    rowCoord = coord.copy()
+    for y in range(int(corner.y), h, map.provider.tileHeight()):
+        tileCoord = rowCoord.copy()
+        for x in range(int(corner.x), w, map.provider.tileWidth()):
+            tiles.append(TileRequest(map.provider, tileCoord, Point(x, y)))
+            tileCoord = tileCoord.right()
+        rowCoord = rowCoord.down()
+
+    return render_tiles(tiles, map.dimensions, downloader=downloader)
 
 
 def calculateMapCenter(provider, centerCoord):
