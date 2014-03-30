@@ -19,6 +19,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+"""
+GeoTiler map tiles downloading functionality.
+
+To download map tiles and render them as a single image use
+:py:func:`render_tiles` function.
+
+The :py:class:`TileThreadDownloader` implements default tiles downloading
+strategy. New strategy can be implemented by deriving from
+:py:class:`TileDownloader` abstract class.
+"""
+
 from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 import http.client
@@ -153,7 +164,6 @@ class TileThreadDownloader(TileDownloader):
         pool = ThreadPoolExecutor(max_workers=32)
         pool.map(self.fetch_tile, tiles, timeout=5)
         pool.shutdown()
-
 
 
 
