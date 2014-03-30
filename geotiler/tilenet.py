@@ -29,12 +29,16 @@ import PIL.Image as Image
 
 logger = logging.getLogger(__name__)
 
+HEADERS = {
+    'User-Agent': 'GeoTiler/0.1.0',
+}
+
 @lru_cache()
 def fetch(netloc, path, query):
     img = None
 
     conn = http.client.HTTPConnection(netloc)
-    conn.request('GET', path + ('?' + query).rstrip('?'), headers={'User-Agent': 'Modest Maps python branch (http://modestmaps.com)'})
+    conn.request('GET', path + ('?' + query).rstrip('?'), headers=HEADERS)
     response = conn.getresponse()
     status = str(response.status)
 
