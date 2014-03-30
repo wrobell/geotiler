@@ -4,10 +4,6 @@ from math import pi, pow
 from ..Core import Coordinate
 from ..Geo import LinearProjection, MercatorProjection, deriveTransformation
 
-ids = (
-    'MICROSOFT_ROAD', 'MICROSOFT_AERIAL', 'MICROSOFT_HYBRID', 'YAHOO_ROAD',
-    'YAHOO_AERIAL', 'YAHOO_HYBRID', 'BLUE_MARBLE', 'OPEN_STREET_MAP'
-)
 
 class IMapProvider(object):
     def __init__(self):
