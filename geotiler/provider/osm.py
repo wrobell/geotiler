@@ -8,8 +8,8 @@
 
 from math import pi
 
-from ..Core import Coordinate
-from ..Geo import MercatorProjection, deriveTransformation
+from ..core import Coordinate
+from ..geo import MercatorProjection, deriveTransformation
 from .base import IMapProvider
 
 

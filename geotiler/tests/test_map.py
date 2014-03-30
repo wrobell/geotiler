@@ -1,5 +1,5 @@
 #
-# GeoTiler - library to create maps using tiles from a map provider
+# geoTiler - library to create maps using tiles from a map provider
 #
 # NOTE: The code contains BSD licensed code from Modest Maps project.
 #
@@ -23,7 +23,7 @@ from shapely.geometry import Point
 
 from geotiler.map import Map
 from geotiler import Microsoft
-from geotiler.Core import Coordinate
+from geotiler.core import Coordinate
 
 import unittest
 

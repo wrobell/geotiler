@@ -15,11 +15,11 @@
 from math import pi
 import random
 
-from ..Core import Coordinate
-from ..Geo import MercatorProjection, deriveTransformation
+from ..core import Coordinate
+from ..geo import MercatorProjection, deriveTransformation
 from .base import IMapProvider
 
-from .. import Tiles
+from .. import tiles
 
 class AbstractProvider(IMapProvider):
     def __init__(self):

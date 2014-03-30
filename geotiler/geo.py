@@ -1,6 +1,6 @@
 import math
 from shapely.geometry import Point
-from .Core import Coordinate
+from .core import Coordinate
 
 
 class Transformation:

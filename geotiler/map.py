@@ -1,5 +1,5 @@
 #
-# GeoTiler - library to create maps using tiles from a map provider
+# geoTiler - library to create maps using tiles from a map provider
 #
 # NOTE: The code contains BSD licensed code from Modest Maps project.
 #
@@ -26,7 +26,7 @@ from shapely.geometry import Point
 import PIL.Image as Image
 
 from .provider.conf import DEFAULT_PROVIDER
-from . import Core
+from . import core
 from .tilenet import TileRequest, render_tiles
 
 logger = logging.getLogger(__name__)
@@ -170,7 +170,7 @@ class Map(object):
         height = abs(coord_a.row - coord_b.row) * self.provider.tile_height
 
         # projected center of the map
-        center_coord = Core.Coordinate(
+        center_coord = core.Coordinate(
             (coord_a.row + coord_b.row) / 2,
             (coord_a.column + coord_b.column) / 2,
             self._zoom
@@ -208,7 +208,7 @@ class Map(object):
     def pointLocation(self, point):
         """ Return a geographical location on the map image for a given x, y point.
         """
-        hizoomCoord = self.coordinate.zoomTo(Core.Coordinate.MAX_ZOOM)
+        hizoomCoord = self.coordinate.zoomTo(core.Coordinate.MAX_ZOOM)
 
         w, h = self._size
 
@@ -216,15 +216,15 @@ class Map(object):
         point = Point(point.x - w / 2, point.y - h / 2)
 
         # distance in tile widths from reference tile to point
-        xTiles = (point.x - self.offset.x) / self.provider.tile_width
-        yTiles = (point.y - self.offset.y) / self.provider.tile_height
+        xtiles = (point.x - self.offset.x) / self.provider.tile_width
+        ytiles = (point.y - self.offset.y) / self.provider.tile_height
 
         # distance in rows & columns at maximum zoom
-        xDistance = xTiles * math.pow(2, (Core.Coordinate.MAX_ZOOM - self.coordinate.zoom))
-        yDistance = yTiles * math.pow(2, (Core.Coordinate.MAX_ZOOM - self.coordinate.zoom))
+        xDistance = xtiles * math.pow(2, (core.Coordinate.MAX_ZOOM - self.coordinate.zoom))
+        yDistance = ytiles * math.pow(2, (core.Coordinate.MAX_ZOOM - self.coordinate.zoom))
 
         # new point coordinate reflecting that distance
-        coord = Core.Coordinate(round(hizoomCoord.row + yDistance),
+        coord = core.Coordinate(round(hizoomCoord.row + yDistance),
                                 round(hizoomCoord.column + xDistance),
                                 hizoomCoord.zoom)
 
@@ -293,11 +293,11 @@ def calculateMapExtent(provider, width, height, *args):
     """
     coordinates = list(map(provider.locationCoordinate, args))
 
-    TL = Core.Coordinate(min([c.row for c in coordinates]),
+    TL = core.Coordinate(min([c.row for c in coordinates]),
                          min([c.column for c in coordinates]),
                          min([c.zoom for c in coordinates]))
 
-    BR = Core.Coordinate(max([c.row for c in coordinates]),
+    BR = core.Coordinate(max([c.row for c in coordinates]),
                          max([c.column for c in coordinates]),
                          max([c.zoom for c in coordinates]))
 
@@ -330,7 +330,7 @@ def calculateMapExtent(provider, width, height, *args):
     centerRow = (TL.row + BR.row) / 2
     centerColumn = (TL.column + BR.column) / 2
     centerZoom = (TL.zoom + BR.zoom) / 2
-    centerCoord = Core.Coordinate(centerRow, centerColumn, centerZoom).zoomTo(initZoom)
+    centerCoord = core.Coordinate(centerRow, centerColumn, centerZoom).zoomTo(initZoom)
 
     return calculateMapCenter(provider, centerCoord)
 

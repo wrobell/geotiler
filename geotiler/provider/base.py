@@ -1,8 +1,8 @@
 ﻿import re
 from math import pi, pow
 
-from ..Core import Coordinate
-from ..Geo import LinearProjection, MercatorProjection, deriveTransformation
+from ..core import Coordinate
+from ..geo import LinearProjection, MercatorProjection, deriveTransformation
 
 
 class IMapProvider(object):

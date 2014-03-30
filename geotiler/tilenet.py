@@ -1,5 +1,5 @@
 #
-# GeoTiler - library to create maps using tiles from a map provider
+# geoTiler - library to create maps using tiles from a map provider
 #
 # NOTE: The code contains BSD licensed code from Modest Maps project.
 #
@@ -20,7 +20,7 @@
 #
 
 """
-GeoTiler map tiles downloading functionality.
+geoTiler map tiles downloading functionality.
 
 To download map tiles and render them as a single image use
 :py:func:`render_tiles` function.
@@ -42,7 +42,7 @@ import PIL.Image
 logger = logging.getLogger(__name__)
 
 HEADERS = {
-    'User-Agent': 'GeoTiler/0.1.0',
+    'User-Agent': 'geoTiler/0.1.0',
 }
 
 MAX_ATTEMPTS = 5 # how many times to retry a failing tile

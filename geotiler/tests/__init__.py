@@ -1,5 +1,5 @@
 #
-# GeoTiler - library to create maps using tiles from a map provider
+# geoTiler - library to create maps using tiles from a map provider
 #
 # NOTE: The code contains BSD licensed code from Modest Maps project.
 #

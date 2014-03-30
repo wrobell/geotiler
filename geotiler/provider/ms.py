@@ -20,12 +20,12 @@
 
 from math import pi
 
-from ..Core import Coordinate
-from ..Geo import MercatorProjection, deriveTransformation
+from ..core import Coordinate
+from ..geo import MercatorProjection, deriveTransformation
 from .base import IMapProvider
 
 import random
-from .. import Tiles
+from .. import tiles
 
 class AbstractProvider(IMapProvider):
     def __init__(self):
@@ -34,7 +34,7 @@ class AbstractProvider(IMapProvider):
         self.projection = MercatorProjection(0, t)
 
     def getZoomString(self, coordinate):
-        return Tiles.toMicrosoft(int(coordinate.column), int(coordinate.row), int(coordinate.zoom))
+        return tiles.toMicrosoft(int(coordinate.column), int(coordinate.row), int(coordinate.zoom))
 
     @property
     def tile_width(self):
