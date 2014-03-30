@@ -60,19 +60,18 @@ class Map(object):
         """
         super().__init__()
         self.provider = provider
-        self.dimensions = None
         self.coordinate = None
         self.offset = None
 
         self._extent = extent
         self._center = None
         self._zoom = zoom
-        #self._size = None
+        self._size = None
 
         self._on_change_extent_zoom()
         #assert self._center is not None
         assert self.coordinate is not None
-        assert self.dimensions is not None
+        assert self._size is not None
         assert self.offset is not None
 
 
@@ -115,12 +114,12 @@ class Map(object):
 
         Setting size of the image changes map extent.
         """
-        return self.dimensions
+        return self._size
 
 
     @size.setter
     def size(self, size):
-        self.dimensions = size
+        self._size = size
         self._on_change_size()
 
 
@@ -138,7 +137,7 @@ class Map(object):
         """
         Update map center after map extent change.
         """
-        width, height = self.dimensions
+        width, height = self._size
         p1 = Point(*self._extent[:2])
         p2 = Point(*self._extent[2:])
         map_coord, map_offset = calculateMapExtent(self.provider, width, height, p1, p2)
@@ -150,7 +149,7 @@ class Map(object):
         """
         Update map extent after map image size change.
         """
-        w, h = self.dimensions
+        w, h = self._size
         p1 = self.pointLocation(Point(0, h))
         p2 = self.pointLocation(Point(w, 0))
         self._extent = p1.x, p1.y, p2.x, p2.y
@@ -181,11 +180,11 @@ class Map(object):
 
         self.coordinate = map_coord
         self.offset = map_offset
-        self.dimensions = int(width), int(height)
+        self._size = int(width), int(height)
 
 
     def __str__(self):
-        return 'Map(%(provider)s, %(dimensions)s, %(coordinate)s, %(offset)s)' % self.__dict__
+        return 'Map(%(provider)s, %(_size)s, %(coordinate)s, %(offset)s)' % self.__dict__
 
 
     def locationPoint(self, location):
@@ -201,7 +200,7 @@ class Map(object):
         )
 
         # because of the center/corner business
-        w, h = self.dimensions
+        w, h = self._size
         point = Point(point.x + w / 2, point.y + h / 2)
 
         return point
@@ -211,7 +210,7 @@ class Map(object):
         """
         hizoomCoord = self.coordinate.zoomTo(Core.Coordinate.MAX_ZOOM)
 
-        w, h = self.dimensions
+        w, h = self._size
 
         # because of the center/corner business
         point = Point(point.x - w / 2, point.y - h / 2)
@@ -249,7 +248,7 @@ def render_map(map, downloader=None):
     :param downloader: Map tiles downloader.
     """
     coord = map.coordinate.copy()
-    w, h = map.dimensions
+    w, h = map._size
     corner = Point(int(map.offset.x + w / 2), int(map.offset.y + h / 2))
 
     while corner.x > 0:
@@ -270,7 +269,7 @@ def render_map(map, downloader=None):
             tileCoord = tileCoord.right()
         rowCoord = rowCoord.down()
 
-    return render_tiles(tiles, map.dimensions, downloader=downloader)
+    return render_tiles(tiles, map._size, downloader=downloader)
 
 
 def calculateMapCenter(provider, centerCoord):
