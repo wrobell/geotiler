@@ -13,25 +13,28 @@ class IMapProvider(object):
     def __init__(self):
         raise NotImplementedError("Abstract method not implemented by subclass.")
 
+
     def get_tile_urls(self, coordinate):
         raise NotImplementedError("Abstract method not implemented by subclass.")
+
 
     @property
     def tile_width(self):
         raise NotImplementedError("Abstract method not implemented by subclass.")
 
+
     @property
     def tile_height(self):
         raise NotImplementedError("Abstract method not implemented by subclass.")
 
+
     def locationCoordinate(self, location):
         return self.projection.locationCoordinate(location)
+
 
     def coordinateLocation(self, location):
         return self.projection.coordinateLocation(location)
 
-    def sourceCoordinate(self, coordinate):
-        raise NotImplementedError("Abstract method not implemented by subclass.")
 
     def sourceCoordinate(self, coordinate):
         wrappedColumn = coordinate.column % pow(2, coordinate.zoom)
@@ -40,6 +43,8 @@ class IMapProvider(object):
             wrappedColumn += pow(2, coordinate.zoom)
 
         return Coordinate(coordinate.row, wrappedColumn, coordinate.zoom)
+
+
 
 class TemplatedMercatorProvider(IMapProvider):
     """ Convert URI templates into tile URLs, using a tileUrlTemplate identical to:
