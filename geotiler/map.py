@@ -238,7 +238,7 @@ class Map(object):
 
 
 
-    def draw(self, fatbits_ok=False):
+    def draw(self):
         """ Draw map out to a PIL.Image and return it.
         """
         coord = self.coordinate.copy()
@@ -263,11 +263,11 @@ class Map(object):
                 tileCoord = tileCoord.right()
             rowCoord = rowCoord.down()
 
-        return self.render_tiles(tiles, w, h, fatbits_ok)
+        return self.render_tiles(tiles, w, h)
 
     #
 
-    def render_tiles(self, tiles, img_width, img_height, fatbits_ok=False):
+    def render_tiles(self, tiles, img_width, img_height):
         tp = tiles[:]
         for k in range(TileRequest.MAX_ATTEMPTS):
             pool = ThreadPoolExecutor(max_workers=32)
@@ -276,32 +276,6 @@ class Map(object):
             tp = [t for t in tp if not t.done]
             if not tp:
                 break
-
-        # FIXME: reimplement
-        ###if tp and fatbits_ok:
-        ###    #
-        ###    # We're probably never going to see this tile.
-        ###    # Try the next lower zoom level for a pixellated output?
-        ###    #
-        ###    neighbor = self.coord.zoomBy(-1)
-        ###    parent = neighbor.container()
-        ###
-        ###    col_shift = 2 * (neighbor.column - parent.column)
-        ###    row_shift = 2 * (neighbor.row - parent.row)
-        ###
-        ###    # sleep for a second or two, helps prime the image cache
-        ###    time.sleep(col_shift + row_shift/2)
-        ###
-        ###    x_shift = scale * self.provider.tileWidth() * col_shift
-        ###    y_shift = scale * self.provider.tileHeight() * row_shift
-        ###
-        ###    self.offset.x -= int(x_shift)
-        ###    self.offset.y -= int(y_shift)
-        ###    self.coord = parent
-
-        ###    return self.load(lock, verbose, cache, fatbits_ok, attempt+1, scale*2)
-        ###    imgs = [img.resize((img.size[0] * scale, img.size[1] * scale)) for img in imgs]
-
 
         mapImg = Image.new('RGB', (img_width, img_height))
 
