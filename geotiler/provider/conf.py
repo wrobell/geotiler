@@ -19,32 +19,30 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from . import Yahoo, Microsoft, BlueMarble, OpenStreetMap, CloudMade, \
-    MapQuest, Stamen
+from . import yahoo, ms, bluemarble, osm, cloudmade, mapquest, stamen
 
 # a handy list of possible providers, which isn't
 # to say that you can't go writing your own.
 builtinProviders = {
-    'OPENSTREETMAP': OpenStreetMap.Provider,
-    'OPEN_STREET_MAP': OpenStreetMap.Provider,
-    'BLUE_MARBLE': BlueMarble.Provider,
-    'MAPQUEST_ROAD': MapQuest.RoadProvider,
-    'MAPQUEST_AERIAL': MapQuest.AerialProvider,
-    'MICROSOFT_ROAD': Microsoft.RoadProvider,
-    'MICROSOFT_AERIAL': Microsoft.AerialProvider,
-    'MICROSOFT_HYBRID': Microsoft.HybridProvider,
-    'YAHOO_ROAD': Yahoo.RoadProvider,
-    'YAHOO_AERIAL': Yahoo.AerialProvider,
-    'YAHOO_HYBRID': Yahoo.HybridProvider,
-    'CLOUDMADE_ORIGINAL': CloudMade.OriginalProvider,
-    'CLOUDMADE_FINELINE': CloudMade.FineLineProvider,
-    'CLOUDMADE_TOURIST': CloudMade.TouristProvider,
-    'CLOUDMADE_FRESH': CloudMade.FreshProvider,
-    'CLOUDMADE_PALEDAWN': CloudMade.PaleDawnProvider,
-    'CLOUDMADE_MIDNIGHTCOMMANDER': CloudMade.MidnightCommanderProvider,
-    'STAMEN_TONER': Stamen.TonerProvider,
-    'STAMEN_TERRAIN': Stamen.TerrainProvider,
-    'STAMEN_WATERCOLOR': Stamen.WatercolorProvider,
+    'OPENSTREETMAP': osm.Provider,
+    'BLUE_MARBLE': bluemarble.Provider,
+    'MAPQUEST_ROAD': mapquest.RoadProvider,
+    'MAPQUEST_AERIAL': mapquest.AerialProvider,
+    'MICROSOFT_ROAD': ms.RoadProvider,
+    'MICROSOFT_AERIAL': ms.AerialProvider,
+    'MICROSOFT_HYBRID': ms.HybridProvider,
+    'YAHOO_ROAD': yahoo.RoadProvider,
+    'YAHOO_AERIAL': yahoo.AerialProvider,
+    'YAHOO_HYBRID': yahoo.HybridProvider,
+    'CLOUDMADE_ORIGINAL': cloudmade.OriginalProvider,
+    'CLOUDMADE_FINELINE': cloudmade.FineLineProvider,
+    'CLOUDMADE_TOURIST': cloudmade.TouristProvider,
+    'CLOUDMADE_FRESH': cloudmade.FreshProvider,
+    'CLOUDMADE_PALEDAWN': cloudmade.PaleDawnProvider,
+    'CLOUDMADE_MIDNIGHTCOMMANDER': cloudmade.MidnightCommanderProvider,
+    'STAMEN_TONER': stamen.TonerProvider,
+    'STAMEN_TERRAIN': stamen.TerrainProvider,
+    'STAMEN_WATERCOLOR': stamen.WatercolorProvider,
 }
 
 

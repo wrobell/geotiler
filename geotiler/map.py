@@ -25,7 +25,7 @@ import logging
 from shapely.geometry import Point
 import PIL.Image as Image
 
-from .conf import default_provider
+from .provider.conf import default_provider
 from . import Core
 from .tilenet import TileRequest, render_tiles
 
