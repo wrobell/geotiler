@@ -19,13 +19,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 import http.client
 import io
 import urllib.parse
 import logging
 
-import PIL.Image as Image
+import PIL.Image
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +45,7 @@ def fetch(host, path, query):
 
     if status.startswith('2'):
         data = io.BytesIO(response.read())
-        img = Image.open(data).convert('RGBA')
+        img = PIL.Image.open(data).convert('RGBA')
 
     return img
 
@@ -81,7 +82,7 @@ class TileRequest:
 
             for (scheme, host, path, params, query, fragment) in map(urllib.parse.urlparse, urls):
                 if scheme in ('file', ''):
-                    img = Image.open(path).convert('RGBA')
+                    img = PIL.Image.open(path).convert('RGBA')
                 elif scheme == 'http':
                     img = fetch(host, path, query)
                 imgs.append(img)
@@ -101,6 +102,55 @@ class TileRequest:
                      # ModestMaps errors
 
         self.imgs = imgs
+
+
+class TileThreadDownloader(object):
+    """
+    Tile downloader based on thead pool executor.
+    """
+    def fetch(self, tiles):
+        """
+        Execute all tile requests.
+
+        :param tiles: List of tile requests.
+        """
+        pool = ThreadPoolExecutor(max_workers=32)
+        pool.map(lambda tile: tile.load(), tiles, timeout=5)
+        pool.shutdown()
+
+
+
+def render_tiles(tiles, size, downloader=None):
+    """
+    Download map tiles and render them as an image.
+
+    The default tiles downloader is :py:class:`TileThreadDownloader`.
+
+    :param tiles: List of tiles requests.
+    :param size: Map image size.
+    :param downloader: Map tiles downloader.
+    """
+    if downloader is None:
+        downloader = TileThreadDownloader()
+
+    tp = tiles[:]
+    for k in range(TileRequest.MAX_ATTEMPTS):
+        downloader.fetch(tiles)
+        tp = [t for t in tp if not t.done]
+        if not tp:
+            break
+
+    image = PIL.Image.new('RGB', size)
+
+    for tile in tiles:
+        try:
+            for img in tile.images():
+                image.paste(img, (int(tile.offset.x), int(tile.offset.y)), img)
+        except Exception as ex:
+            logger.warn('tile rendering error')
+            logger.exception(ex)
+
+    return image
 
 
 # vim: sw=4:et:ai

@@ -20,7 +20,6 @@
 #
 
 import math
-from concurrent.futures import ThreadPoolExecutor
 import logging
 
 from shapely.geometry import Point
@@ -28,7 +27,7 @@ import PIL.Image as Image
 
 from .conf import default_provider
 from . import Core
-from .tilenet import TileRequest
+from .tilenet import TileRequest, render_tiles
 
 logger = logging.getLogger(__name__)
 
@@ -263,33 +262,8 @@ class Map(object):
                 tileCoord = tileCoord.right()
             rowCoord = rowCoord.down()
 
-        return self.render_tiles(tiles, w, h)
+        return render_tiles(tiles, self.dimensions)
 
-    #
-
-    def render_tiles(self, tiles, img_width, img_height):
-        tp = tiles[:]
-        for k in range(TileRequest.MAX_ATTEMPTS):
-            pool = ThreadPoolExecutor(max_workers=32)
-            pool.map(lambda tile: tile.load(), tiles, timeout=5)
-            pool.shutdown()
-            tp = [t for t in tp if not t.done]
-            if not tp:
-                break
-
-        mapImg = Image.new('RGB', (img_width, img_height))
-
-        c = 1
-        for tile in tiles:
-            try:
-                for img in tile.images():
-                    mapImg.paste(img, (int(tile.offset.x), int(tile.offset.y)), img)
-
-            except:
-                # something failed to paste, so we ignore it
-                pass
-
-        return mapImg
 
 
 
