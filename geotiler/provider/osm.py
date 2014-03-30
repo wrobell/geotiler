@@ -13,18 +13,14 @@ from ..Geo import MercatorProjection, deriveTransformation
 from .base import IMapProvider
 from .. import Tiles
 
-FMT_MAP = 'http://tile.openstreetmap.org/%d/%d/%d.png'
-FMT_CYCLE = 'http://tile.opencyclemap.org/cycle/%d/%d/%d.png'
 
-class Provider(IMapProvider):
+class Base(IMapProvider):
+    FMT_URL = None
 
-    def __init__(self, layer='map'):
+    def __init__(self):
         # the spherical mercator world tile covers (-π, -π) to (π, π)
         t = deriveTransformation(-pi, pi, 0, 0, pi, pi, 1, 0, -pi, -pi, 0, 1)
         self.projection = MercatorProjection(0, t)
-        self.fmt = FMT_MAP
-        if layer == 'cycle':
-            self.fmt = FMT_CYCLE
 
     def tileWidth(self):
         return 256
@@ -33,7 +29,19 @@ class Provider(IMapProvider):
         return 256
 
     def getTileUrls(self, coordinate):
-        return (self.fmt % (coordinate.zoom, coordinate.column, coordinate.row),)
+        return (self.FMT_URL % (coordinate.zoom, coordinate.column, coordinate.row),)
+
+
+
+class Provider(Base):
+    FMT_URL = 'http://tile.openstreetmap.org/%d/%d/%d.png'
+
+
+
+class CycleProvider(Base):
+    FMT_URL = 'http://tile.opencyclemap.org/cycle/%d/%d/%d.png'
+
+
 
 if __name__ == '__main__':
     import doctest

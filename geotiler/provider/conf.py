@@ -27,6 +27,7 @@ from . import yahoo, ms, bluemarble, osm, cloudmade, mapquest, stamen
 
 PROVIDERS = {
     'osm': osm.Provider,
+    'osm-cycle': osm.CycleProvider,
     'bluemarble': bluemarble.Provider,
     'mapquest_road': mapquest.RoadProvider,
     'mapquest_aerial': mapquest.AerialProvider,
