@@ -47,15 +47,20 @@ class Map(object):
     :var _extent: Map geographical extent.
     :var _center: Map geographical center.
     :var _zoom: Map zoom.
-    :var _size: Image size.
+    :var _size: Map image size.
     :var _offset: Position of base tile relative to map center.
     """
-    def __init__(self, extent, zoom, provider=DEFAULT_PROVIDER):
+    def __init__(
+        self, extent=None, center=None, zoom=None, size=None,
+        provider=DEFAULT_PROVIDER
+    ):
         """
         Create map.
 
         :param extent: Map geographical extent.
+        :param center: Map geographical center.
         :param zoom: Map zoom.
+        :param size: Map image size.
         :param provider: Map tiles provider.
         """
         super().__init__()
@@ -64,14 +69,33 @@ class Map(object):
         self.offset = None
 
         self._extent = extent
-        self._center = None
+        self._center = center
         self._zoom = zoom
-        self._size = None
+        self._size = size
 
-        self._on_change_extent_zoom()
+        if center and extent:
+            raise ValueError('Bad map coverage, center and extent can\'t both be set')
+        elif extent and size and zoom:
+            raise ValueError('Bad map coverage, size and zoom can\'t be set together with extent')
+        elif center and zoom and size:
+            self._on_change_center_zoom()
+            self._on_change_size()
+        elif extent and size:
+            self._on_change_extent()
+        elif extent and zoom:
+            self._on_change_extent_zoom()
+        else:
+            raise ValueError(
+                'Unknown combination of extent, center, zoom and size' \
+                ' parameters'
+            )
+
+        assert self._extent is not None
         #assert self._center is not None
-        assert self.coordinate is not None
+        assert self._zoom is not None
         assert self._size is not None
+
+        assert self.coordinate is not None
         assert self.offset is not None
 
 
@@ -102,7 +126,7 @@ class Map(object):
     @zoom.setter
     def zoom(self, zoom):
         self._zoom = zoom
-        self._on_change_zoom()
+        self._on_change_center_zoom()
 
 
     @property
@@ -123,11 +147,12 @@ class Map(object):
         self._on_change_size()
 
 
-    def _on_change_zoom(self):
+    def _on_change_center_zoom(self):
         """
-        Update map center after map zoom change.
+        Update map after map center and zoom change.
         """
-        center_coord = self.provider.locationCoordinate(self._center).zoomTo(self._zoom)
+        p = Point(*self._center)
+        center_coord = self.provider.locationCoordinate(p).zoomTo(self._zoom)
         map_coord, map_offset = calculateMapCenter(self.provider, center_coord)
         self.coordinate = map_coord
         self.offset = map_offset
@@ -135,14 +160,17 @@ class Map(object):
 
     def _on_change_extent(self):
         """
-        Update map center after map extent change.
+        Update map after map extent change.
         """
         width, height = self._size
+
         p1 = Point(*self._extent[:2])
         p2 = Point(*self._extent[2:])
+
         map_coord, map_offset = calculateMapExtent(self.provider, width, height, p1, p2)
         self.coordinate = map_coord
         self.offset = map_offset
+        self._zoom = map_coord.zoom
 
 
     def _on_change_size(self):
@@ -156,7 +184,8 @@ class Map(object):
 
 
     def _on_change_extent_zoom(self):
-        """ Return map instance given a provider, two corner locations, and zoom value.
+        """
+        Update map after map extent and zoom change.
         """
         # a coordinate per corner
         x1, y1, x2, y2 = self._extent

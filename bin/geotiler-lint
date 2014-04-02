@@ -80,22 +80,13 @@ try:
 except KeyError:
     raise BadComposure('Error: bad provider "%s".' % args.provider)
 
-if args.center and args.extent:
-    raise BadComposure("Error: bad map coverage, center and extent can't both be set.")
-elif args.extent and args.size and args.zoom:
-    raise BadComposure("Error: bad map coverage, size and zoom can't be set together with extent.")
-elif args.center and args.zoom and args.size:
-    map = geotiler.Map((0, 0, 0, 0), args.zoom, provider=provider)
-    map.size = args.size
-    map.center = args.center
-elif args.extent and args.size:
-    map = geotiler.Map(args.extent, 0, provider=provider)
-    map.size = args.size
-elif args.extent and args.zoom:
-    map = geotiler.Map(args.extent, args.zoom, provider=provider)
-else:
-    raise BadComposure("Error: not really sure what's going on.")
-
+map = geotiler.Map(
+    extent=args.extent,
+    center=args.center,
+    zoom=args.zoom,
+    size=args.size,
+    provider=provider
+)
 
 if args.verbose:
     logging.basicConfig(level=logging.DEBUG)

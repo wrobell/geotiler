@@ -22,7 +22,7 @@
 from shapely.geometry import Point
 
 from geotiler.map import Map
-from geotiler.provider import ms
+from geotiler.provider import ms, osm
 from geotiler.core import Coordinate
 
 import unittest
@@ -32,6 +32,77 @@ class MapTestCase(unittest.TestCase):
     """
     Map unit tests.
     """
+    def test_map_create_error_center_extent(self):
+        """
+        Test map instantiation error with center and extent
+        """
+        extent = (0, 0, 0, 0)
+        center = (0, 0)
+        map = self.assertRaises(ValueError, Map, extent=extent, center=center)
+
+
+    def test_map_create_error_extent_size_zoom(self):
+        """
+        Test map instantiation error with extent, size and zoom
+        """
+        extent = (0, 0, 0, 0)
+        size = (0, 0)
+        zoom = 1
+        map = self.assertRaises(
+            ValueError, Map, extent=extent, size=size, zoom=zoom
+        )
+
+
+    def test_map_create_center_zoom_size(self):
+        """
+        Test map instantiation with center, zoom and size
+        """
+        provider = osm.Provider()
+        center = 11.788135, 46.48183
+        zoom = 18
+        size = 512, 512
+        map = Map(center=center, zoom=zoom, size=size)
+        self.assertEquals((512, 512), map.size)
+        self.assertEquals(18, map.zoom)
+        expected = (
+            11.7867636, 46.4808858,
+            11.7895102, 46.4827771,
+        )
+        for v1, v2 in zip(expected, map.extent):
+            self.assertAlmostEquals(v1, v2, 6)
+        #self.assertEquals((11.788135, 46.48183), map.center)
+
+
+    def test_map_create_extent_size(self):
+        """
+        Test map instantiation with extent and size
+        """
+        provider = osm.Provider()
+        extent = 11.78560, 46.48083, 11.79067, 46.48283
+        size = 512, 512
+        map = Map(extent=extent, size=size)
+
+        self.assertEquals((512, 512), map.size)
+        self.assertEquals(17, map.zoom)
+        self.assertEquals((11.78560, 46.48083, 11.79067, 46.48283), map.extent)
+        #self.assertEquals((11.788135, 46.48183), map.center)
+
+
+    def test_map_create_extent_zoom(self):
+        """
+        Test map instantiation with extent and zoom
+        """
+        provider = osm.Provider()
+        extent = 11.78560, 46.48083, 11.79067, 46.48283
+        zoom = 18
+        map = Map(extent=extent, zoom=zoom)
+
+        self.assertEquals((945, 541), map.size)
+        self.assertEquals(18, map.zoom)
+        self.assertEquals((11.78560, 46.48083, 11.79067, 46.48283), map.extent)
+        #self.assertEquals((11.788135, 46.48183), map.center)
+
+
     def test_1(self):
         provider = ms.RoadProvider()
         m = Map((0, 0, 0, 0), 13, provider=provider)
@@ -63,7 +134,7 @@ class MapTestCase(unittest.TestCase):
         self.assertEquals(1582, m.coordinate.row)
         self.assertEquals(656, m.coordinate.column)
         self.assertEquals(12, m.coordinate.zoom)
-        
+
         self.assertEquals((-235.000, -196.000), m.offset)
 
 

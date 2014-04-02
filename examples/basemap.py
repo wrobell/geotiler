@@ -21,11 +21,9 @@ ax = plt.subplot(111)
 #
 # download background map using OpenStreetMap
 #
-mm = geotiler.Map(bbox, 18)
+mm = geotiler.Map(extent=bbox, zoom=18)
 #mm.zoom = 20
 mm.size = WIDTH, HEIGHT
-#mm = ModestMaps.mapByExtent(provider, loc1, loc2, dimensions)
-#mm = ModestMaps.mapByExtentZoom(provider, loc1, loc2, 18)
 
 img = geotiler.render_map(mm)
 bbox = mm.extent  # recalculate bbox, which can change due to requested
