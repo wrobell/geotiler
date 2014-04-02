@@ -114,6 +114,20 @@ class Map(object):
 
 
     @property
+    def center(self):
+        """
+        Map geographical center.
+        """
+        return self._center
+
+
+    @center.setter
+    def center(self, center):
+        self._center = center
+        self._on_change_center_zoom()
+
+
+    @property
     def zoom(self):
         """
         Map zoom value.

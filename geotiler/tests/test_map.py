@@ -103,9 +103,95 @@ class MapTestCase(unittest.TestCase):
         #self.assertEquals((11.788135, 46.48183), map.center)
 
 
+    def test_map_size_change_512(self):
+        """
+        Test changing map size (512x512)
+        """
+        provider = osm.Provider()
+        extent = 11.78560, 46.48083, 11.79067, 46.48283
+        zoom = 18
+        map = Map(extent=extent, zoom=zoom)
+
+        assert map.size == (945, 541), map.size
+
+        map.size = 512, 512
+
+        self.assertEquals((512, 512), map.size)
+        self.assertEquals(18, map.zoom) # zoom has not changed
+        expected = (
+            11.7867636, 46.4808858,
+            11.7895102, 46.4827771,
+        )
+        for v1, v2 in zip(expected, map.extent):
+            self.assertAlmostEquals(v1, v2, 6)
+
+        self.assertEquals(139655, map.coordinate.column)
+        self.assertEquals(92753, map.coordinate.row)
+        self.assertEquals(18, map.coordinate.zoom)
+        self.assertEquals(-220.0, map.offset.x)
+        self.assertEquals(-132.0, map.offset.y)
+
+
+    def test_map_size_change_1024(self):
+        """
+        Test changing map size (1024x1024)
+        """
+        provider = osm.Provider()
+        extent = 11.78560, 46.48083, 11.79067, 46.48283
+        zoom = 18
+        map = Map(extent=extent, zoom=zoom)
+
+        assert map.size == (945, 541), map.size
+
+        map.size = 1024, 1024
+
+        self.assertEquals((1024, 1024), map.size)
+        self.assertEquals(18, map.zoom) # zoom has not changed
+        expected = (
+            11.785390, 46.479940,
+            11.790884, 46.483723,
+        )
+        for v1, v2 in zip(expected, map.extent):
+            self.assertAlmostEquals(v1, v2, 6)
+
+        # the same as in test_map_size_change_512
+        self.assertEquals(139655, map.coordinate.column)
+        self.assertEquals(92753, map.coordinate.row)
+        self.assertEquals(18, map.coordinate.zoom)
+        # what about offset?
+        self.assertEquals(-220.0, map.offset.x)
+        self.assertEquals(-132.0, map.offset.y)
+
+
+    def test_map_center_change(self):
+        """
+        Test changing map center
+        """
+        provider = osm.Provider()
+        extent = 11.78560, 46.48083, 11.79067, 46.48283
+        zoom = 18
+        map = Map(extent=extent, zoom=zoom)
+
+        assert map.size == (945, 541), map.size
+
+        delta = 4 * 1e-6
+        map.center = 11.788135 + delta, 46.48183 + delta
+
+        self.assertEquals((945, 541), map.size)
+        self.assertEquals(18, map.zoom)
+
+        expected = tuple(v + delta for v in extent)
+        for k, (v1, v2) in enumerate(zip(expected, map.extent)):
+            self.assertAlmostEquals(v1, v2, 6, k)
+
+
+    # TODO: test_map_zoom_change
+    # TODO: test_map_extent_change
+
+
     def test_1(self):
         provider = ms.RoadProvider()
-        m = Map((0, 0, 0, 0), 13, provider=provider)
+        m = Map(extent=(0, 0, 0, 0), zoom=13, provider=provider)
         m.coordinate = Coordinate(3165, 1313, 13)
         m.offset = Point(-144, -94)
         m.size = 600, 600
@@ -119,70 +205,14 @@ class MapTestCase(unittest.TestCase):
         self.assertAlmostEquals(p.y, 37.804, 3)
 
 
-    def test_map_center_size_change(self):
-        """
-        Test changing map size and center
-        """
-        center = Point(-122.262940, 37.804274)
-        size = 800, 600
-        provider = ms.RoadProvider()
-        m = Map((0, 0, 0, 0), 12, provider=provider)
-        m.size = size
-        m.center = center
-
-        self.assertEquals((800, 600), m.dimensions)
-        self.assertEquals(1582, m.coordinate.row)
-        self.assertEquals(656, m.coordinate.column)
-        self.assertEquals(12, m.coordinate.zoom)
-
-        self.assertEquals((-235.000, -196.000), m.offset)
-
-
-    def test_size_change_800_600(self):
-        """
-        Test changing map size (800x600)
-        """
-        extent = -123.533554, 36.893326, -121.208153, 38.864246
-        size = 800, 600
-        provider = ms.RoadProvider()
-        m = Map(extent, 8, provider=provider)
-        m.size = size
-
-        self.assertEquals((800.000, 600.000), m.dimensions)
-        self.assertEquals(98.0, m.coordinate.row)
-        self.assertEquals(40.0, m.coordinate.column)
-        self.assertEquals(8, m.coordinate.zoom)
-        self.assertEquals(-251.000, m.offset.x)
-        self.assertEquals(-218.000, m.offset.y)
-
-
-    def test_size_change_1600_1200(self):
-        """
-        Test changing map size (800x600)
-        """
-        extent = -121.208153, 36.893326, -123.533554, 38.864246
-        size = 1600, 1200
-        provider = ms.RoadProvider()
-
-        m = Map(extent, 10, provider=provider)
-        m.size = size
-
-        self.assertEquals((1600.000, 1200.000), m.dimensions)
-        self.assertEquals(197.000, m.coordinate.row)
-        self.assertEquals(81.000, m.coordinate.column)
-        self.assertEquals(8, m.coordinate.zoom)
-        self.assertEquals(-246.000, m.offset.x)
-        self.assertEquals(-179.000, m.offset.y)
-
-
     def test_5(self):
         extent = -123.533554, 36.893326, -121.208153, 38.864246
         zoom = 10
         provider = ms.RoadProvider()
 
-        m = Map(extent, zoom, provider=provider)
+        m = Map(extent=extent, zoom=zoom, provider=provider)
 
-        self.assertEquals((1693.000, 1818.000), m.dimensions)
+        self.assertEquals((1693.000, 1818.000), m.size)
         self.assertEquals(395.000, m.coordinate.row)
         self.assertEquals(163.000, m.coordinate.column)
         self.assertEquals(10, m.coordinate.zoom)
@@ -194,9 +224,9 @@ class MapTestCase(unittest.TestCase):
         extent = -121.208153, 36.893326, -123.533554, 38.864246
         zoom = 9
         provider = ms.RoadProvider()
-        m = Map(extent, zoom, provider=provider)
+        m = Map(extent=extent, zoom=zoom, provider=provider)
 
-        self.assertEquals((846.000, 909.000), m.dimensions)
+        self.assertEquals((846.000, 909.000), m.size)
         self.assertEquals(197.000, m.coordinate.row)
         self.assertEquals(81.000, m.coordinate.column)
         self.assertEquals(9, m.coordinate.zoom)
