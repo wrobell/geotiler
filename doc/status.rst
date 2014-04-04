@@ -3,8 +3,10 @@ Project Status
 The source code of GeoTiler is based on Python port of
 `Modest Maps <https://github.com/stamen/modestmaps-py/>`_ project.
 
-The GeoTiler project effort was focused on
+The GeoTiler project initial focus has been on
 
+* library API improvements
+* simplifying library design
 * ensuring OpenStreetMap and Stamen map providers work
 * reimplementing default map tiles caching to use LRU cache
 * implementing Redis based map tiles cache
