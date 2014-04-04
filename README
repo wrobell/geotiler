@@ -5,8 +5,7 @@ licensed under BSD license. All subsequent changes are licensed under GPL
 v3 license.
 
 The main goal of the library is to enable a programmer to create maps
-using tiles downloaded from a map provider like OpenStreetMap, Yahoo or
-Google Maps.
+using tiles downloaded from a map provider like OpenStreetMap or Stamen.
 
 The maps can be used by interactive applications or to create data analysis
 graphs.
