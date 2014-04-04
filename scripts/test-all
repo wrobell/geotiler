@@ -1,6 +1,6 @@
 #!/bin/sh
 
-PROVIDERS="osm osm-cycle"
+PROVIDERS="osm osm-cycle stamen-toner"
 EXTENT="11.78560 46.48083 11.79067 46.48283"
 CENTER="11.788135 46.48183"
 ZOOM=18
