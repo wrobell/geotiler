@@ -35,17 +35,10 @@ class Map(object):
     """
     Map created from tiles and to be drawn as an image.
 
-    The initial map instance is created using geographical extent and zoom.
-    This calculates center of the map and size of the image.
-
     The extent, zoom, center and image size can be changed at any time with
     appropriate properties.
 
-    *NOTE:* Changing image size recalculates map extent.
-
     :var provider: Map tiles provider (default OpenStreetMap).
-    :var _extent: Map geographical extent.
-    :var _center: Map geographical center.
     :var _zoom: Map zoom.
     :var _size: Map image size.
     :var _offset: Position of base tile relative to map center.
@@ -56,6 +49,15 @@ class Map(object):
     ):
         """
         Create map.
+
+        The one of the following parameters combination is required
+
+        - center, zoom and size
+        - extent and size
+        - extent and zoom
+
+        If none of above parameters combination is provided, then `ValueError`
+        exception is raised.
 
         :param extent: Map geographical extent.
         :param center: Map geographical center.
@@ -68,33 +70,32 @@ class Map(object):
         self.coordinate = None
         self.offset = None
 
-        self._extent = extent
-        self._center = center
         self._zoom = zoom
         self._size = size
 
         if center and extent:
-            raise ValueError('Bad map coverage, center and extent can\'t both be set')
+            raise ValueError(
+                'Bad map coverage, center and extent can\'t both be set'
+            )
         elif extent and size and zoom:
-            raise ValueError('Bad map coverage, size and zoom can\'t be set together with extent')
+            raise ValueError(
+                'Bad map coverage, size and zoom can\'t be set together' \
+                ' with extent'
+            )
         elif center and zoom and size:
-            self._on_change_center_zoom()
-            self._on_change_size()
+            self._change_center_zoom(center, zoom)
         elif extent and size:
-            self._on_change_extent()
+            self._change_extent_and_zoom(extent)
         elif extent and zoom:
-            self._on_change_extent_zoom()
+            self.extent = extent
         else:
             raise ValueError(
                 'Unknown combination of extent, center, zoom and size' \
                 ' parameters'
             )
 
-        assert self._extent is not None
-        #assert self._center is not None
         assert self._zoom is not None
         assert self._size is not None
-
         assert self.coordinate is not None
         assert self.offset is not None
 
@@ -102,29 +103,56 @@ class Map(object):
     @property
     def extent(self):
         """
-        Map geographical extent.
+        Calculate map geographical extent.
+
+        Setting map extent changes map image size.
         """
-        return self._extent
+        w, h = self._size
+        p1 = self.pointLocation(Point(0, h))
+        p2 = self.pointLocation(Point(w, 0))
+        return p1.x, p1.y, p2.x, p2.y
 
 
     @extent.setter
     def extent(self, extent):
-        self._extent = extent
-        self._on_change_extent()
+        p1 = Point(*extent[:2])
+        p2 = Point(*extent[2:])
+
+        c1 = self.provider.locationCoordinate(p1).zoomTo(self._zoom)
+        c2 = self.provider.locationCoordinate(p2).zoomTo(self._zoom)
+
+        width = abs(c1.column - c2.column) * self.provider.tile_width
+        height = abs(c1.row - c2.row) * self.provider.tile_height
+
+        row = (c1.row + c2.row) / 2
+        col = (c1.column + c2.column) / 2
+        center_coord = core.Coordinate(row, col, self._zoom)
+
+        map_coord, map_offset = calculateMapCenter(self.provider, center_coord)
+        self.coordinate = map_coord
+        self.offset = map_offset
+        self._size = int(width), int(height)
 
 
     @property
     def center(self):
         """
-        Map geographical center.
+        Calculate map geographical center.
+
+        Setting map geographical center affects map geographical extent.
         """
-        return self._center
+        w, h = self._size
+        pt = self.pointLocation(Point(w / 2, h / 2))
+        return pt.x, pt.y
 
 
     @center.setter
     def center(self, center):
-        self._center = center
-        self._on_change_center_zoom()
+        p = Point(*center)
+        center_coord = self.provider.locationCoordinate(p).zoomTo(self._zoom)
+        map_coord, map_offset = calculateMapCenter(self.provider, center_coord)
+        self.coordinate = map_coord
+        self.offset = map_offset
 
 
     @property
@@ -132,15 +160,20 @@ class Map(object):
         """
         Map zoom value.
 
-        Setting zoom value changes map offset.
+        Setting map value does *not* affect any other map properties like
+        extent, center or image size.
         """
         return self._zoom
 
 
     @zoom.setter
     def zoom(self, zoom):
+        center_coord = self.coordinate.zoomTo(zoom)
+        map_coord, map_offset = calculateMapCenter(self.provider, center_coord)
+        self.coordinate = map_coord
+        self.offset = map_offset
         self._zoom = zoom
-        self._on_change_center_zoom()
+
 
 
     @property
@@ -150,7 +183,7 @@ class Map(object):
 
         It is a tuple (width, height).
 
-        Setting size of the image changes map extent.
+        Setting size of the image affects map geographical extent.
         """
         return self._size
 
@@ -158,72 +191,40 @@ class Map(object):
     @size.setter
     def size(self, size):
         self._size = size
-        self._on_change_size()
 
 
-    def _on_change_center_zoom(self):
+    def _change_center_zoom(self, center, zoom):
         """
-        Update map after map center and zoom change.
+        Recalculate map to have new geographical center and update zoom
+        value.
+
+        :param center: Map geographical center.
+        :param zoom: Map zoom value.
         """
-        p = Point(*self._center)
-        center_coord = self.provider.locationCoordinate(p).zoomTo(self._zoom)
+        p = Point(*center)
+        center_coord = self.provider.locationCoordinate(p).zoomTo(zoom)
         map_coord, map_offset = calculateMapCenter(self.provider, center_coord)
         self.coordinate = map_coord
         self.offset = map_offset
+        self._zoom = zoom
 
 
-    def _on_change_extent(self):
+    def _change_extent_and_zoom(self, extent):
         """
-        Update map after map extent change.
+        Recalculate map to have new geographical extent and calculate map
+        zoom.
+
+        :param extent: Map geographical extent.
         """
         width, height = self._size
 
-        p1 = Point(*self._extent[:2])
-        p2 = Point(*self._extent[2:])
+        p1 = Point(*extent[:2])
+        p2 = Point(*extent[2:])
 
         map_coord, map_offset = calculateMapExtent(self.provider, width, height, p1, p2)
         self.coordinate = map_coord
         self.offset = map_offset
         self._zoom = map_coord.zoom
-
-
-    def _on_change_size(self):
-        """
-        Update map extent after map image size change.
-        """
-        w, h = self._size
-        p1 = self.pointLocation(Point(0, h))
-        p2 = self.pointLocation(Point(w, 0))
-        self._extent = p1.x, p1.y, p2.x, p2.y
-
-
-    def _on_change_extent_zoom(self):
-        """
-        Update map after map extent and zoom change.
-        """
-        # a coordinate per corner
-        x1, y1, x2, y2 = self._extent
-        p1 = Point(x1, y1)
-        p2 = Point(x2, y2)
-        coord_a = self.provider.locationCoordinate(p1).zoomTo(self._zoom)
-        coord_b = self.provider.locationCoordinate(p2).zoomTo(self._zoom)
-
-        # precise width and height in pixels
-        width = abs(coord_a.column - coord_b.column) * self.provider.tile_width
-        height = abs(coord_a.row - coord_b.row) * self.provider.tile_height
-
-        # projected center of the map
-        center_coord = core.Coordinate(
-            (coord_a.row + coord_b.row) / 2,
-            (coord_a.column + coord_b.column) / 2,
-            self._zoom
-        )
-
-        map_coord, map_offset = calculateMapCenter(self.provider, center_coord)
-
-        self.coordinate = map_coord
-        self.offset = map_offset
-        self._size = int(width), int(height)
 
 
     def __str__(self):

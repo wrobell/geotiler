@@ -58,19 +58,23 @@ class MapTestCase(unittest.TestCase):
         Test map instantiation with center, zoom and size
         """
         provider = osm.Provider()
-        center = 11.788135, 46.48183
-        zoom = 18
+        center = 11.788137, 46.481832
+        zoom = 17
         size = 512, 512
         map = Map(center=center, zoom=zoom, size=size)
         self.assertEquals((512, 512), map.size)
-        self.assertEquals(18, map.zoom)
-        expected = (
-            11.7867636, 46.4808858,
-            11.7895102, 46.4827771,
-        )
-        for v1, v2 in zip(expected, map.extent):
-            self.assertAlmostEquals(v1, v2, 6)
-        #self.assertEquals((11.788135, 46.48183), map.center)
+        self.assertEquals(17, map.zoom)
+
+        expected = 11.785390377044687, 46.4799402452901, 11.790883541107167, 46.48372275323265
+        self.assertEquals(expected, map.extent)
+        self.assertAlmostEquals(11.788137, map.center[0], 6)
+        self.assertAlmostEquals(46.481832, map.center[1], 6)
+
+        self.assertEquals(69827, map.coordinate.column)
+        self.assertEquals(46376, map.coordinate.row)
+        self.assertEquals(17, map.coordinate.zoom)
+        self.assertEquals(-238.0, map.offset.x)
+        self.assertEquals(-194.0, map.offset.y)
 
 
     def test_map_create_extent_size(self):
@@ -78,14 +82,21 @@ class MapTestCase(unittest.TestCase):
         Test map instantiation with extent and size
         """
         provider = osm.Provider()
-        extent = 11.78560, 46.48083, 11.79067, 46.48283
+        extent = 11.785390377044687, 46.4799402452901, 11.790883541107167, 46.48372275323265
         size = 512, 512
         map = Map(extent=extent, size=size)
 
         self.assertEquals((512, 512), map.size)
         self.assertEquals(17, map.zoom)
-        self.assertEquals((11.78560, 46.48083, 11.79067, 46.48283), map.extent)
-        #self.assertEquals((11.788135, 46.48183), map.center)
+        self.assertEquals(extent, map.extent)
+        self.assertAlmostEquals(11.788137, map.center[0], 6)
+        self.assertAlmostEquals(46.481832, map.center[1], 6)
+
+        self.assertEquals(69827, map.coordinate.column)
+        self.assertEquals(46376, map.coordinate.row)
+        self.assertEquals(17, map.coordinate.zoom)
+        self.assertEquals(-238.0, map.offset.x)
+        self.assertEquals(-194.0, map.offset.y)
 
 
     def test_map_create_extent_zoom(self):
@@ -93,74 +104,73 @@ class MapTestCase(unittest.TestCase):
         Test map instantiation with extent and zoom
         """
         provider = osm.Provider()
-        extent = 11.78560, 46.48083, 11.79067, 46.48283
-        zoom = 18
+        extent = 11.785604953765853, 46.48083418203029, 11.790668964386, 46.4828288639531
+        zoom = 17
         map = Map(extent=extent, zoom=zoom)
+
+        self.assertEquals((472, 270), map.size)
+        self.assertEquals(17, map.zoom)
+        self.assertEquals(extent, map.extent)
+        self.assertAlmostEquals(11.788137, map.center[0], 6)
+        self.assertAlmostEquals(46.481832, map.center[1], 6)
+
+        self.assertEquals(69827, map.coordinate.column)
+        self.assertEquals(46376, map.coordinate.row)
+        self.assertEquals(17, map.coordinate.zoom)
+        self.assertEquals(-238.0, map.offset.x)
+        self.assertEquals(-194.0, map.offset.y)
+
+
+    def test_map_size_change_954_541(self):
+        """
+        Test changing map size (954x541)
+        """
+        provider = osm.Provider()
+        extent = 11.785604953765853, 46.48083418203029, 11.790668964386, 46.4828288639531
+        zoom = 17
+        map = Map(extent=extent, zoom=zoom)
+
+        assert map.size == (472, 270), map.size
+
+        map.size = 945, 541
 
         self.assertEquals((945, 541), map.size)
-        self.assertEquals(18, map.zoom)
-        self.assertEquals((11.78560, 46.48083, 11.79067, 46.48283), map.extent)
-        #self.assertEquals((11.788135, 46.48183), map.center)
-
-
-    def test_map_size_change_512(self):
-        """
-        Test changing map size (512x512)
-        """
-        provider = osm.Provider()
-        extent = 11.78560, 46.48083, 11.79067, 46.48283
-        zoom = 18
-        map = Map(extent=extent, zoom=zoom)
-
-        assert map.size == (945, 541), map.size
-
-        map.size = 512, 512
-
-        self.assertEquals((512, 512), map.size)
-        self.assertEquals(18, map.zoom) # zoom has not changed
-        expected = (
-            11.7867636, 46.4808858,
-            11.7895102, 46.4827771,
-        )
+        self.assertEquals(17, map.zoom) # zoom has not changed
+        expected = 11.783073, 46.4798368, 11.7932010, 46.4838261
         for v1, v2 in zip(expected, map.extent):
             self.assertAlmostEquals(v1, v2, 6)
 
-        self.assertEquals(139655, map.coordinate.column)
-        self.assertEquals(92753, map.coordinate.row)
-        self.assertEquals(18, map.coordinate.zoom)
-        self.assertEquals(-220.0, map.offset.x)
-        self.assertEquals(-132.0, map.offset.y)
+        self.assertEquals(69827, map.coordinate.column)
+        self.assertEquals(46376, map.coordinate.row)
+        self.assertEquals(17, map.coordinate.zoom)
+        self.assertEquals(-238.0, map.offset.x)
+        self.assertEquals(-194.0, map.offset.y)
 
 
-    def test_map_size_change_1024(self):
+    def test_map_size_change_1908x1082(self):
         """
-        Test changing map size (1024x1024)
+        Test changing map size (1908x1082)
         """
         provider = osm.Provider()
-        extent = 11.78560, 46.48083, 11.79067, 46.48283
-        zoom = 18
+        extent = 11.785604953765853, 46.48083418203029, 11.790668964386, 46.4828288639531
+        zoom = 17
         map = Map(extent=extent, zoom=zoom)
 
-        assert map.size == (945, 541), map.size
+        assert map.size == (472, 270), map.size
 
-        map.size = 1024, 1024
+        map.size = 1908, 1082
 
-        self.assertEquals((1024, 1024), map.size)
-        self.assertEquals(18, map.zoom) # zoom has not changed
-        expected = (
-            11.785390, 46.479940,
-            11.790884, 46.483723,
-        )
+        self.assertEquals((1908, 1082), map.size)
+        self.assertEquals(17, map.zoom) # zoom has not changed
+        expected = 11.777902, 46.4778346, 11.7983723, 46.4858281
         for v1, v2 in zip(expected, map.extent):
             self.assertAlmostEquals(v1, v2, 6)
 
-        # the same as in test_map_size_change_512
-        self.assertEquals(139655, map.coordinate.column)
-        self.assertEquals(92753, map.coordinate.row)
-        self.assertEquals(18, map.coordinate.zoom)
-        # what about offset?
-        self.assertEquals(-220.0, map.offset.x)
-        self.assertEquals(-132.0, map.offset.y)
+        self.assertEquals(69827, map.coordinate.column)
+        self.assertEquals(46376, map.coordinate.row)
+        self.assertEquals(17, map.coordinate.zoom)
+        self.assertEquals(-238.0, map.offset.x)
+        self.assertEquals(-194.0, map.offset.y)
 
 
     def test_map_center_change(self):
@@ -168,25 +178,79 @@ class MapTestCase(unittest.TestCase):
         Test changing map center
         """
         provider = osm.Provider()
-        extent = 11.78560, 46.48083, 11.79067, 46.48283
-        zoom = 18
+        extent = 11.785604953765853, 46.48083418203029, 11.790668964386, 46.4828288639531
+        zoom = 17
         map = Map(extent=extent, zoom=zoom)
 
-        assert map.size == (945, 541), map.size
+        assert map.size == (472, 270), map.size
 
-        delta = 4 * 1e-6
-        map.center = 11.788135 + delta, 46.48183 + delta
+        delta = 4 * 1e-5
+        map.center = 11.788136959075942 + delta, 46.481831532133 + delta
 
-        self.assertEquals((945, 541), map.size)
-        self.assertEquals(18, map.zoom)
+        self.assertEquals((472, 270), map.size)
+        self.assertEquals(17, map.zoom)
 
-        expected = tuple(v + delta for v in extent)
-        for k, (v1, v2) in enumerate(zip(expected, map.extent)):
-            self.assertAlmostEquals(v1, v2, 6, k)
+        expected = 11.7856478, 46.480871, 11.790712, 46.482866
+        for v1, v2 in zip(expected, map.extent):
+            self.assertAlmostEquals(v1, v2, 6, map.extent)
+
+        self.assertEquals(69827, map.coordinate.column)
+        self.assertEquals(46376, map.coordinate.row)
+        self.assertEquals(17, map.coordinate.zoom)
+        self.assertEquals(-242.0, map.offset.x)
+        self.assertEquals(-189.0, map.offset.y)
 
 
-    # TODO: test_map_zoom_change
-    # TODO: test_map_extent_change
+    def test_map_zoom_change(self):
+        """
+        Test changing map zoom
+        """
+        provider = osm.Provider()
+        extent = 11.785604953765853, 46.48083418203029, 11.790668964386, 46.4828288639531
+        zoom = 17
+        map = Map(extent=extent, zoom=zoom)
+
+        assert map.size == (472, 270), map.size
+        assert map.zoom == 17, map.zoom
+
+        map.zoom = 16
+
+        self.assertEquals((472, 270), map.size)
+        self.assertEquals(16, map.zoom)
+
+        expected = 11.780519, 46.481270, 11.790648, 46.485259
+        for v1, v2 in zip(expected, map.extent):
+            self.assertAlmostEquals(v1, v2, 6, map.extent)
+
+        self.assertEquals(34913, map.coordinate.column)
+        self.assertEquals(23188, map.coordinate.row)
+        self.assertEquals(16, map.coordinate.zoom)
+        self.assertEquals(-128.0, map.offset.x)
+        self.assertEquals(0.0, map.offset.y)
+
+
+    def test_map_extent_change(self):
+        """
+        Test changing map extent
+        """
+        provider = osm.Provider()
+        extent = 11.785604953765853, 46.48083418203029, 11.790668964386, 46.4828288639531
+        zoom = 17
+        map = Map(extent=extent, zoom=zoom)
+
+        assert map.size == (472, 270), map.size
+        assert map.zoom == 17, map.zoom
+
+        map.extent = 11.785590, 46.480830, 11.790680, 46.482840
+
+        self.assertEquals((474, 272), map.size)
+        self.assertEquals(17, map.zoom)
+
+        self.assertEquals(69827, map.coordinate.column)
+        self.assertEquals(46376, map.coordinate.row)
+        self.assertEquals(17, map.coordinate.zoom)
+        self.assertEquals(-238.0, map.offset.x)
+        self.assertEquals(-194.0, map.offset.y)
 
 
     def test_1(self):
