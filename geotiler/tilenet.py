@@ -20,7 +20,7 @@
 #
 
 """
-geoTiler map tiles downloading functionality.
+GeoTiler map tiles downloading functionality.
 
 To download map tiles and render them as a single image use
 :py:func:`render_tiles` function.
@@ -141,6 +141,22 @@ class TileDownloader(object):
         return img
 
 
+    def set_cache(self, cache):
+        """
+        Override existing map tile downloader cache.
+
+        The cache decorator function takes
+        :py:func:`TileDownloader.fetch_image` function as an argument and
+        creates a wrapper, which caches the results of the
+        :py:func:`TileDownloader.fetch_image` function.
+
+        :param cache: Cache decorator function.
+
+        .. seealso:: :py:class:`geotiler.cache.redis.RedisCache`
+        """
+        self.fetch_image = cache(self.fetch_image.__wrapped__)
+
+
     def fetch(self, tiles):
         """
         Execute all tile requests.
@@ -178,7 +194,7 @@ def render_tiles(tiles, size, downloader=None):
     :param downloader: Map tiles downloader.
     """
     if downloader is None:
-        downloader = TileThreadDownloader()
+        downloader = DEFAULT_TILE_DOWNLOADER
 
     tp = tiles[:]
     for k in range(MAX_ATTEMPTS):
@@ -199,5 +215,6 @@ def render_tiles(tiles, size, downloader=None):
 
     return image
 
+DEFAULT_TILE_DOWNLOADER = TileThreadDownloader()
 
 # vim: sw=4:et:ai
