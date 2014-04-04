@@ -63,22 +63,19 @@ parser.add_argument('output', help='Output file')
 args = parser.parse_args()
 outfile = args.output
 
-try:
-    if args.provider.startswith('cloudmade_'):
-        if not options.apikey:
-            raise BadComposure("Error: Cloudmade provider requires an API key. Register at http://developers.cloudmade.com/")
+if args.provider.startswith('cloudmade_'):
+    if not args.apikey:
+        raise BadComposure("Error: Cloudmade provider requires an API key. Register at http://developers.cloudmade.com/")
 
-        provider = ModestMaps.builtinProviders[args.provider](args.apikey)
-    elif args.provider.startswith('http://'):
-        provider = ModestMaps.Providers.TemplatedMercatorProvider(args.provider)
-    elif args.provider.startswith('https://'):
-        provider = ModestMaps.Providers.TemplatedMercatorProvider(args.provider)
-    elif args.provider.startswith('file://'):
-        args = ModestMaps.Providers.TemplatedMercatorProvider(args.provider)
-    else:
-        provider = geotiler.find_provider(args.provider)
-except KeyError:
-    raise BadComposure('Error: bad provider "%s".' % args.provider)
+    provider = ModestMaps.builtinProviders[args.provider](args.apikey)
+elif args.provider.startswith('http://'):
+    provider = ModestMaps.Providers.TemplatedMercatorProvider(args.provider)
+elif args.provider.startswith('https://'):
+    provider = ModestMaps.Providers.TemplatedMercatorProvider(args.provider)
+elif args.provider.startswith('file://'):
+    args = ModestMaps.Providers.TemplatedMercatorProvider(args.provider)
+else:
+    provider = geotiler.find_provider(args.provider)
 
 map = geotiler.Map(
     extent=args.extent,
