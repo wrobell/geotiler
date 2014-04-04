@@ -64,17 +64,15 @@ class RedisCache(object):
             key = (host, path, query)
             if self.client.exists(key):
                 if __debug__:
-                    logger.debug('getting from cache, key {}'.format(key))
+                    logger.debug('cache hit, key {}'.format(key))
                 data = self.client.get(key)
                 img = PIL.Image.frombytes('RGBA', (256, 256), data)
                 return img
             else:
-                if __debug__:
-                    logger.debug('download for key {}'.format(key))
                 img = f(self.downloader, host, path, query)
                 self.client.setex(key, img.tobytes(), self.timeout)
                 if __debug__:
-                    logger.debug('data for key {} stored in cache'.format(key))
+                    logger.debug('data stored in cache, key {}'.format(key))
                 return img
         return wrapper
 
