@@ -53,14 +53,14 @@ class TileRequest(object):
     Tile request information.
 
     :param provider: Map tile provider.
-    :param coord: Tile coordinates.
-    :param offset: Tile offset.
+    :param origin: Base tile origin.
+    :param offset: Base tile offset.
     :param images: List of downloaded tile images.
     :param done: Downloaded if true.
     """
-    def __init__(self, provider, coord, offset):
+    def __init__(self, provider, origin, offset):
         self.provider = provider
-        self.coord = coord
+        self.origin = origin
         self.offset = offset
         self.images = []
         self.done = False
@@ -83,7 +83,7 @@ class TileDownloader(object):
             # don't bother?
             return
 
-        urls = tile.provider.get_tile_urls(tile.coord)
+        urls = tile.provider.get_tile_urls(tile.origin)
 
         if __debug__:
             logger.debug('Requesting {}'.format(urls))

@@ -41,7 +41,8 @@ class Map(object):
     :var provider: Map tiles provider (default OpenStreetMap).
     :var _zoom: Map zoom.
     :var _size: Map image size.
-    :var _offset: Position of base tile relative to map center.
+    :var origin: Center of base tile relative to map center.
+    :var offset: Position of base tile relative to map center.
     """
     def __init__(
         self, extent=None, center=None, zoom=None, size=None,
@@ -67,7 +68,7 @@ class Map(object):
         """
         super().__init__()
         self.provider = provider
-        self.coordinate = None
+        self.origin = None
         self.offset = None
 
         self._zoom = zoom
@@ -96,7 +97,7 @@ class Map(object):
 
         assert self._zoom is not None
         assert self._size is not None
-        assert self.coordinate is not None
+        assert self.origin is not None
         assert self.offset is not None
 
 
@@ -126,10 +127,10 @@ class Map(object):
 
         row = (c1.row + c2.row) / 2
         col = (c1.column + c2.column) / 2
-        center_coord = core.Coordinate(row, col, self._zoom)
+        center_origin = core.Coordinate(row, col, self._zoom)
 
-        map_coord, map_offset = calculateMapCenter(self.provider, center_coord)
-        self.coordinate = map_coord
+        map_origin, map_offset = calculateMapCenter(self.provider, center_origin)
+        self.origin = map_origin
         self.offset = map_offset
         self._size = int(width), int(height)
 
@@ -149,9 +150,9 @@ class Map(object):
     @center.setter
     def center(self, center):
         p = Point(*center)
-        center_coord = self.provider.locationCoordinate(p).zoomTo(self._zoom)
-        map_coord, map_offset = calculateMapCenter(self.provider, center_coord)
-        self.coordinate = map_coord
+        center_origin = self.provider.locationCoordinate(p).zoomTo(self._zoom)
+        map_origin, map_offset = calculateMapCenter(self.provider, center_origin)
+        self.origin = map_origin
         self.offset = map_offset
 
 
@@ -168,9 +169,9 @@ class Map(object):
 
     @zoom.setter
     def zoom(self, zoom):
-        center_coord = self.coordinate.zoomTo(zoom)
-        map_coord, map_offset = calculateMapCenter(self.provider, center_coord)
-        self.coordinate = map_coord
+        center_origin = self.origin.zoomTo(zoom)
+        map_origin, map_offset = calculateMapCenter(self.provider, center_origin)
+        self.origin = map_origin
         self.offset = map_offset
         self._zoom = zoom
 
@@ -202,9 +203,9 @@ class Map(object):
         :param zoom: Map zoom value.
         """
         p = Point(*center)
-        center_coord = self.provider.locationCoordinate(p).zoomTo(zoom)
-        map_coord, map_offset = calculateMapCenter(self.provider, center_coord)
-        self.coordinate = map_coord
+        center_origin = self.provider.locationCoordinate(p).zoomTo(zoom)
+        map_origin, map_offset = calculateMapCenter(self.provider, center_origin)
+        self.origin = map_origin
         self.offset = map_offset
         self._zoom = zoom
 
@@ -221,10 +222,10 @@ class Map(object):
         p1 = Point(*extent[:2])
         p2 = Point(*extent[2:])
 
-        map_coord, map_offset = calculateMapExtent(self.provider, width, height, p1, p2)
-        self.coordinate = map_coord
+        map_origin, map_offset = calculateMapExtent(self.provider, width, height, p1, p2)
+        self.origin = map_origin
         self.offset = map_offset
-        self._zoom = map_coord.zoom
+        self._zoom = map_origin.zoom
 
 
     def __str__(self):
@@ -235,12 +236,12 @@ class Map(object):
         """ Return an x, y point on the map image for a given geographical location.
         """
         point = Point(self.offset.x, self.offset.y)
-        coord = self.provider.locationCoordinate(location).zoomTo(self.coordinate.zoom)
+        coord = self.provider.locationCoordinate(location).zoomTo(self.origin.zoom)
 
         # distance from the known coordinate offset
         point = Point(
-            point.x + self.provider.tile_width * (coord.column - self.coordinate.column),
-            point.y + self.provider.tile_height * (coord.row - self.coordinate.row)
+            point.x + self.provider.tile_width * (coord.column - self.origin.column),
+            point.y + self.provider.tile_height * (coord.row - self.origin.row)
         )
 
         # because of the center/corner business
@@ -252,7 +253,7 @@ class Map(object):
     def pointLocation(self, point):
         """ Return a geographical location on the map image for a given x, y point.
         """
-        hizoomCoord = self.coordinate.zoomTo(core.Coordinate.MAX_ZOOM)
+        hizoomCoord = self.origin.zoomTo(core.Coordinate.MAX_ZOOM)
 
         w, h = self._size
 
@@ -264,15 +265,15 @@ class Map(object):
         ytiles = (point.y - self.offset.y) / self.provider.tile_height
 
         # distance in rows & columns at maximum zoom
-        xDistance = xtiles * math.pow(2, (core.Coordinate.MAX_ZOOM - self.coordinate.zoom))
-        yDistance = ytiles * math.pow(2, (core.Coordinate.MAX_ZOOM - self.coordinate.zoom))
+        xDistance = xtiles * math.pow(2, (core.Coordinate.MAX_ZOOM - self.origin.zoom))
+        yDistance = ytiles * math.pow(2, (core.Coordinate.MAX_ZOOM - self.origin.zoom))
 
         # new point coordinate reflecting that distance
         coord = core.Coordinate(round(hizoomCoord.row + yDistance),
                                 round(hizoomCoord.column + xDistance),
                                 hizoomCoord.zoom)
 
-        coord = coord.zoomTo(self.coordinate.zoom)
+        coord = coord.zoomTo(self.origin.zoom)
 
         location = self.provider.coordinateLocation(coord)
 
@@ -291,7 +292,7 @@ def render_map(map, downloader=None):
     :param map: Map instance.
     :param downloader: Map tiles downloader.
     """
-    coord = map.coordinate.copy()
+    coord = map.origin.copy()
     w, h = map._size
     corner = Point(int(map.offset.x + w / 2), int(map.offset.y + h / 2))
 
