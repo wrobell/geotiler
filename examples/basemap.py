@@ -2,7 +2,6 @@
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
-from shapely.geometry import Point
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
