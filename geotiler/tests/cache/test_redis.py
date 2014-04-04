@@ -23,7 +23,6 @@
 Redis cache unit tests.
 """
 
-from geotiler.tilenet import TileThreadDownloader
 from geotiler.cache.redis import RedisCache
 
 import unittest
