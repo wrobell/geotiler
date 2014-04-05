@@ -49,8 +49,8 @@ class Map(object):
     appropriate properties.
 
     :var provider: Map tiles provider (default OpenStreetMap).
-    :var _zoom: Map zoom.
-    :var _size: Map image size.
+    :var _zoom: Map zoom attribute accessed via `zoom` property.
+    :var _size: Map image size accessed via `size` property.
     :var origin: Center of base tile relative to map center.
     :var offset: Position of base tile relative to map center.
     """
@@ -116,6 +116,11 @@ class Map(object):
         """
         Calculate map geographical extent.
 
+        It is a tuple of 2 coordinates (longitude and latitude)
+
+        - lower-bottom corner of the map
+        - right-top corner of the map
+
         Setting map extent changes map image size.
         """
         w, h = self._size
@@ -149,6 +154,8 @@ class Map(object):
     def center(self):
         """
         Calculate map geographical center.
+
+        It is a tuple of two values - longitude and latitude.
 
         Setting map geographical center affects map geographical extent.
         """
@@ -192,7 +199,7 @@ class Map(object):
         """
         Size of the image containing map.
 
-        It is a tuple (width, height).
+        It is a tuple - width and height of the image.
 
         Setting size of the image affects map geographical extent.
         """
