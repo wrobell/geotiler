@@ -27,9 +27,9 @@
 
 """
 >>> p = Provider()
->>> p.getTileUrls(Coordinate(10, 13, 7))
+>>> p.get_tile_urls(Coordinate(10, 13, 7))
 ('http://s3.amazonaws.com/com.modestmaps.bluemarble/7-r10-c13.jpg',)
->>> p.getTileUrls(Coordinate(13, 10, 7))
+>>> p.get_tile_urls(Coordinate(13, 10, 7))
 ('http://s3.amazonaws.com/com.modestmaps.bluemarble/7-r13-c10.jpg',)
 """
 

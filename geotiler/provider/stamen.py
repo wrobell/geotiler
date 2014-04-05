@@ -27,19 +27,19 @@
 
 """
 >>> p = BaseProvider('toner')
->>> p.getTileUrls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
 ('http://tile.stamen.com/toner/16/10507/25322.png',)
 
 >>> p = TonerProvider()
->>> p.getTileUrls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
 ('http://tile.stamen.com/toner/16/10507/25322.png',)
 
 >>> p = TerrainProvider()
->>> p.getTileUrls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
 ('http://tile.stamen.com/terrain/16/10507/25322.png',)
 
 >>> p = WatercolorProvider()
->>> p.getTileUrls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
 ('http://tile.stamen.com/watercolor/16/10507/25322.png',)
 """
 

@@ -27,31 +27,31 @@
 
 """
 >>> p = OriginalProvider('example')
->>> p.getTileUrls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
 ('http://tile.cloudmade.com/example/1/256/16/10507/25322.png',)
 
 >>> p = FineLineProvider('example')
->>> p.getTileUrls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
 ('http://tile.cloudmade.com/example/2/256/16/10507/25322.png',)
 
 >>> p = TouristProvider('example')
->>> p.getTileUrls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
 ('http://tile.cloudmade.com/example/7/256/16/10507/25322.png',)
 
 >>> p = FreshProvider('example')
->>> p.getTileUrls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
 ('http://tile.cloudmade.com/example/997/256/16/10507/25322.png',)
 
 >>> p = PaleDawnProvider('example')
->>> p.getTileUrls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
 ('http://tile.cloudmade.com/example/998/256/16/10507/25322.png',)
 
 >>> p = MidnightCommanderProvider('example')
->>> p.getTileUrls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
 ('http://tile.cloudmade.com/example/999/256/16/10507/25322.png',)
 
 >>> p = BaseProvider('example', 510)
->>> p.getTileUrls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
 ('http://tile.cloudmade.com/example/510/256/16/10507/25322.png',)
 """
 

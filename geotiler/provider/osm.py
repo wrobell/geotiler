@@ -27,9 +27,9 @@
 
 """
 >>> p = Provider()
->>> p.getTileUrls(Coordinate(10, 13, 7))
+>>> p.get_tile_urls(Coordinate(10, 13, 7))
 ('http://tile.openstreetmap.org/7/13/10.png',)
->>> p.getTileUrls(Coordinate(13, 10, 7))
+>>> p.get_tile_urls(Coordinate(13, 10, 7))
 ('http://tile.openstreetmap.org/7/10/13.png',)
 """
 

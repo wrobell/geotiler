@@ -27,15 +27,15 @@
 
 """
 >>> p = RoadProvider()
->>> p.getTileUrls(Coordinate(10, 13, 7)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls(Coordinate(10, 13, 7)) #doctest: +ELLIPSIS
 ('http://otile....mqcdn.com/tiles/1.0.0/7/13/10.png',)
->>> p.getTileUrls(Coordinate(13, 10, 7)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls(Coordinate(13, 10, 7)) #doctest: +ELLIPSIS
 ('http://otile....mqcdn.com/tiles/1.0.0/7/10/13.png',)
 
 >>> p = AerialProvider()
->>> p.getTileUrls(Coordinate(10, 13, 7)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls(Coordinate(10, 13, 7)) #doctest: +ELLIPSIS
 ('http://oatile....mqcdn.com/naip/7/13/10.png',)
->>> p.getTileUrls(Coordinate(13, 10, 7)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls(Coordinate(13, 10, 7)) #doctest: +ELLIPSIS
 ('http://oatile....mqcdn.com/naip/7/10/13.png',)
 """
 

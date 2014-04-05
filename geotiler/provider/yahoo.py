@@ -27,21 +27,21 @@
 
 """
 >>> p = RoadProvider()
->>> p.getTileUrls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
 ('http://us.maps2.yimg.com/us.png.maps.yimg.com/png?v=...&t=m&x=10507&y=7445&z=2',)
->>> p.getTileUrls(Coordinate(25333, 10482, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls(Coordinate(25333, 10482, 16)) #doctest: +ELLIPSIS
 ('http://us.maps2.yimg.com/us.png.maps.yimg.com/png?v=...&t=m&x=10482&y=7434&z=2',)
 
 >>> p = AerialProvider()
->>> p.getTileUrls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
 ('http://us.maps3.yimg.com/aerial.maps.yimg.com/tile?v=...&t=a&x=10507&y=7445&z=2',)
->>> p.getTileUrls(Coordinate(25333, 10482, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls(Coordinate(25333, 10482, 16)) #doctest: +ELLIPSIS
 ('http://us.maps3.yimg.com/aerial.maps.yimg.com/tile?v=...&t=a&x=10482&y=7434&z=2',)
 
 >>> p = HybridProvider()
->>> p.getTileUrls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
 ('http://us.maps3.yimg.com/aerial.maps.yimg.com/tile?v=...&t=a&x=10507&y=7445&z=2', 'http://us.maps3.yimg.com/aerial.maps.yimg.com/png?v=...&t=h&x=10507&y=7445&z=2')
->>> p.getTileUrls(Coordinate(25333, 10482, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls(Coordinate(25333, 10482, 16)) #doctest: +ELLIPSIS
 ('http://us.maps3.yimg.com/aerial.maps.yimg.com/tile?v=...&t=a&x=10482&y=7434&z=2', 'http://us.maps3.yimg.com/aerial.maps.yimg.com/png?v=...&t=h&x=10482&y=7434&z=2')
 """
 
@@ -79,7 +79,7 @@ class AerialProvider(AbstractProvider):
 
 class HybridProvider(AbstractProvider):
     def get_tile_urls(self, coordinate):
-        under = AerialProvider().getTileUrls(coordinate)[0]
+        under = AerialProvider().get_tile_urls(coordinate)[0]
         over = 'http://us.maps3.yimg.com/aerial.maps.yimg.com/png?v=%s&t=h&%s' % (HYBRID_VERSION, self.getZoomString(self.sourceCoordinate(coordinate)))
         return (under, over)
 

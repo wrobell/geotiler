@@ -27,21 +27,21 @@
 
 """
 >>> p = RoadProvider()
->>> p.getTileUrls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
 ('http://r....ortho.tiles.virtualearth.net/tiles/r0230102122203031.png?g=90&shading=hill',)
->>> p.getTileUrls(Coordinate(25333, 10482, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls(Coordinate(25333, 10482, 16)) #doctest: +ELLIPSIS
 ('http://r....ortho.tiles.virtualearth.net/tiles/r0230102033330212.png?g=90&shading=hill',)
 
 >>> p = AerialProvider()
->>> p.getTileUrls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
 ('http://a....ortho.tiles.virtualearth.net/tiles/a0230102122203031.jpeg?g=90',)
->>> p.getTileUrls(Coordinate(25333, 10482, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls(Coordinate(25333, 10482, 16)) #doctest: +ELLIPSIS
 ('http://a....ortho.tiles.virtualearth.net/tiles/a0230102033330212.jpeg?g=90',)
 
 >>> p = HybridProvider()
->>> p.getTileUrls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
 ('http://h....ortho.tiles.virtualearth.net/tiles/h0230102122203031.jpeg?g=90',)
->>> p.getTileUrls(Coordinate(25333, 10482, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls(Coordinate(25333, 10482, 16)) #doctest: +ELLIPSIS
 ('http://h....ortho.tiles.virtualearth.net/tiles/h0230102033330212.jpeg?g=90',)
 """
 
