@@ -214,7 +214,7 @@ def render_tiles(tiles, size, downloader=None):
     for tile in tiles:
         try:
             for img in tile.images:
-                image.paste(img, (int(tile.offset.x), int(tile.offset.y)), img)
+                image.paste(img, (int(tile.offset[0]), int(tile.offset[1])), img)
         except Exception as ex:
             logger.warn('tile rendering error')
             logger.exception(ex)

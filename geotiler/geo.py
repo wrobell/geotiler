@@ -26,7 +26,6 @@
 #
 
 import math
-from shapely.geometry import Point
 from .core import Coordinate
 
 
@@ -40,12 +39,20 @@ class Transformation:
         self.cy = cy
 
     def transform(self, point):
-        return Point(self.ax*point.x + self.bx*point.y + self.cx,
-                     self.ay*point.x + self.by*point.y + self.cy)
+        x, y = point
+        return (
+            self.ax * x + self.bx * y + self.cx,
+            self.ay * x + self.by * y + self.cy
+        )
+
 
     def untransform(self, point):
-        return Point((point.x*self.by - point.y*self.bx - self.cx*self.by + self.cy*self.bx) / (self.ax*self.by - self.ay*self.bx),
-                     (point.x*self.ay - point.y*self.ax - self.cx*self.ay + self.cy*self.ax) / (self.bx*self.ay - self.by*self.ax))
+        x, y = point
+        return (
+            (x * self.by - y * self.bx - self.cx * self.by + self.cy * self.bx) / (self.ax * self.by - self.ay * self.bx),
+            (x * self.ay - y * self.ax - self.cx * self.ay + self.cy * self.ax) / (self.bx * self.ay - self.by * self.ax)
+        )
+
 
 def deriveTransformation(a1x, a1y, a2x, a2y, b1x, b1y, b2x, b2y, c1x, c1y, c2x, c2y):
     """ Generates a transform based on three pairs of points, a1 -> a2, b1 -> b2, c1 -> c2.
@@ -54,6 +61,7 @@ def deriveTransformation(a1x, a1y, a2x, a2y, b1x, b1y, b2x, b2y, c1x, c1y, c2x, 
     ay, by, cy = linearSolution(a1x, a1y, a2y, b1x, b1y, b2y, c1x, c1y, c2y)
 
     return Transformation(ax, bx, cx, ay, by, cy)
+
 
 def linearSolution(r1, s1, t1, r2, s2, t2, r3, s3, t3):
     """ Solves a system of linear equations.
@@ -104,31 +112,36 @@ class IProjection:
         return point
 
     def locationCoordinate(self, location):
-        point = Point(math.pi * location.x / 180.0, math.pi * location.y / 180.0)
-        point = self.project(point)
-        return Coordinate(point.y, point.x, self.zoom)
+        x, y = location
+        point = math.pi * x / 180.0, math.pi * y / 180.0
+        x, y = self.project(point)
+        return Coordinate(y, x, self.zoom)
 
     def coordinateLocation(self, coordinate):
         coordinate = coordinate.zoomTo(self.zoom)
-        point = Point(coordinate.column, coordinate.row)
-        point = self.unproject(point)
-        return Point(180.0 * point.x / math.pi, 180.0 * point.y / math.pi)
+        point = coordinate.column, coordinate.row
+        x, y = self.unproject(point)
+        return 180.0 * x / math.pi, 180.0 * y / math.pi
+
+
 
 class LinearProjection(IProjection):
     def rawProject(self, point):
-        return Point(point.x, point.y)
+        x, y = point
+        return x, y
 
     def rawUnproject(self, point):
-        return Point(point.x, point.y)
+        return x, y
+
 
 class MercatorProjection(IProjection):
     def rawProject(self, point):
-        return Point(point.x,
-                     math.log(math.tan(0.25 * math.pi + 0.5 * point.y)))
+        x, y = point
+        return x, math.log(math.tan(0.25 * math.pi + 0.5 * y))
 
     def rawUnproject(self, point):
-        return Point(point.x,
-                     2 * math.atan(math.pow(math.e, point.y)) - 0.5 * math.pi)
+        x, y = point
+        return x, 2 * math.atan(math.pow(math.e, y)) - 0.5 * math.pi
 
 
 # vim:et sts=4 sw=4:

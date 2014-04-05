@@ -25,8 +25,6 @@
 #   License: BSD
 #
 
-from shapely.geometry import Point
-
 from geotiler.core import Coordinate
 from geotiler.geo import Transformation, MercatorProjection
 
@@ -35,67 +33,67 @@ import unittest
 class TransformationTestCase(unittest.TestCase):
     def test_1(self):
         t = Transformation(1, 0, 0, 0, 1, 0)
-        p = Point(1, 1)
+        p = 1, 1
 
         pt = t.transform(p)
-        self.assertEquals(1.0, pt.x)
-        self.assertEquals(1.0, pt.y)
+        self.assertEquals(1.0, pt[0])
+        self.assertEquals(1.0, pt[1])
 
         ptt = t.untransform(pt)
-        self.assertEquals(1.0, ptt.x)
-        self.assertEquals(1.0, ptt.y)
+        self.assertEquals(1.0, ptt[0])
+        self.assertEquals(1.0, ptt[1])
 
 
     def test_2(self):
         t = Transformation(0, 1, 0, 1, 0, 0)
-        p = Point(0, 1)
+        p = 0, 1
 
         pt = t.transform(p)
-        self.assertEquals(1.0, pt.x)
-        self.assertEquals(0.0, pt.y)
+        self.assertEquals(1.0, pt[0])
+        self.assertEquals(0.0, pt[1])
 
         ptt = t.untransform(pt)
-        self.assertEquals(0.0, ptt.x)
-        self.assertEquals(1.0, ptt.y)
+        self.assertEquals(0.0, ptt[0])
+        self.assertEquals(1.0, ptt[1])
 
 
     def test_3(self):
         t = Transformation(1, 0, 1, 0, 1, 1)
-        p = Point(0, 0)
+        p = 0, 0
 
         pt = t.transform(p)
-        self.assertEquals(1.0, pt.x)
-        self.assertEquals(1.0, pt.y)
+        self.assertEquals(1.0, pt[0])
+        self.assertEquals(1.0, pt[1])
 
         ptt = t.untransform(pt)
-        self.assertEquals(0.0, ptt.x)
-        self.assertEquals(0.0, ptt.y)
+        self.assertEquals(0.0, ptt[0])
+        self.assertEquals(0.0, ptt[1])
 
 
 
 class MercatorProjectionTestCase(unittest.TestCase):
     def test_1(self):
         m = MercatorProjection(10)
-        coord = m.locationCoordinate(Point(0, 0))
+        coord = m.locationCoordinate((0, 0))
         self.assertAlmostEquals(0.0, coord.column)
         self.assertAlmostEquals(0.0, coord.row)
         self.assertAlmostEquals(10.0, coord.zoom)
 
         pt = m.coordinateLocation(Coordinate(0, 0, 10))
-        self.assertAlmostEquals(0.0, pt.x)
-        self.assertAlmostEquals(0.0, pt.y)
+        self.assertAlmostEquals(0.0, pt[0])
+        self.assertAlmostEquals(0.0, pt[1])
 
 
     def test_2(self):
         m = MercatorProjection(10)
-        coord = m.locationCoordinate(Point(-122, 37))
+        coord = m.locationCoordinate((-122, 37))
         self.assertAlmostEquals(0.696, coord.row, 3)
         self.assertAlmostEquals(-2.129, coord.column, 3)
         self.assertAlmostEquals(10.0, coord.zoom)
 
         pt = m.coordinateLocation(Coordinate(0.696, -2.129, 10.000))
-        self.assertAlmostEquals(-121.983, pt.x, 3)
-        self.assertAlmostEquals(37.001, pt.y, 3)
+        self.assertAlmostEquals(-121.983, pt[0], 3)
+        self.assertAlmostEquals(37.001, pt[1], 3)
 
 
 # vim: sw=4:et:ai

@@ -25,8 +25,6 @@
 #   License: BSD
 #
 
-from shapely.geometry import Point
-
 from geotiler.map import Map
 from geotiler.provider import ms, osm
 from geotiler.core import Coordinate
@@ -79,8 +77,8 @@ class MapTestCase(unittest.TestCase):
         self.assertEquals(69827, map.origin.column)
         self.assertEquals(46376, map.origin.row)
         self.assertEquals(17, map.origin.zoom)
-        self.assertEquals(-238.0, map.offset.x)
-        self.assertEquals(-194.0, map.offset.y)
+        self.assertEquals(-238.0, map.offset[0])
+        self.assertEquals(-194.0, map.offset[1])
 
 
     def test_map_create_extent_size(self):
@@ -101,8 +99,8 @@ class MapTestCase(unittest.TestCase):
         self.assertEquals(69827, map.origin.column)
         self.assertEquals(46376, map.origin.row)
         self.assertEquals(17, map.origin.zoom)
-        self.assertEquals(-238.0, map.offset.x)
-        self.assertEquals(-194.0, map.offset.y)
+        self.assertEquals(-238.0, map.offset[0])
+        self.assertEquals(-194.0, map.offset[1])
 
 
     def test_map_create_extent_zoom(self):
@@ -123,8 +121,8 @@ class MapTestCase(unittest.TestCase):
         self.assertEquals(69827, map.origin.column)
         self.assertEquals(46376, map.origin.row)
         self.assertEquals(17, map.origin.zoom)
-        self.assertEquals(-238.0, map.offset.x)
-        self.assertEquals(-194.0, map.offset.y)
+        self.assertEquals(-238.0, map.offset[0])
+        self.assertEquals(-194.0, map.offset[1])
 
 
     def test_map_size_change_954_541(self):
@@ -149,8 +147,8 @@ class MapTestCase(unittest.TestCase):
         self.assertEquals(69827, map.origin.column)
         self.assertEquals(46376, map.origin.row)
         self.assertEquals(17, map.origin.zoom)
-        self.assertEquals(-238.0, map.offset.x)
-        self.assertEquals(-194.0, map.offset.y)
+        self.assertEquals(-238.0, map.offset[0])
+        self.assertEquals(-194.0, map.offset[1])
 
 
     def test_map_size_change_1908x1082(self):
@@ -175,8 +173,8 @@ class MapTestCase(unittest.TestCase):
         self.assertEquals(69827, map.origin.column)
         self.assertEquals(46376, map.origin.row)
         self.assertEquals(17, map.origin.zoom)
-        self.assertEquals(-238.0, map.offset.x)
-        self.assertEquals(-194.0, map.offset.y)
+        self.assertEquals(-238.0, map.offset[0])
+        self.assertEquals(-194.0, map.offset[1])
 
 
     def test_map_center_change(self):
@@ -203,8 +201,8 @@ class MapTestCase(unittest.TestCase):
         self.assertEquals(69827, map.origin.column)
         self.assertEquals(46376, map.origin.row)
         self.assertEquals(17, map.origin.zoom)
-        self.assertEquals(-242.0, map.offset.x)
-        self.assertEquals(-189.0, map.offset.y)
+        self.assertEquals(-242.0, map.offset[0])
+        self.assertEquals(-189.0, map.offset[1])
 
 
     def test_map_zoom_change(self):
@@ -231,8 +229,8 @@ class MapTestCase(unittest.TestCase):
         self.assertEquals(34913, map.origin.column)
         self.assertEquals(23188, map.origin.row)
         self.assertEquals(16, map.origin.zoom)
-        self.assertEquals(-128.0, map.offset.x)
-        self.assertEquals(0.0, map.offset.y)
+        self.assertEquals(-128.0, map.offset[0])
+        self.assertEquals(0.0, map.offset[1])
 
 
     def test_map_extent_change(self):
@@ -255,24 +253,24 @@ class MapTestCase(unittest.TestCase):
         self.assertEquals(69827, map.origin.column)
         self.assertEquals(46376, map.origin.row)
         self.assertEquals(17, map.origin.zoom)
-        self.assertEquals(-238.0, map.offset.x)
-        self.assertEquals(-194.0, map.offset.y)
+        self.assertEquals(-238.0, map.offset[0])
+        self.assertEquals(-194.0, map.offset[1])
 
 
     def test_1(self):
         provider = ms.RoadProvider()
         m = Map(extent=(0, 0, 0, 0), zoom=13, provider=provider)
         m.coordinate = Coordinate(3165, 1313, 13)
-        m.offset = Point(-144, -94)
+        m.offset = -144, -94
         m.size = 600, 600
 
-        p = m.locationPoint(Point(-122.262940, 37.804274))
-        self.assertAlmostEquals(p.x, 370.724, 3)
-        self.assertAlmostEquals(p.y, 342.549, 3)
+        p = m.locationPoint((-122.262940, 37.804274))
+        self.assertAlmostEquals(p[0], 370.724, 3)
+        self.assertAlmostEquals(p[1], 342.549, 3)
 
         p = m.pointLocation(p)
-        self.assertAlmostEquals(p.x, -122.263, 3)
-        self.assertAlmostEquals(p.y, 37.804, 3)
+        self.assertAlmostEquals(p[0], -122.263, 3)
+        self.assertAlmostEquals(p[1], 37.804, 3)
 
 
     def test_5(self):
@@ -286,8 +284,8 @@ class MapTestCase(unittest.TestCase):
         self.assertEquals(395.000, m.origin.row)
         self.assertEquals(163.000, m.origin.column)
         self.assertEquals(10, m.origin.zoom)
-        self.assertEquals(-236.000, m.offset.x)
-        self.assertEquals(-102.000, m.offset.y)
+        self.assertEquals(-236.000, m.offset[0])
+        self.assertEquals(-102.000, m.offset[1])
 
 
     def test_6(self):
@@ -300,8 +298,8 @@ class MapTestCase(unittest.TestCase):
         self.assertEquals(197.000, m.origin.row)
         self.assertEquals(81.000, m.origin.column)
         self.assertEquals(9, m.origin.zoom)
-        self.assertEquals(-246.000, m.offset.x)
-        self.assertEquals(-179.000, m.offset.y)
+        self.assertEquals(-246.000, m.offset[0])
+        self.assertEquals(-179.000, m.offset[1])
 
 
 # vim: sw=4:et:ai
