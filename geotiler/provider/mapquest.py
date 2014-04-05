@@ -46,7 +46,6 @@ from ..core import Coordinate
 from ..geo import MercatorProjection, deriveTransformation
 from .base import IMapProvider
 
-from .. import tiles
 
 class AbstractProvider(IMapProvider):
     def __init__(self):

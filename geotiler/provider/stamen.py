@@ -48,7 +48,7 @@ from math import pi
 from ..core import Coordinate
 from ..geo import MercatorProjection, deriveTransformation
 from .base import IMapProvider
-from .. import tiles
+
 
 class BaseProvider(IMapProvider):
     def __init__(self, style):

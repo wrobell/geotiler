@@ -52,7 +52,6 @@ from ..geo import MercatorProjection, deriveTransformation
 from .base import IMapProvider
 
 import random
-from .. import tiles
 
 class AbstractProvider(IMapProvider):
     def __init__(self):
@@ -61,7 +60,7 @@ class AbstractProvider(IMapProvider):
         self.projection = MercatorProjection(0, t)
 
     def getZoomString(self, coordinate):
-        return tiles.toMicrosoft(int(coordinate.column), int(coordinate.row), int(coordinate.zoom))
+        return toMicrosoft(int(coordinate.column), int(coordinate.row), int(coordinate.zoom))
 
     @property
     def tile_width(self):
@@ -82,6 +81,46 @@ class AerialProvider(AbstractProvider):
 class HybridProvider(AbstractProvider):
     def get_tile_urls(self, coordinate):
         return ('http://h%d.ortho.tiles.virtualearth.net/tiles/h%s.jpeg?g=90' % (random.randint(0, 3), self.getZoomString(self.sourceCoordinate(coordinate))),)
+
+
+microsoftFromCorners = {'0': '00', '1': '01', '2': '10', '3': '11'}
+microsoftToCorners = {'00': '0', '01': '1', '10': '2', '11': '3'}
+
+def fromMicrosoft(s):
+    """ Return column, row, zoom for Microsoft tile string.
+    """
+    row, col = [int(''.join(v), 2) for v in zip(*[microsoftFromCorners[c] for c in s])]
+    zoom = len(s)
+    return col, row, zoom
+
+def toMicrosoft(col, row, zoom):
+    """ Return string for Microsoft tile column, row, zoom.
+    """
+    x = col
+    y = row
+    y, x = bin(y)[2:].rjust(zoom, '0'), bin(x)[2:].rjust(zoom, '0')
+    v = ''.join([microsoftToCorners[y[c]+x[c]] for c in range(zoom)])
+    return v
+
+def fromMicrosoftRoad(s):
+    """ Return column, row, zoom for Microsoft Road tile string.
+    """
+    return fromMicrosoft(s)
+
+def toMicrosoftRoad(col, row, zoom):
+    """ Return x, y, z for Microsoft Road tile column, row, zoom.
+    """
+    return toMicrosoft(col, row, zoom)
+
+def fromMicrosoftAerial(s):
+    """ Return column, row, zoom for Microsoft Aerial tile string.
+    """
+    return fromMicrosoft(s)
+
+def toMicrosoftAerial(col, row, zoom):
+    """ Return x, y, z for Microsoft Aerial tile column, row, zoom.
+    """
+    return toMicrosoft(col, row, zoom)
 
 
 # vim:et sts=4 sw=4:

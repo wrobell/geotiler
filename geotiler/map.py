@@ -267,6 +267,7 @@ class Map(object):
 
         return point
 
+
     def pointLocation(self, point):
         """ Return a geographical location on the map image for a given x, y point.
         """
