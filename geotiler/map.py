@@ -25,6 +25,10 @@
 #   License: BSD
 #
 
+"""
+GeoTiler map functionality.
+"""
+
 import math
 import logging
 
@@ -57,7 +61,7 @@ class Map(object):
         """
         Create map.
 
-        The one of the following parameters combination is required
+        One of the following parameters combination is required
 
         - center, zoom and size
         - extent and size
