@@ -26,23 +26,28 @@
 #   License: BSD
 #
 
-
 from distutils.core import setup
 
 import geotiler
 
-version = geotiler.__version__
-
 setup(
     name='GeoTiler',
-    version=version,
+    packages=['geotiler'],
+    version=geotiler.__version__,
     description='GeoTiler - library to create maps using tiles'
         ' from a map provider',
     author='Artur Wroblewski',
     author_email='wrobell@pld-linux.org',
     url='http://geotiler.readthedocs.org/',
-    requires=['PIL'],
-    packages=['geotiler'],
+    setup_requires = ['setuptools_git >= 1.0'],
+    install_requires=['PIL'],
+    classifiers=[
+        'Topic :: Scientific/Engineering :: GIS',
+        'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)'
+        'License :: OSI Approved :: BSD License',
+        'Programming Language :: Python :: 3',
+        'Development Status :: 4 - Beta',
+    ],
     license='GPL (includes BSD licensed code)'
 )
 
