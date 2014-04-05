@@ -134,8 +134,8 @@ class Map(object):
         p1 = Point(*extent[:2])
         p2 = Point(*extent[2:])
 
-        c1 = self.provider.locationCoordinate(p1).zoomTo(self._zoom)
-        c2 = self.provider.locationCoordinate(p2).zoomTo(self._zoom)
+        c1 = self.provider.projection.locationCoordinate(p1).zoomTo(self._zoom)
+        c2 = self.provider.projection.locationCoordinate(p2).zoomTo(self._zoom)
 
         width = abs(c1.column - c2.column) * self.provider.tile_width
         height = abs(c1.row - c2.row) * self.provider.tile_height
@@ -167,7 +167,7 @@ class Map(object):
     @center.setter
     def center(self, center):
         p = Point(*center)
-        center_origin = self.provider.locationCoordinate(p).zoomTo(self._zoom)
+        center_origin = self.provider.projection.locationCoordinate(p).zoomTo(self._zoom)
         map_origin, map_offset = calculateMapCenter(self.provider, center_origin)
         self.origin = map_origin
         self.offset = map_offset
@@ -220,7 +220,7 @@ class Map(object):
         :param zoom: Map zoom value.
         """
         p = Point(*center)
-        center_origin = self.provider.locationCoordinate(p).zoomTo(zoom)
+        center_origin = self.provider.projection.locationCoordinate(p).zoomTo(zoom)
         map_origin, map_offset = calculateMapCenter(self.provider, center_origin)
         self.origin = map_origin
         self.offset = map_offset
@@ -253,7 +253,7 @@ class Map(object):
         """ Return an x, y point on the map image for a given geographical location.
         """
         point = Point(self.offset.x, self.offset.y)
-        coord = self.provider.locationCoordinate(location).zoomTo(self.origin.zoom)
+        coord = self.provider.projection.locationCoordinate(location).zoomTo(self.origin.zoom)
 
         # distance from the known coordinate offset
         point = Point(
@@ -293,7 +293,7 @@ class Map(object):
 
         coord = coord.zoomTo(self.origin.zoom)
 
-        location = self.provider.coordinateLocation(coord)
+        location = self.provider.projection.coordinateLocation(coord)
 
         return location
 
@@ -354,7 +354,7 @@ def calculateMapExtent(provider, width, height, *args):
         returns the coordinate of an initial tile and its point placement,
         relative to the map center.
     """
-    coordinates = list(map(provider.locationCoordinate, args))
+    coordinates = list(map(provider.projection.locationCoordinate, args))
 
     TL = core.Coordinate(min([c.row for c in coordinates]),
                          min([c.column for c in coordinates]),

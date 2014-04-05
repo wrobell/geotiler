@@ -45,17 +45,10 @@ class IMapProvider(object):
     def tile_width(self):
         return 256
 
+
     @property
     def tile_height(self):
         return 256
-
-
-    def locationCoordinate(self, location):
-        return self.projection.locationCoordinate(location)
-
-
-    def coordinateLocation(self, location):
-        return self.projection.coordinateLocation(location)
 
 
     def sourceCoordinate(self, coordinate):
