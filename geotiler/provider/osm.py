@@ -48,13 +48,6 @@ class Base(IMapProvider):
         t = deriveTransformation(-pi, pi, 0, 0, pi, pi, 1, 0, -pi, -pi, 0, 1)
         self.projection = MercatorProjection(0, t)
 
-    @property
-    def tile_width(self):
-        return 256
-
-    @property
-    def tile_height(self):
-        return 256
 
     def get_tile_urls(self, coordinate):
         url = self.FMT_URL.format(

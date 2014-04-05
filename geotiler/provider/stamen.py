@@ -58,25 +58,24 @@ class BaseProvider(IMapProvider):
 
         self.style = style
 
-    @property
-    def tile_width(self):
-        return 256
-
-    @property
-    def tile_height(self):
-        return 256
 
     def get_tile_urls(self, coordinate):
         zoom, column, row = coordinate.zoom, coordinate.column, coordinate.row
         return ('http://tile.stamen.com/%s/%d/%d/%d.png' % (self.style, zoom, column, row),)
 
+
+
 class TonerProvider(BaseProvider):
     def __init__(self):
         BaseProvider.__init__(self, 'toner')
 
+
+
 class TerrainProvider(BaseProvider):
     def __init__(self):
         BaseProvider.__init__(self, 'terrain')
+
+
 
 class WatercolorProvider(BaseProvider):
     def __init__(self):

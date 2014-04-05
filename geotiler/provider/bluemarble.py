@@ -46,13 +46,6 @@ class Provider(IMapProvider):
         t = deriveTransformation(-pi, pi, 0, 0, pi, pi, 1, 0, -pi, -pi, 0, 1)
         self.projection = MercatorProjection(0, t)
 
-    @property
-    def tile_width(self):
-        return 256
-
-    @property
-    def tile_height(self):
-        return 256
 
     def get_tile_urls(self, coordinate):
         return ('http://s3.amazonaws.com/com.modestmaps.bluemarble/%d-r%d-c%d.jpg' % (coordinate.zoom, coordinate.row, coordinate.column),)

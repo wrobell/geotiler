@@ -53,17 +53,12 @@ class AbstractProvider(IMapProvider):
         t = deriveTransformation(-pi, pi, 0, 0, pi, pi, 1, 0, -pi, -pi, 0, 1)
         self.projection = MercatorProjection(0, t)
 
-    @property
-    def tile_width(self):
-        return 256
 
-    @property
-    def tile_height(self):
-        return 256
 
 class RoadProvider(AbstractProvider):
     def get_tile_urls(self, coordinate):
         return ('http://otile%d.mqcdn.com/tiles/1.0.0/%d/%d/%d.png' % (random.randint(1, 4), coordinate.zoom, coordinate.column, coordinate.row),)
+
 
 class AerialProvider(AbstractProvider):
     def get_tile_urls(self, coordinate):

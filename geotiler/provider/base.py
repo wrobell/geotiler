@@ -43,12 +43,11 @@ class IMapProvider(object):
 
     @property
     def tile_width(self):
-        raise NotImplementedError("Abstract method not implemented by subclass.")
-
+        return 256
 
     @property
     def tile_height(self):
-        raise NotImplementedError("Abstract method not implemented by subclass.")
+        return 256
 
 
     def locationCoordinate(self, location):

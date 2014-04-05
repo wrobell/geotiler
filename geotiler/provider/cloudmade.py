@@ -72,17 +72,11 @@ class BaseProvider(IMapProvider):
         if style:
             self.style = style
 
-    @property
-    def tile_width(self):
-        return 256
-
-    @property
-    def tile_height(self):
-        return 256
 
     def get_tile_urls(self, coordinate):
         zoom, column, row = coordinate.zoom, coordinate.column, coordinate.row
         return ('http://tile.cloudmade.com/%s/%d/256/%d/%d/%d.png' % (self.key, self.style, zoom, column, row),)
+
 
 class OriginalProvider(BaseProvider):
     style = 1
