@@ -32,28 +32,22 @@ import logging
 
 import geotiler
 
-class BadComposure(Exception):
-    pass
+desc = """
+Request map of specified coverage and save it as an image.
 
-parser = argparse.ArgumentParser()
-usage = """
-There are three ways to set a map coverage area.
+There are three ways to set a map coverage area
 
 1) Center, zoom, and size: create a map of the specified size,
-   centered on a given geographical point at a given zoom level:
-
-   python compose.py -p OPENSTREETMAP -d 800 800 -c 37.8 -122.3 -z 11 out.jpg
+   centered on a given geographical point at a given zoom level.
 
 2) Extent and size: create a map of the specified size that
-   adequately covers the given geographical extent:
-
-   python compose.py -p MICROSOFT_ROAD -d 800 800 -e 36.9 -123.5 38.9 -121.2 out.png
+   adequately covers the given geographical extent.
 
 3) Extent and zoom: create a map at the given zoom level that covers
-   the precise geographical extent, at whatever pixel size is necessary:
-
-   python compose.py -p BLUE_MARBLE -e 36.9 -123.5 38.9 -121.2 -z 9 out.jpg
+   the precise geographical extent, at whatever pixel size is necessary.
 """
+
+parser = argparse.ArgumentParser(description=desc)
 
 parser.add_argument(
     '-v', '--verbose', dest='verbose', help='Make a bunch of noise',
@@ -89,10 +83,14 @@ parser.add_argument('output', help='Output file')
 args = parser.parse_args()
 outfile = args.output
 
-if args.provider.startswith('cloudmade_'):
+if args.provider.startswith('cloudmade-'):
     if not args.apikey:
-        raise BadComposure("Error: Cloudmade provider requires an API key. Register at http://developers.cloudmade.com/")
-
+        print(
+            'Cloudmade provider requires an API key. Register at' \
+            ' http://developers.cloudmade.com/',
+            file=sys.stderr
+        )
+        sys.exit(1)
     provider = ModestMaps.builtinProviders[args.provider](args.apikey)
 elif args.provider.startswith('http://'):
     provider = ModestMaps.Providers.TemplatedMercatorProvider(args.provider)
