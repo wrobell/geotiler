@@ -100,9 +100,13 @@ class TileDownloader(object):
 
             for (scheme, host, path, params, query, fragment) in map(urllib.parse.urlparse, urls):
                 if scheme in ('file', ''):
-                    img = PIL.Image.open(path).convert('RGBA')
-                elif scheme == 'http':
-                    img = self.fetch_image(host, path, query)
+                    data = open(path)
+                else:
+                    assert scheme == 'http'
+                    data = self.fetch_image(host, path, query)
+                    data = io.BytesIO(data)
+
+                img = PIL.Image.open(data).convert('RGBA')
                 images.append(img)
                 tile.done = True
 
@@ -133,7 +137,7 @@ class TileDownloader(object):
         :param path: HTTP path.
         :param query: HTTP query.
         """
-        img = None
+        data = None
 
         conn = http.client.HTTPConnection(host)
         conn.request('GET', path + ('?' + query).rstrip('?'), headers=HEADERS)
@@ -141,10 +145,9 @@ class TileDownloader(object):
         status = str(response.status)
 
         if status.startswith('2'):
-            data = io.BytesIO(response.read())
-            img = PIL.Image.open(data).convert('RGBA')
+            data = response.read()
 
-        return img
+        return data
 
 
     def set_cache(self, cache):

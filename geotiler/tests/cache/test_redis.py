@@ -61,28 +61,27 @@ class RedisCacheTestCase(unittest.TestCase):
         client = mock.MagicMock()
 
         downloader = mock.MagicMock()
-        img = mock.MagicMock()
-        downloader.f.return_value = img
+        data = mock.MagicMock()
+        downloader.f.return_value = data
 
         cache = RedisCache(client, downloader)
         fc = cache(downloader.f) # function f with cachinig capability
 
         client.exists.return_value = False
         value = fc('host', 'path', 'query')
-        self.assertEquals(img, value)
+        self.assertEquals(data, value)
         downloader.f.assert_called_once_with(
             downloader, 'host', 'path', 'query'
         )
         
         client.setex.assert_called_once_with(
             ('host', 'path', 'query'),
-            img.tobytes(),
+            data,
             cache.timeout
         )
 
 
-    @mock.patch('PIL.Image')
-    def test_cache_use(self, img_cls):
+    def test_cache_use(self):
         """
         Test Redis cache use
 
@@ -90,7 +89,6 @@ class RedisCacheTestCase(unittest.TestCase):
         """ 
         client = mock.MagicMock()
         data = mock.MagicMock() # data returned from cache
-        img = img_cls.frombytes.return_value = mock.MagicMock()
 
         downloader = mock.MagicMock()
 
@@ -101,10 +99,9 @@ class RedisCacheTestCase(unittest.TestCase):
         client.get.return_value = data    # return data from cache
 
         value = fc('host', 'path', 'query')
-        self.assertEquals(img, value)
+        self.assertEquals(data, value)
         self.assertFalse(downloader.f.called)
         client.get.assert_called_once_with(('host', 'path', 'query'))
-        img_cls.frombytes.assert_called_once_with('RGBA', (256, 256), data)
-        
+
 
 # vim: sw=4:et:ai

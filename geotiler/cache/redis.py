@@ -29,8 +29,6 @@
 Cache for GeoTiler based on Redis.
 """
 
-import PIL
-
 from functools import wraps
 import logging
 
@@ -72,14 +70,13 @@ class RedisCache(object):
                 if __debug__:
                     logger.debug('cache hit, key {}'.format(key))
                 data = self.client.get(key)
-                img = PIL.Image.frombytes('RGBA', (256, 256), data)
-                return img
+                return data
             else:
-                img = f(self.downloader, host, path, query)
-                self.client.setex(key, img.tobytes(), self.timeout)
+                data = f(self.downloader, host, path, query)
+                self.client.setex(key, data, self.timeout)
                 if __debug__:
                     logger.debug('data stored in cache, key {}'.format(key))
-                return img
+                return data
         return wrapper
 
 
