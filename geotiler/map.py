@@ -124,8 +124,8 @@ class Map(object):
         Setting map extent changes map image size.
         """
         w, h = self._size
-        p1 = self.pointLocation((0, h))
-        p2 = self.pointLocation((w, 0))
+        p1 = self.geocode((0, h))
+        p2 = self.geocode((w, 0))
         return p1[0], p1[1], p2[0], p2[1]
 
 
@@ -163,7 +163,7 @@ class Map(object):
         Setting map geographical center affects map geographical extent.
         """
         w, h = self._size
-        return self.pointLocation((w / 2, h / 2))
+        return self.geocode((w / 2, h / 2))
 
 
     @center.setter
@@ -255,8 +255,13 @@ class Map(object):
         return 'Map(%(provider)s, %(_size)s, %(coordinate)s, %(offset)s)' % self.__dict__
 
 
-    def locationPoint(self, location):
-        """ Return an x, y point on the map image for a given geographical location.
+    def rev_geocode(self, location):
+        """
+        Reverse geocode geographical location.
+
+        The method calculates location position (x, y) on map image.
+
+        :param location: Geographical location (longitude, latitude).
         """
         ox, oy = self.offset
         projection = self.provider.projection
@@ -272,8 +277,14 @@ class Map(object):
         return x + w / 2, y + h / 2
 
 
-    def pointLocation(self, point):
-        """ Return a geographical location on the map image for a given x, y point.
+    def geocode(self, point):
+        """
+        Geocode map image point.
+
+        The method calculates geographical location (longitude, latitude)
+        of image point.
+
+        :param point: Image map point (x, y).
         """
         max_zoom = MAX_ZOOM
         max_coord = zoom_to(self.origin, self._zoom, max_zoom)
