@@ -1,0 +1,19 @@
+@import url('css/theme.css');
+
+div.diagram pre {
+    font-family: monospace;
+    font-size: 12px;
+    padding: 5px;
+    line-height: 95%;
+    background: #fff;
+    margin: 1px 0 24px 0;
+}
+
+div.figure p.caption {
+    text-align: center;
+}
+
+div.figure p.caption:before {
+    content: 'Figure: ';
+    font-weight: bold;
+}
