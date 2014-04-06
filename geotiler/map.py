@@ -36,7 +36,7 @@ import PIL.Image as Image
 
 from .provider.conf import DEFAULT_PROVIDER
 from . import core
-from .tilenet import TileRequest, render_tiles
+from .tilenet import render_tiles
 
 logger = logging.getLogger(__name__)
 
@@ -304,13 +304,18 @@ def render_map(map, downloader=None):
     """
     coord, corner = _find_top_left_tile(map)
     tiles = _find_tiles(map, coord, corner)
-    img = render_tiles(tiles, map._size, downloader=downloader)
+    img = render_tiles(map.provider, tiles, map.size, downloader=downloader)
     return img
 
 
 def _find_tiles(map, tile_coord, corner):
     """
     Calculate all map tiles required to render a map.
+
+    For each tile a tuple of two items is created
+
+    - tile coordinates
+    - position of a tile within map image
 
     :param map: Map instance.
     :param tile_coord: Top-left map tile coordinate.
@@ -323,7 +328,7 @@ def _find_tiles(map, tile_coord, corner):
     for y in range(corner[1], h, map.provider.tile_height):
         tileCoord = rowCoord.copy()
         for x in range(corner[0], w, map.provider.tile_width):
-            tiles.append(TileRequest(map.provider, tileCoord, (x, y)))
+            tiles.append((tileCoord, (x, y)))
             tileCoord = tileCoord.right()
         rowCoord = rowCoord.down()
 

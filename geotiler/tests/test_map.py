@@ -320,22 +320,22 @@ class MapTestCase(unittest.TestCase):
         t1, t2, t3, t4 = tiles
 
         # first row
-        self.assertEquals(69827, t1.origin.column, t1.origin)
-        self.assertEquals(46376, t1.origin.row, t1.origin)
-        self.assertEquals((-88, -44), t1.offset)
+        self.assertEquals(69827, t1[0].column, t1[0])
+        self.assertEquals(46376, t1[0].row, t1[0])
+        self.assertEquals((-88, -44), t1[1])
 
-        self.assertEquals(69828, t2.origin.column, t2.origin)
-        self.assertEquals(46376, t2.origin.row, t2.origin)
-        self.assertEquals((-88 + 256, -44), t2.offset)
+        self.assertEquals(69828, t2[0].column, t2[0])
+        self.assertEquals(46376, t2[0].row, t2[0])
+        self.assertEquals((-88 + 256, -44), t2[1])
 
         # second row
-        self.assertEquals(69827, t3.origin.column, t3.origin)
-        self.assertEquals(46377, t3.origin.row, t3.origin)
-        self.assertEquals((-88, -44 + 256), t3.offset)
+        self.assertEquals(69827, t3[0].column, t3[0])
+        self.assertEquals(46377, t3[0].row, t3[0])
+        self.assertEquals((-88, -44 + 256), t3[1])
 
-        self.assertEquals(69828, t4.origin.column, t4.origin)
-        self.assertEquals(46377, t4.origin.row, t4.origin)
-        self.assertEquals((-88 + 256, -44 + 256), t4.offset)
+        self.assertEquals(69828, t4[0].column, t4[0])
+        self.assertEquals(46377, t4[0].row, t4[0])
+        self.assertEquals((-88 + 256, -44 + 256), t4[1])
 
 
     def test_1(self):

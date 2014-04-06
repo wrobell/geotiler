@@ -192,24 +192,25 @@ class TileThreadDownloader(TileDownloader):
 
 
 
-def render_tiles(tiles, size, downloader=None):
+def render_tiles(provider, tiles, size, downloader=None):
     """
     Download map tiles and render them as an image.
 
     The default tiles downloader is :py:class:`TileThreadDownloader`.
 
-    :param tiles: List of tiles requests.
+    :param provider: Map tiles provider.
+    :param tiles: List of tile coordinates and their map image positions.
     :param size: Map image size.
     :param downloader: Map tiles downloader.
     """
     if downloader is None:
         downloader = DEFAULT_TILE_DOWNLOADER
 
-    tp = tiles[:]
+    requests = tiles[TileRequest(provider, t[0], t[1])]
     for k in range(MAX_ATTEMPTS):
         downloader.fetch(tiles)
-        tp = [t for t in tp if not t.done]
-        if not tp:
+        requests = [t for t in requests if not t.done]
+        if not requests:
             break
 
     image = PIL.Image.new('RGB', size)
