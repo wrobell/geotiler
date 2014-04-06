@@ -73,10 +73,6 @@ def linearSolution(r1, s1, t1, r2, s2, t2, r3, s3, t3):
         a, b, c are the unknowns to be solved.
         returns the a, b, c coefficients.
     """
-
-    # make them all floats
-    r1, s1, t1, r2, s2, t2, r3, s3, t3 = list(map(float, (r1, s1, t1, r2, s2, t2, r3, s3, t3)))
-
     a = (((t2 - t3) * (s1 - s2)) - ((t1 - t2) * (s2 - s3))) \
       / (((r2 - r3) * (s1 - s2)) - ((r1 - r2) * (s2 - s3)))
 
@@ -100,12 +96,12 @@ class IProjection:
 
     def project(self, point):
         point = self.rawProject(point)
-        if(self.transformation):
+        if self.transformation:
             point = self.transformation.transform(point)
         return point
 
     def unproject(self, point):
-        if(self.transformation):
+        if self.transformation:
             point = self.transformation.untransform(point)
         point = self.rawUnproject(point)
         return point
