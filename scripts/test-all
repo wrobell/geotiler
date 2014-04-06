@@ -5,10 +5,10 @@
 #
 
 PROVIDERS="osm osm-cycle stamen-toner bluemarble"
-EXTENT="-38.540 29.114 65.946 58.579"
-CENTER="13.703 43.8465"
+EXTENT="-10.854492187499988 35.20972164522138 41.8798828125 71.37110941823617"
+CENTER="15.512695312500005 57.49221366670073"
 ZOOM=5
-SIZE="800 400"
+SIZE="1200 1500"
 GEOTILER='./bin/geotiler-lint -v --cache redis'
 
 i=1
@@ -19,4 +19,4 @@ for p in $PROVIDERS; do
     $GEOTILER -e $EXTENT -z $ZOOM $p test-all-$ii-$p-extent-zoom.png
     i=$((i + 1))
 done
-gm montage -geometry '800x300>+2+2' -tile 3x test-all-*.png test-all.png
+gm montage -geometry '1200x1500>+2+2' -tile 3x test-all-*.png test-all.png

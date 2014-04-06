@@ -9,6 +9,7 @@ Map Rendering
 
 .. autoclass:: geotiler.Map
    :members:
+   :special-members:
 
 .. autofunction:: geotiler.render_map
 
