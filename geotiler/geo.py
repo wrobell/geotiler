@@ -111,17 +111,33 @@ class IProjection:
         point = self.rawUnproject(point)
         return point
 
-    def locationCoordinate(self, location):
+
+    def rev_geocode(self, location):
+        """
+        Reverse geocode location as tile coordinates at projection's zoom.
+
+        The method returns tile coordinates (x, y) for given location and
+        projection's zoom level.
+
+        :param location: Location to reverse geocode.
+        """
         x, y = location
         point = math.pi * x / 180.0, math.pi * y / 180.0
-        x, y = self.project(point)
-        return Coordinate(y, x, self.zoom)
+        return self.project(point)
 
-    def coordinateLocation(self, coord):
-        coord = zoom_to((coord.column, coord.row), coord.zoom, self.zoom)
-        coord = Coordinate(coord[1], coord[0], self.zoom)
-        point = coord.column, coord.row
-        x, y = self.unproject(point)
+
+    def geocode(self, tile_coord, zoom):
+        """
+        Geocode tile coordinates and zoom level information.
+
+        The method returns (longitude, latitude) pair of the tile
+        coordinates at their zoom level.
+
+        :param tile_coord: Tile coordinates.
+        :param zoom: Zoom of the tile coordinates.
+        """
+        pt = zoom_to(tile_coord, zoom, self.zoom)
+        x, y = self.unproject(pt)
         return 180.0 * x / math.pi, 180.0 * y / math.pi
 
 

@@ -74,24 +74,22 @@ class TransformationTestCase(unittest.TestCase):
 class MercatorProjectionTestCase(unittest.TestCase):
     def test_1(self):
         m = MercatorProjection(10)
-        coord = m.locationCoordinate((0, 0))
-        self.assertAlmostEquals(0.0, coord.column)
-        self.assertAlmostEquals(0.0, coord.row)
-        self.assertAlmostEquals(10.0, coord.zoom)
+        coord = m.rev_geocode((0, 0))
+        self.assertAlmostEquals(0.0, coord[0])
+        self.assertAlmostEquals(0.0, coord[1])
 
-        pt = m.coordinateLocation(Coordinate(0, 0, 10))
+        pt = m.geocode((0, 0), 10)
         self.assertAlmostEquals(0.0, pt[0])
         self.assertAlmostEquals(0.0, pt[1])
 
 
     def test_2(self):
         m = MercatorProjection(10)
-        coord = m.locationCoordinate((-122, 37))
-        self.assertAlmostEquals(0.696, coord.row, 3)
-        self.assertAlmostEquals(-2.129, coord.column, 3)
-        self.assertAlmostEquals(10.0, coord.zoom)
+        coord = m.rev_geocode((-122, 37))
+        self.assertAlmostEquals(-2.129, coord[0], 3)
+        self.assertAlmostEquals(0.696, coord[1], 3)
 
-        pt = m.coordinateLocation(Coordinate(0.696, -2.129, 10.000))
+        pt = m.geocode((-2.129, 0.696), 10.000)
         self.assertAlmostEquals(-121.983, pt[0], 3)
         self.assertAlmostEquals(37.001, pt[1], 3)
 
