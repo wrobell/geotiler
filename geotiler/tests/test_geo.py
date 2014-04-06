@@ -25,7 +25,6 @@
 #   License: BSD
 #
 
-from geotiler.core import Coordinate
 from geotiler.geo import Transformation, MercatorProjection, zoom_to
 
 import unittest

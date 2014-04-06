@@ -26,7 +26,6 @@
 #
 
 import math
-from .core import Coordinate
 
 
 class Transformation:

@@ -42,7 +42,6 @@
 from math import pi
 import random
 
-from ..core import Coordinate
 from ..geo import MercatorProjection, deriveTransformation
 from .base import IMapProvider
 

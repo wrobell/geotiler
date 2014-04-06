@@ -34,11 +34,12 @@ import math
 import logging
 
 from .provider.conf import DEFAULT_PROVIDER
-from . import core
 from .geo import zoom_to
 from .tilenet import render_tiles
 
 logger = logging.getLogger(__name__)
+
+MAX_ZOOM = 25
 
 class Map(object):
     """
@@ -145,9 +146,8 @@ class Map(object):
 
         col = (c1[0] + c2[0]) / 2
         row = (c1[1] + c2[1]) / 2
-        center_origin = core.Coordinate(row, col, self._zoom)
 
-        map_origin, map_offset = calculateMapCenter(self.provider, center_origin)
+        map_origin, map_offset = calculateMapCenter(self.provider, (col, row))
         self.origin = map_origin
         self.offset = map_offset
         self._size = int(width), int(height)
@@ -171,9 +171,8 @@ class Map(object):
         projection = self.provider.projection
         c = projection.rev_geocode(center)
         c = zoom_to(c, projection.zoom, self._zoom)
-        center_origin = core.Coordinate(c[1], c[0], self._zoom)
 
-        map_origin, map_offset = calculateMapCenter(self.provider, center_origin)
+        map_origin, map_offset = calculateMapCenter(self.provider, c)
         self.origin = map_origin
         self.offset = map_offset
 
@@ -191,11 +190,9 @@ class Map(object):
 
     @zoom.setter
     def zoom(self, zoom):
-        c = self.origin
-        c = zoom_to((c.column, c.row), c.zoom, zoom)
-        center_origin = core.Coordinate(c[1], c[0], zoom)
+        c = zoom_to(self.origin, self._zoom, zoom)
 
-        map_origin, map_offset = calculateMapCenter(self.provider, center_origin)
+        map_origin, map_offset = calculateMapCenter(self.provider, c)
         self.origin = map_origin
         self.offset = map_offset
         self._zoom = zoom
@@ -229,9 +226,8 @@ class Map(object):
         projection = self.provider.projection
         c = projection.rev_geocode(center)
         c = zoom_to(c, projection.zoom, zoom)
-        center_origin = core.Coordinate(c[1], c[0], zoom)
 
-        map_origin, map_offset = calculateMapCenter(self.provider, center_origin)
+        map_origin, map_offset = calculateMapCenter(self.provider, c)
         self.origin = map_origin
         self.offset = map_offset
         self._zoom = zoom
@@ -249,10 +245,10 @@ class Map(object):
         p1 = extent[:2]
         p2 = extent[2:]
 
-        map_origin, map_offset = calculateMapExtent(self.provider, width, height, p1, p2)
+        map_origin, map_offset, zoom = calculateMapExtent(self.provider, width, height, p1, p2)
         self.origin = map_origin
         self.offset = map_offset
-        self._zoom = map_origin.zoom
+        self._zoom = zoom
 
 
     def __str__(self):
@@ -279,9 +275,8 @@ class Map(object):
     def pointLocation(self, point):
         """ Return a geographical location on the map image for a given x, y point.
         """
-        coord = self.origin
-        hizoomCoord = zoom_to((coord.column, coord.row), coord.zoom, core.Coordinate.MAX_ZOOM)
-        hizoomCoord = core.Coordinate(hizoomCoord[1], hizoomCoord[0], core.Coordinate.MAX_ZOOM)
+        max_zoom = MAX_ZOOM
+        max_coord = zoom_to(self.origin, self._zoom, max_zoom)
 
         w, h = self._size
 
@@ -293,16 +288,16 @@ class Map(object):
         ytiles = (y - self.offset[1]) / self.provider.tile_height
 
         # distance in rows & columns at maximum zoom
-        xDistance = xtiles * math.pow(2, (core.Coordinate.MAX_ZOOM - self.origin.zoom))
-        yDistance = ytiles * math.pow(2, (core.Coordinate.MAX_ZOOM - self.origin.zoom))
+        xDistance = xtiles * math.pow(2, (MAX_ZOOM - self._zoom))
+        yDistance = ytiles * math.pow(2, (MAX_ZOOM - self._zoom))
 
         # new point coordinate reflecting that distance
-        x = round(hizoomCoord.column + xDistance)
-        y = round(hizoomCoord.row + yDistance)
-        coord = zoom_to((x, y), hizoomCoord.zoom, self.origin.zoom)
+        x = round(max_coord[0] + xDistance)
+        y = round(max_coord[1] + yDistance)
+        coord = zoom_to((x, y), max_zoom, self._zoom)
 
         projection = self.provider.projection
-        location = projection.geocode(coord, self.origin.zoom)
+        location = projection.geocode(coord, self._zoom)
 
         return location
 
@@ -378,7 +373,7 @@ def _find_top_left_tile(map):
     px -= dx * tw
     py -= dy * th
 
-    coord = origin.column - dx, origin.row - dy
+    coord = origin[0] - dx, origin[1] - dy
 
     # if corner position not in ((-tw, -th), (0, 0)], then map image does
     # not contain the map properly
@@ -387,16 +382,16 @@ def _find_top_left_tile(map):
     return coord, (px, py)
 
 
-def calculateMapCenter(provider, centerCoord):
+def calculateMapCenter(provider, tile_coord):
     """ Based on a provider and center coordinate, returns the coordinate
         of an initial tile and its point placement, relative to the map center.
     """
     # initial tile coordinate
-    initTileCoord = centerCoord.container()
+    initTileCoord = math.floor(tile_coord[0]), math.floor(tile_coord[1])
 
     # initial tile position, assuming centered tile well in grid
-    initX = (initTileCoord.column - centerCoord.column) * provider.tile_width
-    initY = (initTileCoord.row - centerCoord.row) * provider.tile_height
+    initX = (initTileCoord[0] - tile_coord[0]) * provider.tile_width
+    initY = (initTileCoord[1] - tile_coord[1]) * provider.tile_height
     initPoint = round(initX), round(initY)
 
     return initTileCoord, initPoint
@@ -409,31 +404,26 @@ def calculateMapExtent(provider, width, height, *args):
     projection = provider.projection
     coordinates = [projection.rev_geocode(p) for p in args]
 
-    TL = core.Coordinate(min([c[1] for c in coordinates]),
-                         min([c[0] for c in coordinates]),
-                         projection.zoom)
-
-    BR = core.Coordinate(max([c[1] for c in coordinates]),
-                         max([c[0] for c in coordinates]),
-                         projection.zoom)
+    TL = min(c[0] for c in coordinates), min(c[1] for c in coordinates)
+    BR = max(c[0] for c in coordinates), max(c[1] for c in coordinates)
 
     # multiplication factor between horizontal span and map width
-    hFactor = (BR.column - TL.column) / (float(width) / provider.tile_width)
+    hFactor = (BR[0] - TL[0]) / (float(width) / provider.tile_width)
 
     # multiplication factor expressed as base-2 logarithm, for zoom difference
     hZoomDiff = math.log(hFactor) / math.log(2)
 
     # possible horizontal zoom to fit geographical extent in map width
-    hPossibleZoom = TL.zoom - math.ceil(hZoomDiff)
+    hPossibleZoom = projection.zoom - math.ceil(hZoomDiff)
 
     # multiplication factor between vertical span and map height
-    vFactor = (BR.row - TL.row) / (float(height) / provider.tile_height)
+    vFactor = (BR[1] - TL[1]) / (float(height) / provider.tile_height)
 
     # multiplication factor expressed as base-2 logarithm, for zoom difference
     vZoomDiff = math.log(vFactor) / math.log(2)
 
     # possible vertical zoom to fit geographical extent in map height
-    vPossibleZoom = TL.zoom - math.ceil(vZoomDiff)
+    vPossibleZoom = projection.zoom - math.ceil(vZoomDiff)
 
     # initial zoom to fit extent vertically and horizontally
     initZoom = min(hPossibleZoom, vPossibleZoom)
@@ -443,14 +433,14 @@ def calculateMapExtent(provider, width, height, *args):
     #initZoom = max(initZoom, provider.outerLimits()[0].zoom)
 
     # coordinate of extent center
-    centerRow = (TL.row + BR.row) / 2
-    centerColumn = (TL.column + BR.column) / 2
-    centerZoom = (TL.zoom + BR.zoom) / 2
+    centerColumn = (TL[0] + BR[0]) / 2
+    centerRow = (TL[1] + BR[1]) / 2
+    centerZoom = projection.zoom
 
     coord = zoom_to((centerColumn, centerRow), centerZoom, initZoom)
-    coord = core.Coordinate(coord[1], coord[0], initZoom)
 
-    return calculateMapCenter(provider, coord)
+    origin, offset = calculateMapCenter(provider, coord)
+    return origin, offset, initZoom
 
 
 # vim: sw=4:et:ai

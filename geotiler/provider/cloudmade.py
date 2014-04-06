@@ -57,7 +57,6 @@
 
 from math import pi
 
-from ..core import Coordinate
 from ..geo import MercatorProjection, deriveTransformation
 from .base import IMapProvider
 

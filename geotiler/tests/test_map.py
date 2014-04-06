@@ -73,9 +73,8 @@ class MapTestCase(unittest.TestCase):
         self.assertAlmostEquals(11.788137, map.center[0], 6)
         self.assertAlmostEquals(46.481832, map.center[1], 6)
 
-        self.assertEquals(69827, map.origin.column)
-        self.assertEquals(46376, map.origin.row)
-        self.assertEquals(17, map.origin.zoom)
+        self.assertEquals((69827, 46376), map.origin)
+        self.assertEquals(17, map.zoom)
         self.assertEquals(-238.0, map.offset[0])
         self.assertEquals(-194.0, map.offset[1])
 
@@ -95,9 +94,8 @@ class MapTestCase(unittest.TestCase):
         self.assertAlmostEquals(11.788137, map.center[0], 6)
         self.assertAlmostEquals(46.481832, map.center[1], 6)
 
-        self.assertEquals(69827, map.origin.column)
-        self.assertEquals(46376, map.origin.row)
-        self.assertEquals(17, map.origin.zoom)
+        self.assertEquals((69827, 46376), map.origin)
+        self.assertEquals(17, map.zoom)
         self.assertEquals(-238.0, map.offset[0])
         self.assertEquals(-194.0, map.offset[1])
 
@@ -117,9 +115,8 @@ class MapTestCase(unittest.TestCase):
         self.assertAlmostEquals(11.788137, map.center[0], 6)
         self.assertAlmostEquals(46.481832, map.center[1], 6)
 
-        self.assertEquals(69827, map.origin.column)
-        self.assertEquals(46376, map.origin.row)
-        self.assertEquals(17, map.origin.zoom)
+        self.assertEquals((69827, 46376), map.origin)
+        self.assertEquals(17, map.zoom)
         self.assertEquals(-238.0, map.offset[0])
         self.assertEquals(-194.0, map.offset[1])
 
@@ -143,9 +140,8 @@ class MapTestCase(unittest.TestCase):
         for v1, v2 in zip(expected, map.extent):
             self.assertAlmostEquals(v1, v2, 6)
 
-        self.assertEquals(69827, map.origin.column)
-        self.assertEquals(46376, map.origin.row)
-        self.assertEquals(17, map.origin.zoom)
+        self.assertEquals((69827, 46376), map.origin)
+        self.assertEquals(17, map.zoom)
         self.assertEquals(-238.0, map.offset[0])
         self.assertEquals(-194.0, map.offset[1])
 
@@ -169,9 +165,8 @@ class MapTestCase(unittest.TestCase):
         for v1, v2 in zip(expected, map.extent):
             self.assertAlmostEquals(v1, v2, 6)
 
-        self.assertEquals(69827, map.origin.column)
-        self.assertEquals(46376, map.origin.row)
-        self.assertEquals(17, map.origin.zoom)
+        self.assertEquals((69827, 46376), map.origin)
+        self.assertEquals(17, map.zoom)
         self.assertEquals(-238.0, map.offset[0])
         self.assertEquals(-194.0, map.offset[1])
 
@@ -197,9 +192,8 @@ class MapTestCase(unittest.TestCase):
         for v1, v2 in zip(expected, map.extent):
             self.assertAlmostEquals(v1, v2, 6, map.extent)
 
-        self.assertEquals(69827, map.origin.column)
-        self.assertEquals(46376, map.origin.row)
-        self.assertEquals(17, map.origin.zoom)
+        self.assertEquals((69827, 46376), map.origin)
+        self.assertEquals(17, map.zoom)
         self.assertEquals(-242.0, map.offset[0])
         self.assertEquals(-189.0, map.offset[1])
 
@@ -225,9 +219,8 @@ class MapTestCase(unittest.TestCase):
         for v1, v2 in zip(expected, map.extent):
             self.assertAlmostEquals(v1, v2, 6, map.extent)
 
-        self.assertEquals(34913, map.origin.column)
-        self.assertEquals(23188, map.origin.row)
-        self.assertEquals(16, map.origin.zoom)
+        self.assertEquals((34913, 23188), map.origin)
+        self.assertEquals(16, map.zoom)
         self.assertEquals(-128.0, map.offset[0])
         self.assertEquals(0.0, map.offset[1])
 
@@ -249,9 +242,8 @@ class MapTestCase(unittest.TestCase):
         self.assertEquals((474, 272), map.size)
         self.assertEquals(17, map.zoom)
 
-        self.assertEquals(69827, map.origin.column)
-        self.assertEquals(46376, map.origin.row)
-        self.assertEquals(17, map.origin.zoom)
+        self.assertEquals((69827, 46376), map.origin)
+        self.assertEquals(17, map.zoom)
         self.assertEquals(-238.0, map.offset[0])
         self.assertEquals(-194.0, map.offset[1])
 
@@ -267,8 +259,7 @@ class MapTestCase(unittest.TestCase):
 
         assert map.size == (3000, 3000), map.size
         assert map.zoom == 17, map.zoom
-        assert map.origin.column == 69827, map.origin
-        assert map.origin.row == 46376, map.origin
+        assert map.origin == (69827, 46376), map.origin
         assert map.offset == (-238, -194), map.offset
 
         coord, corner = _find_top_left_tile(map)
@@ -288,8 +279,7 @@ class MapTestCase(unittest.TestCase):
 
         assert map.size == (2000, 2000), map.size
         assert map.zoom == 12, map.zoom
-        assert map.origin.column == 2182, map.origin
-        assert map.origin.row == 1449, map.origin
+        assert map.origin == (2182, 1449), map.origin
         assert map.offset == (-31, -70), map.offset
 
         coord, corner = _find_top_left_tile(map)
@@ -312,8 +302,7 @@ class MapTestCase(unittest.TestCase):
 
         self.assertEquals(4, len(tiles))
 
-        assert map.origin.column == 69827, map.origin
-        assert map.origin.row == 46376, map.origin
+        assert map.origin == (69827, 46376), map.origin
         assert map.offset == (-238, -194), map.offset
 
         t1, t2, t3, t4 = tiles
