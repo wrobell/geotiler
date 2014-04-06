@@ -74,9 +74,7 @@ class MapTestCase(unittest.TestCase):
         self.assertAlmostEquals(46.481832, map.center[1], 6)
 
         self.assertEquals((69827, 46376), map.origin)
-        self.assertEquals(17, map.zoom)
-        self.assertEquals(-238.0, map.offset[0])
-        self.assertEquals(-194.0, map.offset[1])
+        self.assertEquals((-238, -194), map.offset)
 
 
     def test_map_create_extent_size(self):
@@ -95,9 +93,7 @@ class MapTestCase(unittest.TestCase):
         self.assertAlmostEquals(46.481832, map.center[1], 6)
 
         self.assertEquals((69827, 46376), map.origin)
-        self.assertEquals(17, map.zoom)
-        self.assertEquals(-238.0, map.offset[0])
-        self.assertEquals(-194.0, map.offset[1])
+        self.assertEquals((-238, -194), map.offset)
 
 
     def test_map_create_extent_zoom(self):
@@ -116,9 +112,7 @@ class MapTestCase(unittest.TestCase):
         self.assertAlmostEquals(46.481832, map.center[1], 6)
 
         self.assertEquals((69827, 46376), map.origin)
-        self.assertEquals(17, map.zoom)
-        self.assertEquals(-238.0, map.offset[0])
-        self.assertEquals(-194.0, map.offset[1])
+        self.assertEquals((-238, -194), map.offset)
 
 
     def test_map_size_change_954_541(self):
@@ -141,9 +135,7 @@ class MapTestCase(unittest.TestCase):
             self.assertAlmostEquals(v1, v2, 6)
 
         self.assertEquals((69827, 46376), map.origin)
-        self.assertEquals(17, map.zoom)
-        self.assertEquals(-238.0, map.offset[0])
-        self.assertEquals(-194.0, map.offset[1])
+        self.assertEquals((-238, -194), map.offset)
 
 
     def test_map_size_change_1908x1082(self):
@@ -166,9 +158,7 @@ class MapTestCase(unittest.TestCase):
             self.assertAlmostEquals(v1, v2, 6)
 
         self.assertEquals((69827, 46376), map.origin)
-        self.assertEquals(17, map.zoom)
-        self.assertEquals(-238.0, map.offset[0])
-        self.assertEquals(-194.0, map.offset[1])
+        self.assertEquals((-238, -194), map.offset)
 
 
     def test_map_center_change(self):
@@ -193,9 +183,7 @@ class MapTestCase(unittest.TestCase):
             self.assertAlmostEquals(v1, v2, 6, map.extent)
 
         self.assertEquals((69827, 46376), map.origin)
-        self.assertEquals(17, map.zoom)
-        self.assertEquals(-242.0, map.offset[0])
-        self.assertEquals(-189.0, map.offset[1])
+        self.assertEquals((-242, -189), map.offset)
 
 
     def test_map_zoom_change(self):
@@ -221,8 +209,7 @@ class MapTestCase(unittest.TestCase):
 
         self.assertEquals((34913, 23188), map.origin)
         self.assertEquals(16, map.zoom)
-        self.assertEquals(-128.0, map.offset[0])
-        self.assertEquals(0.0, map.offset[1])
+        self.assertEquals((-128, 0), map.offset)
 
 
     def test_map_extent_change(self):
@@ -243,9 +230,7 @@ class MapTestCase(unittest.TestCase):
         self.assertEquals(17, map.zoom)
 
         self.assertEquals((69827, 46376), map.origin)
-        self.assertEquals(17, map.zoom)
-        self.assertEquals(-238.0, map.offset[0])
-        self.assertEquals(-194.0, map.offset[1])
+        self.assertEquals((-238, -194), map.offset)
 
 
     def test_map_corner_calculation(self):
@@ -265,7 +250,7 @@ class MapTestCase(unittest.TestCase):
         coord, corner = _find_top_left_tile(map)
         self.assertEquals(69822.000, coord[0])
         self.assertEquals(46370.000, coord[1])
-        self.assertEquals(corner, (-18, -230))
+        self.assertEquals((-18, -230), corner)
 
 
     def test_map_corner_calculation_12(self):
@@ -285,7 +270,7 @@ class MapTestCase(unittest.TestCase):
         coord, corner = _find_top_left_tile(map)
         self.assertEquals(2178, coord[0], coord)
         self.assertEquals(1445, coord[1], coord)
-        self.assertEquals(corner, (-55, -94), corner)
+        self.assertEquals((-55, -94), corner)
 
 
     def test_map_tiles(self):
