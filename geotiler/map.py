@@ -327,18 +327,27 @@ def _find_top_left_tile(map):
 
     :param map: Map instance.
     """
-    coord = map.origin.copy()
+    coord = map.origin
     w, h = map.size
-    corner = int(map.offset[0] + w / 2), int(map.offset[1] + h / 2)
+    tw = map.provider.tile_width
+    th = map.provider.tile_height
 
-    while corner[0] > 0:
-        corner = corner[0] - map.provider.tile_width, corner[1]
-        coord = coord.left()
+    px = map.offset[0] + w // 2
+    py = map.offset[1] + h // 2
 
-    while corner[1] > 0:
-        corner = corner[0], corner[1] - map.provider.tile_height
-        coord = coord.up()
-    return coord, corner
+    dx = px // tw + (px % tw > 0)
+    dy = py // th + (py % th > 0)
+
+    px -= dx * tw
+    py -= dy * th
+
+    coord = core.Coordinate(coord.row - dy, coord.column - dx, coord.zoom)
+
+    # if corner position not in ((-tw, -th), (0, 0)], then map image does
+    # not contain the map properly
+    assert -tw < px <= 0 and -th < py <= 0, (px, py)
+
+    return coord, (px, py)
 
 
 def calculateMapCenter(provider, centerCoord):

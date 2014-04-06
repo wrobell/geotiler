@@ -268,15 +268,35 @@ class MapTestCase(unittest.TestCase):
 
         assert map.size == (3000, 3000), map.size
         assert map.zoom == 17, map.zoom
-        assert map.origin.column == 69827
-        assert map.origin.row == 46376
-        assert map.origin.zoom == 17
-        assert map.offset == (-238, -194)
+        assert map.origin.column == 69827, map.origin
+        assert map.origin.row == 46376, map.origin
+        assert map.offset == (-238, -194), map.offset
 
         coord, corner = _find_top_left_tile(map)
         self.assertEquals(46370.000, coord.row)
         self.assertEquals(69822.000, coord.column)
         self.assertEquals(corner, (-18, -230))
+
+
+    def test_map_corner_calculation_12(self):
+        """
+        Test calculation of map corner (zoom 12)
+        """
+        center = 11.788137, 46.481832
+        zoom = 12
+        size = 2000, 2000
+        map = Map(center=center, zoom=zoom, size=size)
+
+        assert map.size == (2000, 2000), map.size
+        assert map.zoom == 12, map.zoom
+        assert map.origin.column == 2182, map.origin
+        assert map.origin.row == 1449, map.origin
+        assert map.offset == (-31, -70), map.offset
+
+        coord, corner = _find_top_left_tile(map)
+        self.assertEquals(1445, coord.row, coord)
+        self.assertEquals(2178, coord.column, coord)
+        self.assertEquals(corner, (-55, -94), corner)
 
 
     def test_1(self):
