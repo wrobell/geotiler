@@ -21,8 +21,6 @@ ax = plt.subplot(111)
 # download background map using OpenStreetMap
 #
 mm = geotiler.Map(extent=bbox, zoom=18)
-#mm.zoom = 20
-mm.size = WIDTH, HEIGHT
 
 img = geotiler.render_map(mm)
 bbox = mm.extent  # recalculate bbox, which can change due to requested
