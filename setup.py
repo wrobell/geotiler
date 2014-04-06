@@ -28,12 +28,10 @@
 
 from distutils.core import setup
 
-import geotiler
-
 setup(
     name='GeoTiler',
     packages=['geotiler'],
-    version=geotiler.__version__,
+    version='0.1.0',
     description='GeoTiler - library to create maps using tiles'
         ' from a map provider',
     author='Artur Wroblewski',
