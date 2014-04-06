@@ -8,10 +8,6 @@ logging.basicConfig(level=logging.DEBUG)
 
 import geotiler
 
-# background map dimensions
-WIDTH = 512
-HEIGHT = 512
-
 bbox = 11.78560, 46.48083, 11.79067, 46.48283
 
 fig = plt.figure(figsize=(10, 10))
