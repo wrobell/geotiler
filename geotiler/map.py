@@ -302,20 +302,11 @@ def render_map(map, downloader=None):
     :param map: Map instance.
     :param downloader: Map tiles downloader.
     """
-    coord = map.origin.copy()
-    w, h = map._size
-    corner = int(map.offset[0] + w / 2), int(map.offset[1] + h / 2)
-
-    while corner[0] > 0:
-        corner = corner[0] - map.provider.tile_width, corner[1]
-        coord = coord.left()
-
-    while corner[1] > 0:
-        corner = corner[0], corner[1] - map.provider.tile_height
-        coord = coord.up()
+    coord, corner = _find_top_left_tile(map)
 
     tiles = []
 
+    w, h = map.size
     rowCoord = coord.copy()
     for y in range(int(corner[1]), h, map.provider.tile_height):
         tileCoord = rowCoord.copy()
@@ -325,6 +316,29 @@ def render_map(map, downloader=None):
         rowCoord = rowCoord.down()
 
     return render_tiles(tiles, map._size, downloader=downloader)
+
+
+def _find_top_left_tile(map):
+    """
+    Find coordinate of top-left tile of the map.
+
+    The function calculate the tile coordinate and its position relative to
+    top-left corner of the map image.
+
+    :param map: Map instance.
+    """
+    coord = map.origin.copy()
+    w, h = map.size
+    corner = int(map.offset[0] + w / 2), int(map.offset[1] + h / 2)
+
+    while corner[0] > 0:
+        corner = corner[0] - map.provider.tile_width, corner[1]
+        coord = coord.left()
+
+    while corner[1] > 0:
+        corner = corner[0], corner[1] - map.provider.tile_height
+        coord = coord.up()
+    return coord, corner
 
 
 def calculateMapCenter(provider, centerCoord):

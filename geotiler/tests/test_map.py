@@ -25,7 +25,7 @@
 #   License: BSD
 #
 
-from geotiler.map import Map
+from geotiler.map import Map, _find_top_left_tile
 from geotiler.provider import ms, osm
 from geotiler.core import Coordinate
 
@@ -255,6 +255,28 @@ class MapTestCase(unittest.TestCase):
         self.assertEquals(17, map.origin.zoom)
         self.assertEquals(-238.0, map.offset[0])
         self.assertEquals(-194.0, map.offset[1])
+
+
+    def test_map_corner_calculation(self):
+        """
+        Test calculation of map corner
+        """
+        center = 11.788137, 46.481832
+        zoom = 17
+        size = 3000, 3000
+        map = Map(center=center, zoom=zoom, size=size)
+
+        assert map.size == (3000, 3000), map.size
+        assert map.zoom == 17, map.zoom
+        assert map.origin.column == 69827
+        assert map.origin.row == 46376
+        assert map.origin.zoom == 17
+        assert map.offset == (-238, -194)
+
+        coord, corner = _find_top_left_tile(map)
+        self.assertEquals(46370.000, coord.row)
+        self.assertEquals(69822.000, coord.column)
+        self.assertEquals(corner, (-18, -230))
 
 
     def test_1(self):
