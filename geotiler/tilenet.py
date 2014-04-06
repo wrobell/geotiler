@@ -206,16 +206,17 @@ def render_tiles(provider, tiles, size, downloader=None):
     if downloader is None:
         downloader = DEFAULT_TILE_DOWNLOADER
 
-    requests = tiles[TileRequest(provider, t[0], t[1])]
+    tile_req = [TileRequest(provider, t[0], t[1]) for t in tiles]
+    requests = tile_req[:]
     for k in range(MAX_ATTEMPTS):
-        downloader.fetch(tiles)
+        downloader.fetch(requests)
         requests = [t for t in requests if not t.done]
         if not requests:
             break
 
     image = PIL.Image.new('RGB', size)
 
-    for tile in tiles:
+    for tile in tile_req:
         try:
             for img in tile.images:
                 image.paste(img, (int(tile.offset[0]), int(tile.offset[1])), img)
