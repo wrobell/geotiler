@@ -29,6 +29,7 @@
 GeoTiler map functionality.
 """
 
+import itertools
 import math
 import logging
 
@@ -324,13 +325,14 @@ def _find_tiles(map, tile_coord, corner):
     tiles = []
 
     w, h = map.size
-    rowCoord = tile_coord.copy()
-    for y in range(corner[1], h, map.provider.tile_height):
-        tileCoord = rowCoord.copy()
-        for x in range(corner[0], w, map.provider.tile_width):
-            tiles.append((tileCoord, (x, y)))
-            tileCoord = tileCoord.right()
-        rowCoord = rowCoord.down()
+    cols = range(corner[0], w, map.provider.tile_width)
+    rows = range(corner[1], h, map.provider.tile_height)
+
+    # go by rows
+    positions = itertools.product(enumerate(rows), enumerate(cols))
+    for (i, y), (j, x) in positions:
+        coord = core.Coordinate(tile_coord.row + i, tile_coord.column + j, tile_coord.zoom)
+        tiles.append((coord, (x, y)))
 
     return tiles
 
