@@ -308,9 +308,9 @@ def render_map(map, downloader=None):
 
     w, h = map.size
     rowCoord = coord.copy()
-    for y in range(int(corner[1]), h, map.provider.tile_height):
+    for y in range(corner[1], h, map.provider.tile_height):
         tileCoord = rowCoord.copy()
-        for x in range(int(corner[0]), w, map.provider.tile_width):
+        for x in range(corner[0], w, map.provider.tile_width):
             tiles.append(TileRequest(map.provider, tileCoord, (x, y)))
             tileCoord = tileCoord.right()
         rowCoord = rowCoord.down()
