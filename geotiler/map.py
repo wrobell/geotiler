@@ -110,6 +110,13 @@ class Map(object):
         assert self.origin is not None
         assert self.offset is not None
 
+        if __debug__:
+            logger.debug(
+                'extent={map.extent}, center={map.center}, zoom={map.zoom},'
+                ' size={map.size}, origin={map.origin}, offset={map.offset}'
+                .format(map=self)
+            )
+
 
     @property
     def extent(self):
