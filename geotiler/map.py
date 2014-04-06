@@ -303,11 +303,23 @@ def render_map(map, downloader=None):
     :param downloader: Map tiles downloader.
     """
     coord, corner = _find_top_left_tile(map)
+    tiles = _find_tiles(map, coord, corner)
+    img = render_tiles(tiles, map._size, downloader=downloader)
+    return img
 
+
+def _find_tiles(map, tile_coord, corner):
+    """
+    Calculate all map tiles required to render a map.
+
+    :param map: Map instance.
+    :param tile_coord: Top-left map tile coordinate.
+    :param corner: Top-left map tile position on map image.
+    """
     tiles = []
 
     w, h = map.size
-    rowCoord = coord.copy()
+    rowCoord = tile_coord.copy()
     for y in range(corner[1], h, map.provider.tile_height):
         tileCoord = rowCoord.copy()
         for x in range(corner[0], w, map.provider.tile_width):
@@ -315,7 +327,7 @@ def render_map(map, downloader=None):
             tileCoord = tileCoord.right()
         rowCoord = rowCoord.down()
 
-    return render_tiles(tiles, map._size, downloader=downloader)
+    return tiles
 
 
 def _find_top_left_tile(map):

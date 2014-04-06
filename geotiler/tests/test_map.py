@@ -25,7 +25,7 @@
 #   License: BSD
 #
 
-from geotiler.map import Map, _find_top_left_tile
+from geotiler.map import Map, _find_top_left_tile, _find_tiles
 from geotiler.provider import ms, osm
 from geotiler.core import Coordinate
 
@@ -297,6 +297,45 @@ class MapTestCase(unittest.TestCase):
         self.assertEquals(1445, coord.row, coord)
         self.assertEquals(2178, coord.column, coord)
         self.assertEquals(corner, (-55, -94), corner)
+
+
+    def test_map_tiles(self):
+        """
+        Test map tiles calculation
+        """
+        center = 11.788137, 46.481832
+        zoom = 17
+        size = 300, 300
+        map = Map(center=center, zoom=zoom, size=size)
+
+        coord, corner = _find_top_left_tile(map)
+        tiles = _find_tiles(map, coord, corner)
+
+        self.assertEquals(4, len(tiles))
+
+        assert map.origin.column == 69827, map.origin
+        assert map.origin.row == 46376, map.origin
+        assert map.offset == (-238, -194), map.offset
+
+        t1, t2, t3, t4 = tiles
+
+        # first row
+        self.assertEquals(69827, t1.origin.column, t1.origin)
+        self.assertEquals(46376, t1.origin.row, t1.origin)
+        self.assertEquals((-88, -44), t1.offset)
+
+        self.assertEquals(69828, t2.origin.column, t2.origin)
+        self.assertEquals(46376, t2.origin.row, t2.origin)
+        self.assertEquals((-88 + 256, -44), t2.offset)
+
+        # second row
+        self.assertEquals(69827, t3.origin.column, t3.origin)
+        self.assertEquals(46377, t3.origin.row, t3.origin)
+        self.assertEquals((-88, -44 + 256), t3.offset)
+
+        self.assertEquals(69828, t4.origin.column, t4.origin)
+        self.assertEquals(46377, t4.origin.row, t4.origin)
+        self.assertEquals((-88 + 256, -44 + 256), t4.offset)
 
 
     def test_1(self):
