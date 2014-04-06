@@ -1,13 +1,5 @@
 Introduction
 ============
-GeoTiler is a library to create maps using tiles from a map provider.
-
-The main goal of the library is to enable a programmer to create maps
-using tiles downloaded from a map provider like OpenStreetMap, Stamen or
-Blue Marble.
-
-The maps can be used by interactive applications or to create data analysis
-graphs.
 
 Features
 --------
