@@ -78,6 +78,10 @@ parser.add_argument(
 )
 
 parser.add_argument('-k', '--apikey', dest='apikey')
+parser.add_argument(
+    '--cache', dest='cache', choices=['lru', 'redis'], default='lru',
+    help='specify caching strategy'
+)
 parser.add_argument('output', help='Output file')
 
 args = parser.parse_args()
@@ -100,6 +104,17 @@ elif args.provider.startswith('file://'):
     args = ModestMaps.Providers.TemplatedMercatorProvider(args.provider)
 else:
     provider = geotiler.find_provider(args.provider)
+
+if args.cache == 'redis':
+    import redis
+    from geotiler.tilenet import DEFAULT_TILE_DOWNLOADER
+    from geotiler.cache.redis import RedisCache
+
+    downloader = DEFAULT_TILE_DOWNLOADER
+
+    client = redis.Redis('localhost')
+    cache = RedisCache(client, downloader)
+    downloader.set_cache(cache)
 
 map = geotiler.Map(
     extent=args.extent,
