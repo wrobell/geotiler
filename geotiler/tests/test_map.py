@@ -272,8 +272,8 @@ class MapTestCase(unittest.TestCase):
         assert map.offset == (-238, -194), map.offset
 
         coord, corner = _find_top_left_tile(map)
-        self.assertEquals(46370.000, coord.row)
-        self.assertEquals(69822.000, coord.column)
+        self.assertEquals(69822.000, coord[0])
+        self.assertEquals(46370.000, coord[1])
         self.assertEquals(corner, (-18, -230))
 
 
@@ -293,8 +293,8 @@ class MapTestCase(unittest.TestCase):
         assert map.offset == (-31, -70), map.offset
 
         coord, corner = _find_top_left_tile(map)
-        self.assertEquals(1445, coord.row, coord)
-        self.assertEquals(2178, coord.column, coord)
+        self.assertEquals(2178, coord[0], coord)
+        self.assertEquals(1445, coord[1], coord)
         self.assertEquals(corner, (-55, -94), corner)
 
 

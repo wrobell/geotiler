@@ -335,7 +335,7 @@ def _find_tiles(map, tile_coord, corner):
     - position of a tile within map image
 
     :param map: Map instance.
-    :param tile_coord: Top-left map tile coordinate.
+    :param tile_coord: Coordinate of top-left map tile.
     :param corner: Top-left map tile position on map image.
     """
     tiles = []
@@ -347,7 +347,7 @@ def _find_tiles(map, tile_coord, corner):
     # go by rows
     positions = itertools.product(enumerate(rows), enumerate(cols))
     for (i, y), (j, x) in positions:
-        coord = core.Coordinate(tile_coord.row + i, tile_coord.column + j, tile_coord.zoom)
+        coord = core.Coordinate(tile_coord[1] + i, tile_coord[0] + j, map.zoom)
         tiles.append((coord, (x, y)))
 
     return tiles
@@ -362,7 +362,7 @@ def _find_top_left_tile(map):
 
     :param map: Map instance.
     """
-    coord = map.origin
+    origin = map.origin
     w, h = map.size
     tw = map.provider.tile_width
     th = map.provider.tile_height
@@ -376,7 +376,7 @@ def _find_top_left_tile(map):
     px -= dx * tw
     py -= dy * th
 
-    coord = core.Coordinate(coord.row - dy, coord.column - dx, coord.zoom)
+    coord = origin.column - dx, origin.row - dy
 
     # if corner position not in ((-tw, -th), (0, 0)], then map image does
     # not contain the map properly
