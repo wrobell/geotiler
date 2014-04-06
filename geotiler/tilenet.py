@@ -58,11 +58,11 @@ class TileRequest(object):
     """
     Tile request information.
 
-    :param provider: Map tile provider.
-    :param origin: Base tile origin.
-    :param offset: Base tile offset.
-    :param images: List of downloaded tile images.
-    :param done: Downloaded if true.
+    :var provider: Map tile provider.
+    :var origin: Base tile origin.
+    :var offset: Base tile offset.
+    :var images: List of downloaded tile images.
+    :var done: Downloaded if true.
     """
     def __init__(self, provider, origin, offset):
         self.provider = provider
