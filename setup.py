@@ -29,7 +29,7 @@
 from setuptools import setup
 
 setup(
-    name='GeoTiler',
+    name='geotiler',
     packages=['geotiler'],
     version='0.1.0',
     description='GeoTiler - library to create maps using tiles'
