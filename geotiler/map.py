@@ -33,8 +33,6 @@ import itertools
 import math
 import logging
 
-import PIL.Image as Image
-
 from .provider.conf import DEFAULT_PROVIDER
 from . import core
 from .tilenet import render_tiles
