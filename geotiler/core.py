@@ -35,10 +35,6 @@
 1
 >>> c.zoom
 2
->>> c.zoomTo(3)
-(0.000, 2.000 @3.000)
->>> c.zoomTo(1)
-(0.000, 0.500 @1.000)
 """
 
 import math
@@ -66,14 +62,5 @@ class Coordinate:
     def container(self):
         return self.__class__(math.floor(self.row), math.floor(self.column), self.zoom)
 
-    def zoomTo(self, destination):
-        return self.__class__(self.row * math.pow(2, destination - self.zoom),
-                              self.column * math.pow(2, destination - self.zoom),
-                              destination)
-
-    def zoomBy(self, distance):
-        return self.__class__(self.row * math.pow(2, distance),
-                              self.column * math.pow(2, distance),
-                              self.zoom + distance)
 
 # vim:et sts=4 sw=4:

@@ -117,9 +117,10 @@ class IProjection:
         x, y = self.project(point)
         return Coordinate(y, x, self.zoom)
 
-    def coordinateLocation(self, coordinate):
-        coordinate = coordinate.zoomTo(self.zoom)
-        point = coordinate.column, coordinate.row
+    def coordinateLocation(self, coord):
+        coord = zoom_to((coord.column, coord.row), coord.zoom, self.zoom)
+        coord = Coordinate(coord[1], coord[0], self.zoom)
+        point = coord.column, coord.row
         x, y = self.unproject(point)
         return 180.0 * x / math.pi, 180.0 * y / math.pi
 
@@ -142,6 +143,20 @@ class MercatorProjection(IProjection):
     def rawUnproject(self, point):
         x, y = point
         return x, 2 * math.atan(math.pow(math.e, y)) - 0.5 * math.pi
+
+
+
+def zoom_to(tile_coord, zoom, target):
+    """
+    Zoom tile coordinates from current zoom to target zoom. 
+
+    :param tile_coord: Tile coordinates.
+    :param zoom: Current zoom.
+    :param target: Target zoom.
+    """
+    col, row = tile_coord
+    d_zoom = target - zoom
+    return col * math.pow(2, d_zoom), row * math.pow(2, d_zoom)
 
 
 # vim:et sts=4 sw=4:

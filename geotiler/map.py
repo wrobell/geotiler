@@ -35,6 +35,7 @@ import logging
 
 from .provider.conf import DEFAULT_PROVIDER
 from . import core
+from .geo import zoom_to
 from .tilenet import render_tiles
 
 logger = logging.getLogger(__name__)
@@ -132,8 +133,13 @@ class Map(object):
         p1 = extent[:2]
         p2 = extent[2:]
 
-        c1 = self.provider.projection.locationCoordinate(p1).zoomTo(self._zoom)
-        c2 = self.provider.projection.locationCoordinate(p2).zoomTo(self._zoom)
+        c1 = self.provider.projection.locationCoordinate(p1)
+        c1 = zoom_to((c1.column, c1.row), c1.zoom, self._zoom)
+        c1 = core.Coordinate(c1[1], c1[0], self._zoom)
+
+        c2 = self.provider.projection.locationCoordinate(p2)
+        c2 = zoom_to((c2.column, c2.row), c2.zoom, self._zoom)
+        c2 = core.Coordinate(c2[1], c2[0], self._zoom)
 
         width = abs(c1.column - c2.column) * self.provider.tile_width
         height = abs(c1.row - c2.row) * self.provider.tile_height
@@ -163,7 +169,10 @@ class Map(object):
 
     @center.setter
     def center(self, center):
-        center_origin = self.provider.projection.locationCoordinate(center).zoomTo(self._zoom)
+        c = self.provider.projection.locationCoordinate(center)
+        c = zoom_to((c.column, c.row), c.zoom, self._zoom)
+        center_origin = core.Coordinate(c[1], c[0], self._zoom)
+
         map_origin, map_offset = calculateMapCenter(self.provider, center_origin)
         self.origin = map_origin
         self.offset = map_offset
@@ -182,12 +191,14 @@ class Map(object):
 
     @zoom.setter
     def zoom(self, zoom):
-        center_origin = self.origin.zoomTo(zoom)
+        c = self.origin
+        c = zoom_to((c.column, c.row), c.zoom, zoom)
+        center_origin = core.Coordinate(c[1], c[0], zoom)
+
         map_origin, map_offset = calculateMapCenter(self.provider, center_origin)
         self.origin = map_origin
         self.offset = map_offset
         self._zoom = zoom
-
 
 
     @property
@@ -215,7 +226,10 @@ class Map(object):
         :param center: Map geographical center.
         :param zoom: Map zoom value.
         """
-        center_origin = self.provider.projection.locationCoordinate(center).zoomTo(zoom)
+        c = self.provider.projection.locationCoordinate(center)
+        c = zoom_to((c.column, c.row), c.zoom, zoom)
+        center_origin = core.Coordinate(c[1], c[0], zoom)
+
         map_origin, map_offset = calculateMapCenter(self.provider, center_origin)
         self.origin = map_origin
         self.offset = map_offset
@@ -248,21 +262,25 @@ class Map(object):
         """ Return an x, y point on the map image for a given geographical location.
         """
         ox, oy = self.offset
-        coord = self.provider.projection.locationCoordinate(location).zoomTo(self.origin.zoom)
+        coord = self.provider.projection.locationCoordinate(location)
+        coord = zoom_to((coord.column, coord.row), coord.zoom, self.origin.zoom)
+        coord = Coordinate(coord[1], coord[2], self.origin.zoom)
 
         # distance from the known coordinate offset
         x = ox + self.provider.tile_width * (coord.column - self.origin.column)
         y = oy + self.provider.tile_height * (coord.row - self.origin.row)
 
         # because of the center/corner business
-        w, h = self._size
+        w, h = self.size
         return x + w / 2, y + h / 2
 
 
     def pointLocation(self, point):
         """ Return a geographical location on the map image for a given x, y point.
         """
-        hizoomCoord = self.origin.zoomTo(core.Coordinate.MAX_ZOOM)
+        coord = self.origin
+        hizoomCoord = zoom_to((coord.column, coord.row), coord.zoom, core.Coordinate.MAX_ZOOM)
+        hizoomCoord = core.Coordinate(hizoomCoord[1], hizoomCoord[0], core.Coordinate.MAX_ZOOM)
 
         w, h = self._size
 
@@ -282,7 +300,8 @@ class Map(object):
                                 round(hizoomCoord.column + xDistance),
                                 hizoomCoord.zoom)
 
-        coord = coord.zoomTo(self.origin.zoom)
+        coord = zoom_to((coord.column, coord.row), coord.zoom, self.origin.zoom)
+        coord = core.Coordinate(coord[1], coord[0], self.origin.zoom)
 
         location = self.provider.projection.coordinateLocation(coord)
 
@@ -425,9 +444,11 @@ def calculateMapExtent(provider, width, height, *args):
     centerRow = (TL.row + BR.row) / 2
     centerColumn = (TL.column + BR.column) / 2
     centerZoom = (TL.zoom + BR.zoom) / 2
-    centerCoord = core.Coordinate(centerRow, centerColumn, centerZoom).zoomTo(initZoom)
 
-    return calculateMapCenter(provider, centerCoord)
+    coord = zoom_to((centerColumn, centerRow), centerZoom, initZoom)
+    coord = core.Coordinate(coord[1], coord[0], initZoom)
+
+    return calculateMapCenter(provider, coord)
 
 
 # vim: sw=4:et:ai

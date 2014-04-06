@@ -26,7 +26,7 @@
 #
 
 from geotiler.core import Coordinate
-from geotiler.geo import Transformation, MercatorProjection
+from geotiler.geo import Transformation, MercatorProjection, zoom_to
 
 import unittest
 
@@ -94,6 +94,22 @@ class MercatorProjectionTestCase(unittest.TestCase):
         pt = m.coordinateLocation(Coordinate(0.696, -2.129, 10.000))
         self.assertAlmostEquals(-121.983, pt[0], 3)
         self.assertAlmostEquals(37.001, pt[1], 3)
+
+
+
+class ZoomTestCase(unittest.TestCase):
+    """
+    Test tile coordinates zoom functions.
+    """
+    def test_zoom(self):
+        """
+        Test zooming tile coordinates
+        """
+        coord = zoom_to((1, 0), 2, 3)
+        self.assertEquals((2, 0), coord)
+
+        coord = zoom_to((1, 0), 2, 1)
+        self.assertEquals((0.5, 0), coord)
 
 
 # vim: sw=4:et:ai
