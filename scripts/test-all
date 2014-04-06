@@ -12,3 +12,4 @@ for p in $PROVIDERS; do
     $GEOTILER -e $EXTENT -s $SIZE $p test-all-$p-extent-size.png
     $GEOTILER -e $EXTENT -z $ZOOM $p test-all-$p-extent-zoom.png
 done
+gm montage -geometry '512x512>+12+10' test-all-*.png test-all.png
