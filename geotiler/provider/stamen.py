@@ -27,19 +27,19 @@
 
 """
 >>> p = BaseProvider('toner')
->>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls((10507, 25322), 16) #doctest: +ELLIPSIS
 ('http://tile.stamen.com/toner/16/10507/25322.png',)
 
 >>> p = TonerProvider()
->>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls((10507, 25322), 16) #doctest: +ELLIPSIS
 ('http://tile.stamen.com/toner/16/10507/25322.png',)
 
 >>> p = TerrainProvider()
->>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls((10507, 25322), 16) #doctest: +ELLIPSIS
 ('http://tile.stamen.com/terrain/16/10507/25322.png',)
 
 >>> p = WatercolorProvider()
->>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls((10507, 25322), 16) #doctest: +ELLIPSIS
 ('http://tile.stamen.com/watercolor/16/10507/25322.png',)
 """
 
@@ -59,8 +59,8 @@ class BaseProvider(IMapProvider):
         self.style = style
 
 
-    def get_tile_urls(self, coordinate):
-        zoom, column, row = coordinate.zoom, coordinate.column, coordinate.row
+    def get_tile_urls(self, tile_coord, zoom):
+        column, row = tile_coord
         return ('http://tile.stamen.com/%s/%d/%d/%d.png' % (self.style, zoom, column, row),)
 
 

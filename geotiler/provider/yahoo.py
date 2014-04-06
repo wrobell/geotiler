@@ -27,27 +27,26 @@
 
 """
 >>> p = RoadProvider()
->>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls((10507, 25322), 16) #doctest: +ELLIPSIS
 ('http://us.maps2.yimg.com/us.png.maps.yimg.com/png?v=...&t=m&x=10507&y=7445&z=2',)
->>> p.get_tile_urls(Coordinate(25333, 10482, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls((10482, 25333), 16) #doctest: +ELLIPSIS
 ('http://us.maps2.yimg.com/us.png.maps.yimg.com/png?v=...&t=m&x=10482&y=7434&z=2',)
 
 >>> p = AerialProvider()
->>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls((10507, 25322), 16) #doctest: +ELLIPSIS
 ('http://us.maps3.yimg.com/aerial.maps.yimg.com/tile?v=...&t=a&x=10507&y=7445&z=2',)
->>> p.get_tile_urls(Coordinate(25333, 10482, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls((10482, 25333), 16) #doctest: +ELLIPSIS
 ('http://us.maps3.yimg.com/aerial.maps.yimg.com/tile?v=...&t=a&x=10482&y=7434&z=2',)
 
 >>> p = HybridProvider()
->>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls((10507, 25322), 16) #doctest: +ELLIPSIS
 ('http://us.maps3.yimg.com/aerial.maps.yimg.com/tile?v=...&t=a&x=10507&y=7445&z=2', 'http://us.maps3.yimg.com/aerial.maps.yimg.com/png?v=...&t=h&x=10507&y=7445&z=2')
->>> p.get_tile_urls(Coordinate(25333, 10482, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls((10482, 25333), 16) #doctest: +ELLIPSIS
 ('http://us.maps3.yimg.com/aerial.maps.yimg.com/tile?v=...&t=a&x=10482&y=7434&z=2', 'http://us.maps3.yimg.com/aerial.maps.yimg.com/png?v=...&t=h&x=10482&y=7434&z=2')
 """
 
 import math
 
-from ..core import Coordinate
 from ..geo import MercatorProjection, deriveTransformation
 from .base import IMapProvider
 
@@ -62,25 +61,25 @@ class AbstractProvider(IMapProvider):
         t = deriveTransformation(-pi, pi, 0, 0, pi, pi, 1, 0, -pi, -pi, 0, 1)
         self.projection = MercatorProjection(0, t)
 
-    def getZoomString(self, coordinate):
-        return 'x=%d&y=%d&z=%d' % toYahoo(int(coordinate.column), int(coordinate.row), int(coordinate.zoom))
+    def getZoomString(self, coordinate, zoom):
+        return 'x=%d&y=%d&z=%d' % toYahoo(int(coordinate[0]), int(coordinate[1]), int(zoom))
 
 
 
 class RoadProvider(AbstractProvider):
-    def get_tile_urls(self, coordinate):
-        return ('http://us.maps2.yimg.com/us.png.maps.yimg.com/png?v=%s&t=m&%s' % (ROAD_VERSION, self.getZoomString(self.sourceCoordinate(coordinate))),)
+    def get_tile_urls(self, tile_coord, zoom):
+        return ('http://us.maps2.yimg.com/us.png.maps.yimg.com/png?v=%s&t=m&%s' % (ROAD_VERSION, self.getZoomString(self.sourceCoordinate(tile_coord, zoom), zoom)),)
 
 
 class AerialProvider(AbstractProvider):
-    def get_tile_urls(self, coordinate):
-        return ('http://us.maps3.yimg.com/aerial.maps.yimg.com/tile?v=%s&t=a&%s' % (AERIAL_VERSION, self.getZoomString(self.sourceCoordinate(coordinate))),)
+    def get_tile_urls(self, tile_coord, zoom):
+        return ('http://us.maps3.yimg.com/aerial.maps.yimg.com/tile?v=%s&t=a&%s' % (AERIAL_VERSION, self.getZoomString(self.sourceCoordinate(tile_coord, zoom), zoom)),)
 
 
 class HybridProvider(AbstractProvider):
-    def get_tile_urls(self, coordinate):
-        under = AerialProvider().get_tile_urls(coordinate)[0]
-        over = 'http://us.maps3.yimg.com/aerial.maps.yimg.com/png?v=%s&t=h&%s' % (HYBRID_VERSION, self.getZoomString(self.sourceCoordinate(coordinate)))
+    def get_tile_urls(self, tile_coord, zoom):
+        under = AerialProvider().get_tile_urls(tile_coord, zoom)[0]
+        over = 'http://us.maps3.yimg.com/aerial.maps.yimg.com/png?v=%s&t=h&%s' % (HYBRID_VERSION, self.getZoomString(self.sourceCoordinate(tile_coord, zoom), zoom))
         return (under, over)
 
 

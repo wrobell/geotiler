@@ -27,9 +27,9 @@
 
 """
 >>> p = Provider()
->>> p.get_tile_urls(Coordinate(10, 13, 7))
+>>> p.get_tile_urls((13, 10), 7)
 ('http://tile.openstreetmap.org/7/13/10.png',)
->>> p.get_tile_urls(Coordinate(13, 10, 7))
+>>> p.get_tile_urls((10, 13), 7)
 ('http://tile.openstreetmap.org/7/10/13.png',)
 """
 
@@ -49,12 +49,8 @@ class Base(IMapProvider):
         self.projection = MercatorProjection(0, t)
 
 
-    def get_tile_urls(self, coordinate):
-        url = self.FMT_URL.format(
-            x=coordinate.column,
-            y=coordinate.row,
-            z=coordinate.zoom
-        )
+    def get_tile_urls(self, tile_coord, zoom):
+        url = self.FMT_URL.format(x=tile_coord[0], y=tile_coord[1], z=zoom)
         return (url,)
 
 

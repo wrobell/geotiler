@@ -27,27 +27,26 @@
 
 """
 >>> p = RoadProvider()
->>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls((10507, 25322), 16) #doctest: +ELLIPSIS
 ('http://r....ortho.tiles.virtualearth.net/tiles/r0230102122203031.png?g=90&shading=hill',)
->>> p.get_tile_urls(Coordinate(25333, 10482, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls((10482, 25333), 16) #doctest: +ELLIPSIS
 ('http://r....ortho.tiles.virtualearth.net/tiles/r0230102033330212.png?g=90&shading=hill',)
 
 >>> p = AerialProvider()
->>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls((10507, 25322), 16) #doctest: +ELLIPSIS
 ('http://a....ortho.tiles.virtualearth.net/tiles/a0230102122203031.jpeg?g=90',)
->>> p.get_tile_urls(Coordinate(25333, 10482, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls((10482, 25333), 16) #doctest: +ELLIPSIS
 ('http://a....ortho.tiles.virtualearth.net/tiles/a0230102033330212.jpeg?g=90',)
 
 >>> p = HybridProvider()
->>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls((10507, 25322), 16) #doctest: +ELLIPSIS
 ('http://h....ortho.tiles.virtualearth.net/tiles/h0230102122203031.jpeg?g=90',)
->>> p.get_tile_urls(Coordinate(25333, 10482, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls((10482, 25333), 16) #doctest: +ELLIPSIS
 ('http://h....ortho.tiles.virtualearth.net/tiles/h0230102033330212.jpeg?g=90',)
 """
 
 from math import pi
 
-from ..core import Coordinate
 from ..geo import MercatorProjection, deriveTransformation
 from .base import IMapProvider
 
@@ -59,24 +58,24 @@ class AbstractProvider(IMapProvider):
         t = deriveTransformation(-pi, pi, 0, 0, pi, pi, 1, 0, -pi, -pi, 0, 1)
         self.projection = MercatorProjection(0, t)
 
-    def getZoomString(self, coordinate):
-        return toMicrosoft(int(coordinate.column), int(coordinate.row), int(coordinate.zoom))
+    def getZoomString(self, coordinate, zoom):
+        return toMicrosoft(int(coordinate[0]), int(coordinate[1]), int(zoom))
 
 
 
 class RoadProvider(AbstractProvider):
-    def get_tile_urls(self, coordinate):
-        return ('http://r%d.ortho.tiles.virtualearth.net/tiles/r%s.png?g=90&shading=hill' % (random.randint(0, 3), self.getZoomString(self.sourceCoordinate(coordinate))),)
+    def get_tile_urls(self, tile_coord, zoom):
+        return ('http://r%d.ortho.tiles.virtualearth.net/tiles/r%s.png?g=90&shading=hill' % (random.randint(0, 3), self.getZoomString(self.sourceCoordinate(tile_coord, zoom), zoom)),)
 
 
 class AerialProvider(AbstractProvider):
-    def get_tile_urls(self, coordinate):
-        return ('http://a%d.ortho.tiles.virtualearth.net/tiles/a%s.jpeg?g=90' % (random.randint(0, 3), self.getZoomString(self.sourceCoordinate(coordinate))),)
+    def get_tile_urls(self, tile_coord, zoom):
+        return ('http://a%d.ortho.tiles.virtualearth.net/tiles/a%s.jpeg?g=90' % (random.randint(0, 3), self.getZoomString(self.sourceCoordinate(tile_coord, zoom), zoom)),)
 
 
 class HybridProvider(AbstractProvider):
-    def get_tile_urls(self, coordinate):
-        return ('http://h%d.ortho.tiles.virtualearth.net/tiles/h%s.jpeg?g=90' % (random.randint(0, 3), self.getZoomString(self.sourceCoordinate(coordinate))),)
+    def get_tile_urls(self, tile_coord, zoom):
+        return ('http://h%d.ortho.tiles.virtualearth.net/tiles/h%s.jpeg?g=90' % (random.randint(0, 3), self.getZoomString(self.sourceCoordinate(tile_coord, zoom), zoom)),)
 
 
 

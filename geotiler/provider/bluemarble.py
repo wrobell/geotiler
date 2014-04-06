@@ -27,9 +27,9 @@
 
 """
 >>> p = Provider()
->>> p.get_tile_urls(Coordinate(10, 13, 7))
+>>> p.get_tile_urls((13, 10), 7)
 ('http://s3.amazonaws.com/com.modestmaps.bluemarble/7-r10-c13.jpg',)
->>> p.get_tile_urls(Coordinate(13, 10, 7))
+>>> p.get_tile_urls((10, 13), 7)
 ('http://s3.amazonaws.com/com.modestmaps.bluemarble/7-r13-c10.jpg',)
 """
 
@@ -47,8 +47,9 @@ class Provider(IMapProvider):
         self.projection = MercatorProjection(0, t)
 
 
-    def get_tile_urls(self, coordinate):
-        return ('http://s3.amazonaws.com/com.modestmaps.bluemarble/%d-r%d-c%d.jpg' % (coordinate.zoom, coordinate.row, coordinate.column),)
+    def get_tile_urls(self, tile_coord, zoom):
+        fmt = 'http://s3.amazonaws.com/com.modestmaps.bluemarble/{z}-r{y}-c{x}.jpg'
+        return (fmt.format(x=tile_coord[0], y=tile_coord[1], z=zoom),)
 
 
 # vim:et sts=4 sw=4:

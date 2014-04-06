@@ -27,31 +27,31 @@
 
 """
 >>> p = OriginalProvider('example')
->>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls((10507, 25322), 16) #doctest: +ELLIPSIS
 ('http://tile.cloudmade.com/example/1/256/16/10507/25322.png',)
 
 >>> p = FineLineProvider('example')
->>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls((10507, 25322), 16) #doctest: +ELLIPSIS
 ('http://tile.cloudmade.com/example/2/256/16/10507/25322.png',)
 
 >>> p = TouristProvider('example')
->>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls((10507, 25322), 16) #doctest: +ELLIPSIS
 ('http://tile.cloudmade.com/example/7/256/16/10507/25322.png',)
 
 >>> p = FreshProvider('example')
->>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls((10507, 25322), 16) #doctest: +ELLIPSIS
 ('http://tile.cloudmade.com/example/997/256/16/10507/25322.png',)
 
 >>> p = PaleDawnProvider('example')
->>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls((10507, 25322), 16) #doctest: +ELLIPSIS
 ('http://tile.cloudmade.com/example/998/256/16/10507/25322.png',)
 
 >>> p = MidnightCommanderProvider('example')
->>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls((10507, 25322), 16) #doctest: +ELLIPSIS
 ('http://tile.cloudmade.com/example/999/256/16/10507/25322.png',)
 
 >>> p = BaseProvider('example', 510)
->>> p.get_tile_urls(Coordinate(25322, 10507, 16)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls((10507, 25322), 16) #doctest: +ELLIPSIS
 ('http://tile.cloudmade.com/example/510/256/16/10507/25322.png',)
 """
 
@@ -73,8 +73,8 @@ class BaseProvider(IMapProvider):
             self.style = style
 
 
-    def get_tile_urls(self, coordinate):
-        zoom, column, row = coordinate.zoom, coordinate.column, coordinate.row
+    def get_tile_urls(self, tile_coord, zoom):
+        column, row = tile_coord
         return ('http://tile.cloudmade.com/%s/%d/256/%d/%d/%d.png' % (self.key, self.style, zoom, column, row),)
 
 

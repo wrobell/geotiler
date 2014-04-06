@@ -321,7 +321,9 @@ def render_map(map, downloader=None):
     """
     coord, corner = _find_top_left_tile(map)
     tiles = _find_tiles(map, coord, corner)
-    img = render_tiles(map.provider, tiles, map.size, downloader=downloader)
+    img = render_tiles(
+        map.provider, map.zoom, map.size, tiles, downloader=downloader
+    )
     return img
 
 
@@ -347,7 +349,7 @@ def _find_tiles(map, tile_coord, corner):
     # go by rows
     positions = itertools.product(enumerate(rows), enumerate(cols))
     for (i, y), (j, x) in positions:
-        coord = core.Coordinate(tile_coord[1] + i, tile_coord[0] + j, map.zoom)
+        coord = tile_coord[0] + j, tile_coord[1] + i
         tiles.append((coord, (x, y)))
 
     return tiles

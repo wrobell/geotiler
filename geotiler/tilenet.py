@@ -59,14 +59,16 @@ class TileRequest(object):
     Tile request information.
 
     :var provider: Map tile provider.
-    :var origin: Base tile origin.
-    :var offset: Base tile offset.
+    :var coord: Map tile coordinate.
+    :var zoom: Map zoom level.
+    :var offset: Tile position on map image.
     :var images: List of downloaded tile images.
     :var done: Downloaded if true.
     """
-    def __init__(self, provider, origin, offset):
+    def __init__(self, provider, coord, zoom, offset):
         self.provider = provider
-        self.origin = origin
+        self.coord = coord
+        self.zoom = zoom
         self.offset = offset
         self.images = []
         self.done = False
@@ -89,7 +91,7 @@ class TileDownloader(object):
             # don't bother?
             return
 
-        urls = tile.provider.get_tile_urls(tile.origin)
+        urls = tile.provider.get_tile_urls(tile.coord, tile.zoom)
 
         if __debug__:
             logger.debug('Requesting {}'.format(urls))
@@ -192,21 +194,22 @@ class TileThreadDownloader(TileDownloader):
 
 
 
-def render_tiles(provider, tiles, size, downloader=None):
+def render_tiles(provider, zoom, size, tiles, downloader=None):
     """
     Download map tiles and render them as an image.
 
     The default tiles downloader is :py:class:`TileThreadDownloader`.
 
     :param provider: Map tiles provider.
-    :param tiles: List of tile coordinates and their map image positions.
+    :param zoom: Map zoom level.
     :param size: Map image size.
+    :param tiles: List of tile coordinates and their map image positions.
     :param downloader: Map tiles downloader.
     """
     if downloader is None:
         downloader = DEFAULT_TILE_DOWNLOADER
 
-    tile_req = [TileRequest(provider, t[0], t[1]) for t in tiles]
+    tile_req = [TileRequest(provider, t[0], zoom, t[1]) for t in tiles]
     requests = tile_req[:]
     for k in range(MAX_ATTEMPTS):
         downloader.fetch(requests)

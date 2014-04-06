@@ -28,7 +28,6 @@
 import re
 from math import pi, pow
 
-from ..core import Coordinate
 from ..geo import LinearProjection, MercatorProjection, deriveTransformation
 
 
@@ -37,7 +36,7 @@ class IMapProvider(object):
         raise NotImplementedError("Abstract method not implemented by subclass.")
 
 
-    def get_tile_urls(self, coordinate):
+    def get_tile_urls(self, tile_coord, zoom):
         raise NotImplementedError("Abstract method not implemented by subclass.")
 
 
@@ -51,13 +50,13 @@ class IMapProvider(object):
         return 256
 
 
-    def sourceCoordinate(self, coordinate):
-        wrappedColumn = coordinate.column % pow(2, coordinate.zoom)
+    def sourceCoordinate(self, tile_coord, zoom):
+        wrappedColumn = tile_coord[0] % pow(2, zoom)
 
         while wrappedColumn < 0:
-            wrappedColumn += pow(2, coordinate.zoom)
+            wrappedColumn += pow(2, zoom)
 
-        return Coordinate(coordinate.row, wrappedColumn, coordinate.zoom)
+        return wrappedColumn, tile_coord[1]
 
 
 
@@ -93,9 +92,9 @@ class TemplatedMercatorProvider(IMapProvider):
         return 256
 
 
-    def get_tile_urls(self, coordinate):
-        x, y, z = str(int(coordinate.column)), str(int(coordinate.row)), str(int(coordinate.zoom))
-        return [t.replace('{X}', x).replace('{Y}', y).replace('{Z}', z) for t in self.templates]
+    def get_tile_urls(self, tile_coord, zoom):
+        x, y = tile_coord
+        return [t.format(X=x, Y=y, Z=zoom) for t in self.templates]
 
 
 # vim: sw=4:et:ai

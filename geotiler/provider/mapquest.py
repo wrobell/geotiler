@@ -27,15 +27,15 @@
 
 """
 >>> p = RoadProvider()
->>> p.get_tile_urls(Coordinate(10, 13, 7)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls((13, 10), 7) #doctest: +ELLIPSIS
 ('http://otile....mqcdn.com/tiles/1.0.0/7/13/10.png',)
->>> p.get_tile_urls(Coordinate(13, 10, 7)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls((10, 13), 7) #doctest: +ELLIPSIS
 ('http://otile....mqcdn.com/tiles/1.0.0/7/10/13.png',)
 
 >>> p = AerialProvider()
->>> p.get_tile_urls(Coordinate(10, 13, 7)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls((13, 10), 7) #doctest: +ELLIPSIS
 ('http://oatile....mqcdn.com/naip/7/13/10.png',)
->>> p.get_tile_urls(Coordinate(13, 10, 7)) #doctest: +ELLIPSIS
+>>> p.get_tile_urls((10, 13), 7) #doctest: +ELLIPSIS
 ('http://oatile....mqcdn.com/naip/7/10/13.png',)
 """
 
@@ -56,13 +56,13 @@ class AbstractProvider(IMapProvider):
 
 
 class RoadProvider(AbstractProvider):
-    def get_tile_urls(self, coordinate):
-        return ('http://otile%d.mqcdn.com/tiles/1.0.0/%d/%d/%d.png' % (random.randint(1, 4), coordinate.zoom, coordinate.column, coordinate.row),)
+    def get_tile_urls(self, tile_coord, zoom):
+        return ('http://otile%d.mqcdn.com/tiles/1.0.0/%d/%d/%d.png' % (random.randint(1, 4), zoom, tile_coord[0], tile_coord[1]),)
 
 
 class AerialProvider(AbstractProvider):
-    def get_tile_urls(self, coordinate):
-        return ('http://oatile%d.mqcdn.com/naip/%d/%d/%d.png' % (random.randint(1, 4), coordinate.zoom, coordinate.column, coordinate.row),)
+    def get_tile_urls(self, tile_coord, zoom):
+        return ('http://oatile%d.mqcdn.com/naip/%d/%d/%d.png' % (random.randint(1, 4), zoom, tile_coord[0], tile_coord[1]),)
 
 
 # vim:et sts=4 sw=4:
