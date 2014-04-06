@@ -39,14 +39,6 @@
 (0.000, 2.000 @3.000)
 >>> c.zoomTo(1)
 (0.000, 0.500 @1.000)
->>> c.up()
-(-1.000, 1.000 @2.000)
->>> c.right()
-(0.000, 2.000 @2.000)
->>> c.down()
-(1.000, 1.000 @2.000)
->>> c.left()
-(0.000, 0.000 @2.000)
 """
 
 import math
@@ -71,9 +63,6 @@ class Coordinate:
     def __hash__(self):
         return hash(('Coordinate', self.row, self.column, self.zoom))
 
-    def copy(self):
-        return self.__class__(self.row, self.column, self.zoom)
-
     def container(self):
         return self.__class__(math.floor(self.row), math.floor(self.column), self.zoom)
 
@@ -86,18 +75,5 @@ class Coordinate:
         return self.__class__(self.row * math.pow(2, distance),
                               self.column * math.pow(2, distance),
                               self.zoom + distance)
-
-    def up(self, distance=1):
-        return self.__class__(self.row - distance, self.column, self.zoom)
-
-    def right(self, distance=1):
-        return self.__class__(self.row, self.column + distance, self.zoom)
-
-    def down(self, distance=1):
-        return self.__class__(self.row + distance, self.column, self.zoom)
-
-    def left(self, distance=1):
-        return self.__class__(self.row, self.column - distance, self.zoom)
-
 
 # vim:et sts=4 sw=4:
