@@ -26,8 +26,7 @@
 #
 
 from geotiler.map import Map, _find_top_left_tile, _find_tiles
-from geotiler.provider import ms, osm
-from geotiler.core import Coordinate
+from geotiler.provider import osm
 
 import unittest
 
@@ -336,51 +335,6 @@ class MapTestCase(unittest.TestCase):
         self.assertEquals(69828, t4[0].column, t4[0])
         self.assertEquals(46377, t4[0].row, t4[0])
         self.assertEquals((-88 + 256, -44 + 256), t4[1])
-
-
-    def test_1(self):
-        provider = ms.RoadProvider()
-        m = Map(extent=(0, 0, 0, 0), zoom=13, provider=provider)
-        m.coordinate = Coordinate(3165, 1313, 13)
-        m.offset = -144, -94
-        m.size = 600, 600
-
-        p = m.locationPoint((-122.262940, 37.804274))
-        self.assertAlmostEquals(p[0], 370.724, 3)
-        self.assertAlmostEquals(p[1], 342.549, 3)
-
-        p = m.pointLocation(p)
-        self.assertAlmostEquals(p[0], -122.263, 3)
-        self.assertAlmostEquals(p[1], 37.804, 3)
-
-
-    def test_5(self):
-        extent = -123.533554, 36.893326, -121.208153, 38.864246
-        zoom = 10
-        provider = ms.RoadProvider()
-
-        m = Map(extent=extent, zoom=zoom, provider=provider)
-
-        self.assertEquals((1693.000, 1818.000), m.size)
-        self.assertEquals(395.000, m.origin.row)
-        self.assertEquals(163.000, m.origin.column)
-        self.assertEquals(10, m.origin.zoom)
-        self.assertEquals(-236.000, m.offset[0])
-        self.assertEquals(-102.000, m.offset[1])
-
-
-    def test_6(self):
-        extent = -121.208153, 36.893326, -123.533554, 38.864246
-        zoom = 9
-        provider = ms.RoadProvider()
-        m = Map(extent=extent, zoom=zoom, provider=provider)
-
-        self.assertEquals((846.000, 909.000), m.size)
-        self.assertEquals(197.000, m.origin.row)
-        self.assertEquals(81.000, m.origin.column)
-        self.assertEquals(9, m.origin.zoom)
-        self.assertEquals(-246.000, m.offset[0])
-        self.assertEquals(-179.000, m.offset[1])
 
 
 # vim: sw=4:et:ai
