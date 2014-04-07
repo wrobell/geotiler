@@ -68,7 +68,7 @@ x1, y1 = 11.78771, 46.48165 # http://www.openstreetmap.org/search?query=46.48165
 x, y = map((x0, x1), (y0, y1))
 ax.scatter(x, y, c='red', edgecolor='none', s=10, alpha=0.9)
 
-plt.savefig('test.pdf', bbox_inches='tight')
+plt.savefig('ex-basemap.pdf', bbox_inches='tight')
 plt.close()
 
 # vim: sw=4:et:ai
