@@ -27,7 +27,6 @@
 #
 
 import matplotlib.pyplot as plt
-from mpl_toolkits.basemap import Basemap
 import redis
 
 import geotiler
@@ -44,56 +43,47 @@ cache = RedisCache(client, downloader)
 downloader.set_cache(cache)
 
 howth = -6.066, 53.386
-mm = geotiler.Map(center=howth, zoom=15, size=(1000, 1000))
-bbox = mm.extent
-img = geotiler.render_map(mm)
+map = geotiler.Map(center=howth, zoom=15, size=(1000, 1000))
+bbox = map.extent
+img = geotiler.render_map(map)
 
 fig = plt.figure(figsize=(16, 16), dpi=100)
 ax = plt.subplot(111)
 ax.set_xlim((-300, 1300))
-ax.set_ylim((-300, 1300))
+ax.set_ylim((1300, -300))
 ax.set_clip_on(False)
-
-map = Basemap(
-    llcrnrlon=bbox[0], llcrnrlat=bbox[1],
-    urcrnrlon=bbox[2], urcrnrlat=bbox[3],
-    projection='merc', ax=ax
-)
-map.imshow(img, interpolation='lanczos', origin='upper')
+ax.imshow(img)
 
 # show map center
-x, y = map((howth[0],), (howth[1],))
+x, y = map.rev_geocode(howth)
 ax.scatter(x, y, c='blue', edgecolor='none', s=20, alpha=0.9)
 ax.text(
-    x[0], y[0], 'map center ({:.1f}, {:.1f})'.format(*mm.rev_geocode(howth)),
+    x, y, 'map center ({:.1f}, {:.1f})'.format(x, y),
     fontsize='16', color='blue',
     horizontalalignment='center', verticalalignment='bottom'
 )
 
 # draw tiles and show their offset
-coord, corner = _find_top_left_tile(mm)
-tiles = _find_tiles(mm, coord, corner)
+coord, corner = _find_top_left_tile(map)
+tiles = _find_tiles(map, coord, corner)
 for (tile_coord, offset) in tiles:
-    p1 = mm.provider.projection.geocode(tile_coord, mm.zoom)
-    p2 = tile_coord[0] - offset[0] / 256, tile_coord[1] + offset[1] / 256
-    p2 = mm.provider.projection.geocode(p2, mm.zoom)
-
-    x, y = map((p1[0], p2[0]), (p1[1], p2[1]))
-    ax.axhline(y=y[0], xmin=x[0], xmax=x[1], c='red')
-    ax.axvline(x=x[0], ymin=y[1], ymax=y[0], c='red')
+    p = map.provider.projection.geocode(tile_coord, map.zoom)
+    x, y = map.rev_geocode(p)
+    ax.axhline(y=y, xmin=x, xmax=x + 256, c='red')
+    ax.axvline(x=x, ymin=y, ymax=y + 256, c='red')
     ax.scatter(x, y, c='red', edgecolor='none', s=10)
     ax.text(
-        x[0], y[0], str(offset), horizontalalignment='center',
+        x, y, str(offset), horizontalalignment='center',
         verticalalignment='bottom'
     )
 
 
 # draw base tile coordinate and its offset
-c = mm.provider.projection.geocode(mm.origin, mm.zoom)
-x, y = map((c[0],), (c[1],))
+p = map.provider.projection.geocode(map.origin, map.zoom)
+x, y = map.rev_geocode(p)
 ax.scatter(x, y, c='blue', edgecolor='none', s=20)
 ax.text(
-    x[0], y[0], 'origin, offset=({}, {})'.format(*mm.offset),
+    x, y, 'origin\noffset={}'.format(map.offset),
     horizontalalignment='center', verticalalignment='top'
 )
 
