@@ -26,7 +26,6 @@
 #
 
 from geotiler.map import Map, _find_top_left_tile, _find_tiles
-from geotiler.provider import osm
 
 import unittest
 
@@ -60,7 +59,6 @@ class MapTestCase(unittest.TestCase):
         """
         Test map instantiation with center, zoom and size
         """
-        provider = osm.Provider()
         center = 11.788137, 46.481832
         zoom = 17
         size = 512, 512
@@ -81,7 +79,6 @@ class MapTestCase(unittest.TestCase):
         """
         Test map instantiation with extent and size
         """
-        provider = osm.Provider()
         extent = 11.785390377044687, 46.4799402452901, 11.790883541107167, 46.48372275323265
         size = 512, 512
         map = Map(extent=extent, size=size)
@@ -100,7 +97,6 @@ class MapTestCase(unittest.TestCase):
         """
         Test map instantiation with extent and zoom
         """
-        provider = osm.Provider()
         extent = 11.785604953765853, 46.48083418203029, 11.790668964386, 46.4828288639531
         zoom = 17
         map = Map(extent=extent, zoom=zoom)
@@ -119,7 +115,6 @@ class MapTestCase(unittest.TestCase):
         """
         Test changing map size (954x541)
         """
-        provider = osm.Provider()
         extent = 11.785604953765853, 46.48083418203029, 11.790668964386, 46.4828288639531
         zoom = 17
         map = Map(extent=extent, zoom=zoom)
@@ -142,7 +137,6 @@ class MapTestCase(unittest.TestCase):
         """
         Test changing map size (1908x1082)
         """
-        provider = osm.Provider()
         extent = 11.785604953765853, 46.48083418203029, 11.790668964386, 46.4828288639531
         zoom = 17
         map = Map(extent=extent, zoom=zoom)
@@ -165,7 +159,6 @@ class MapTestCase(unittest.TestCase):
         """
         Test changing map center
         """
-        provider = osm.Provider()
         extent = 11.785604953765853, 46.48083418203029, 11.790668964386, 46.4828288639531
         zoom = 17
         map = Map(extent=extent, zoom=zoom)
@@ -190,7 +183,6 @@ class MapTestCase(unittest.TestCase):
         """
         Test changing map zoom
         """
-        provider = osm.Provider()
         extent = 11.785604953765853, 46.48083418203029, 11.790668964386, 46.4828288639531
         zoom = 17
         map = Map(extent=extent, zoom=zoom)
@@ -216,7 +208,6 @@ class MapTestCase(unittest.TestCase):
         """
         Test changing map extent
         """
-        provider = osm.Provider()
         extent = 11.785604953765853, 46.48083418203029, 11.790668964386, 46.4828288639531
         zoom = 17
         map = Map(extent=extent, zoom=zoom)

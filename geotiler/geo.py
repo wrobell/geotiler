@@ -28,7 +28,7 @@
 import math
 
 
-class Transformation:
+class Transformation(object):
     def __init__(self, ax, bx, cx, ay, by, cy):
         self.ax = ax
         self.bx = bx
@@ -159,7 +159,7 @@ class MercatorProjection(IProjection):
 
 def zoom_to(tile_coord, zoom, target):
     """
-    Zoom tile coordinates from current zoom to target zoom. 
+    Zoom tile coordinates from current zoom to target zoom.
 
     :param tile_coord: Tile coordinates.
     :param zoom: Current zoom.
