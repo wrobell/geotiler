@@ -29,7 +29,6 @@ map = Basemap(
     projection='merc', ax=ax
 )
 
-# or optionally, read from tile cache: im = plt.imread(<tile>)
 map.imshow(img, interpolation='lanczos', origin='upper')
 
 #
