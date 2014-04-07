@@ -298,4 +298,14 @@ class MapTestCase(unittest.TestCase):
         self.assertEquals((-88 + 256, -44 + 256), t4[1])
 
 
+    def test_rev_geocode(self):
+        """
+        Test map reverse geocode
+        """
+        location = -6.066, 53.386
+        map = Map(center=location, zoom=15, size=(1000, 1000))
+        pos = map.rev_geocode(map.center)
+        self.assertEquals((500, 500), pos)
+
+
 # vim: sw=4:et:ai
