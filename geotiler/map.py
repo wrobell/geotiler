@@ -273,11 +273,11 @@ class Map(object):
         ox, oy = self.offset
         projection = self.provider.projection
         coord = projection.rev_geocode(location)
-        coord = zoom_to(coord, projection.zoom, self.origin.zoom)
+        coord = zoom_to(coord, projection.zoom, self._zoom)
 
         # distance from the known coordinate offset
-        x = ox + self.provider.tile_width * (coord[0] - self.origin.column)
-        y = oy + self.provider.tile_height * (coord[1] - self.origin.row)
+        x = ox + self.provider.tile_width * (coord[0] - self.origin[0])
+        y = oy + self.provider.tile_height * (coord[1] - self.origin[1])
 
         # because of the center/corner business
         w, h = self.size
