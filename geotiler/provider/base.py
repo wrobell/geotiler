@@ -28,7 +28,7 @@
 import re
 from math import pi, pow
 
-from ..geo import LinearProjection, MercatorProjection, deriveTransformation
+from ..geo import MercatorProjection, deriveTransformation
 
 
 class IMapProvider(object):

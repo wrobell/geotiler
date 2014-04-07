@@ -137,15 +137,6 @@ class IProjection:
 
 
 
-class LinearProjection(IProjection):
-    def rawProject(self, point):
-        x, y = point
-        return x, y
-
-    def rawUnproject(self, point):
-        return x, y
-
-
 class MercatorProjection(IProjection):
     def rawProject(self, point):
         x, y = point
