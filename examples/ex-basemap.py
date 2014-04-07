@@ -19,8 +19,6 @@ ax = plt.subplot(111)
 mm = geotiler.Map(extent=bbox, zoom=18)
 
 img = geotiler.render_map(mm)
-bbox = mm.extent  # recalculate bbox, which can change due to requested
-                  # image size
 
 #
 # create basemap
