@@ -51,7 +51,7 @@ class Map(object):
     :var provider: Map tiles provider (default OpenStreetMap).
     :var _zoom: Map zoom attribute accessed via `zoom` property.
     :var _size: Map image size accessed via `size` property.
-    :var origin: Center of base tile relative to map center.
+    :var origin: Tile coordinates at map zoom level of base tile.
     :var offset: Position of base tile relative to map center.
     """
     def __init__(
