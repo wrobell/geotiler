@@ -26,6 +26,7 @@ Table of Contents
 
    intro
    api
+   changelog
 
 * :ref:`genindex`
 * :ref:`search`
