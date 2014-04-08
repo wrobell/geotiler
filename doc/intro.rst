@@ -14,6 +14,15 @@ GeoTiler features are
 #. The library design supports extensibility. Implement custom map tiles
    providers, tiles downloading or caching strategies within minutes.
 
+Installation
+------------
+To install GeoTiler use `pip`::
+
+    pip install --user geotiler
+
+GeoCoon `Pillow <https://pypi.python.org/pypi/Pillow/>`_ library and Python
+3.3 or later.
+
 Project Status
 --------------
 The source code of GeoTiler is based on Python port of
