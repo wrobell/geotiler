@@ -60,7 +60,7 @@ class TileDownloaderTestCase(unittest.TestCase):
             return f1
 
         downloader.set_cache(cache)
-        self.assertEquals(fetch_image_orig, downloader.fetch_image.__wrapped__)
+        self.assertEqual(fetch_image_orig, downloader.fetch_image.__wrapped__)
 
 
 # vim: sw=4:et:ai

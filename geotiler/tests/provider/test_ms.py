@@ -44,13 +44,13 @@ class MSConversionTestCase(unittest.TestCase):
         Test conversion from MS road
         """
         result = fromMicrosoftRoad('0')
-        self.assertEquals((0, 0, 1), result)
+        self.assertEqual((0, 0, 1), result)
 
         result = fromMicrosoftRoad('0230102122203031')
-        self.assertEquals((10507, 25322, 16), result)
+        self.assertEqual((10507, 25322, 16), result)
 
         result = fromMicrosoftRoad('0230102033330212')
-        self.assertEquals((10482, 25333, 16), result)
+        self.assertEqual((10482, 25333, 16), result)
 
 
     def test_to_ms_road(self):
@@ -58,13 +58,13 @@ class MSConversionTestCase(unittest.TestCase):
         Test conversion to MS road
         """
         result = toMicrosoftRoad(0, 0, 1)
-        self.assertEquals('0', result)
+        self.assertEqual('0', result)
 
         result = toMicrosoftRoad(10507, 25322, 16)
-        self.assertEquals('0230102122203031', result)
+        self.assertEqual('0230102122203031', result)
 
         result = toMicrosoftRoad(10482, 25333, 16)
-        self.assertEquals('0230102033330212', result)
+        self.assertEqual('0230102033330212', result)
 
 
     def test_from_ms_aerial(self):
@@ -72,13 +72,13 @@ class MSConversionTestCase(unittest.TestCase):
         Test conversion from MS aerial
         """
         result = fromMicrosoftAerial('0')
-        self.assertEquals((0, 0, 1), result)
+        self.assertEqual((0, 0, 1), result)
 
         result = fromMicrosoftAerial('0230102122203031')
-        self.assertEquals((10507, 25322, 16), result)
+        self.assertEqual((10507, 25322, 16), result)
 
         result = fromMicrosoftAerial('0230102033330212')
-        self.assertEquals((10482, 25333, 16), result)
+        self.assertEqual((10482, 25333, 16), result)
 
 
     def test_to_ms_aerial(self):
@@ -86,12 +86,12 @@ class MSConversionTestCase(unittest.TestCase):
         Test conversion to MS aerial
         """
         result = toMicrosoftAerial(0, 0, 1)
-        self.assertEquals('0', result)
+        self.assertEqual('0', result)
 
         result = toMicrosoftAerial(10507, 25322, 16)
-        self.assertEquals('0230102122203031', result)
+        self.assertEqual('0230102122203031', result)
         result = toMicrosoftAerial(10482, 25333, 16)
-        self.assertEquals('0230102033330212', result)
+        self.assertEqual('0230102033330212', result)
 
 
 # vim:et sts=4 sw=4:

@@ -35,12 +35,12 @@ class TransformationTestCase(unittest.TestCase):
         p = 1, 1
 
         pt = t.transform(p)
-        self.assertEquals(1.0, pt[0])
-        self.assertEquals(1.0, pt[1])
+        self.assertEqual(1.0, pt[0])
+        self.assertEqual(1.0, pt[1])
 
         ptt = t.untransform(pt)
-        self.assertEquals(1.0, ptt[0])
-        self.assertEquals(1.0, ptt[1])
+        self.assertEqual(1.0, ptt[0])
+        self.assertEqual(1.0, ptt[1])
 
 
     def test_2(self):
@@ -48,12 +48,12 @@ class TransformationTestCase(unittest.TestCase):
         p = 0, 1
 
         pt = t.transform(p)
-        self.assertEquals(1.0, pt[0])
-        self.assertEquals(0.0, pt[1])
+        self.assertEqual(1.0, pt[0])
+        self.assertEqual(0.0, pt[1])
 
         ptt = t.untransform(pt)
-        self.assertEquals(0.0, ptt[0])
-        self.assertEquals(1.0, ptt[1])
+        self.assertEqual(0.0, ptt[0])
+        self.assertEqual(1.0, ptt[1])
 
 
     def test_3(self):
@@ -61,12 +61,12 @@ class TransformationTestCase(unittest.TestCase):
         p = 0, 0
 
         pt = t.transform(p)
-        self.assertEquals(1.0, pt[0])
-        self.assertEquals(1.0, pt[1])
+        self.assertEqual(1.0, pt[0])
+        self.assertEqual(1.0, pt[1])
 
         ptt = t.untransform(pt)
-        self.assertEquals(0.0, ptt[0])
-        self.assertEquals(0.0, ptt[1])
+        self.assertEqual(0.0, ptt[0])
+        self.assertEqual(0.0, ptt[1])
 
 
 
@@ -74,23 +74,23 @@ class MercatorProjectionTestCase(unittest.TestCase):
     def test_1(self):
         m = MercatorProjection(10)
         coord = m.rev_geocode((0, 0))
-        self.assertAlmostEquals(0.0, coord[0])
-        self.assertAlmostEquals(0.0, coord[1])
+        self.assertAlmostEqual(0.0, coord[0])
+        self.assertAlmostEqual(0.0, coord[1])
 
         pt = m.geocode((0, 0), 10)
-        self.assertAlmostEquals(0.0, pt[0])
-        self.assertAlmostEquals(0.0, pt[1])
+        self.assertAlmostEqual(0.0, pt[0])
+        self.assertAlmostEqual(0.0, pt[1])
 
 
     def test_2(self):
         m = MercatorProjection(10)
         coord = m.rev_geocode((-122, 37))
-        self.assertAlmostEquals(-2.129, coord[0], 3)
-        self.assertAlmostEquals(0.696, coord[1], 3)
+        self.assertAlmostEqual(-2.129, coord[0], 3)
+        self.assertAlmostEqual(0.696, coord[1], 3)
 
         pt = m.geocode((-2.129, 0.696), 10.000)
-        self.assertAlmostEquals(-121.983, pt[0], 3)
-        self.assertAlmostEquals(37.001, pt[1], 3)
+        self.assertAlmostEqual(-121.983, pt[0], 3)
+        self.assertAlmostEqual(37.001, pt[1], 3)
 
 
 
@@ -103,10 +103,10 @@ class ZoomTestCase(unittest.TestCase):
         Test zooming tile coordinates
         """
         coord = zoom_to((1, 0), 2, 3)
-        self.assertEquals((2, 0), coord)
+        self.assertEqual((2, 0), coord)
 
         coord = zoom_to((1, 0), 2, 1)
-        self.assertEquals((0.5, 0), coord)
+        self.assertEqual((0.5, 0), coord)
 
 
 # vim: sw=4:et:ai

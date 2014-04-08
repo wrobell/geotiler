@@ -48,7 +48,7 @@ class RedisCacheTestCase(unittest.TestCase):
 
         cache = RedisCache(client, downloader)
         fc = cache(f)
-        self.assertEquals(f, fc.__wrapped__)
+        self.assertEqual(f, fc.__wrapped__)
 
 
     def test_updating_cache(self):
@@ -69,7 +69,7 @@ class RedisCacheTestCase(unittest.TestCase):
 
         client.exists.return_value = False
         value = fc('host', 'path', 'query')
-        self.assertEquals(data, value)
+        self.assertEqual(data, value)
         downloader.f.assert_called_once_with(
             downloader, 'host', 'path', 'query'
         )
@@ -99,7 +99,7 @@ class RedisCacheTestCase(unittest.TestCase):
         client.get.return_value = data    # return data from cache
 
         value = fc('host', 'path', 'query')
-        self.assertEquals(data, value)
+        self.assertEqual(data, value)
         self.assertFalse(downloader.f.called)
         client.get.assert_called_once_with(('host', 'path', 'query'))
 

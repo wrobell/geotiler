@@ -43,13 +43,13 @@ class YahooConvertTestCase(unittest.TestCase):
         Test column conversion from Yahoo road
         """
         result = fromYahooRoad(0, 0, 17)
-        self.assertEquals((0, 0, 1), result)
+        self.assertEqual((0, 0, 1), result)
 
         result = fromYahooRoad(10507, 7445, 2)
-        self.assertEquals((10507, 25322, 16), result)
+        self.assertEqual((10507, 25322, 16), result)
 
         result = fromYahooRoad(10482, 7434, 2)
-        self.assertEquals((10482, 25333, 16), result)
+        self.assertEqual((10482, 25333, 16), result)
 
 
     def test_to_yahoo_road(self):
@@ -57,13 +57,13 @@ class YahooConvertTestCase(unittest.TestCase):
         Test column converstion to Yahoo road
         """
         result = toYahooRoad(0, 0, 1)
-        self.assertEquals((0, 0, 17), result)
+        self.assertEqual((0, 0, 17), result)
 
         result = toYahooRoad(10507, 25322, 16)
-        self.assertEquals((10507, 7445, 2), result)
+        self.assertEqual((10507, 7445, 2), result)
 
         result = toYahooRoad(10482, 25333, 16)
-        self.assertEquals((10482, 7434, 2), result)
+        self.assertEqual((10482, 7434, 2), result)
 
 
     def test_from_yahoo_aerial(self):
@@ -71,13 +71,13 @@ class YahooConvertTestCase(unittest.TestCase):
         Test column converstion from Yahoo aerial
         """
         result = fromYahooAerial(0, 0, 17)
-        self.assertEquals((0, 0, 1), result)
+        self.assertEqual((0, 0, 1), result)
 
         result = fromYahooAerial(10507, 7445, 2)
-        self.assertEquals((10507, 25322, 16), result)
+        self.assertEqual((10507, 25322, 16), result)
 
         result = fromYahooAerial(10482, 7434, 2)
-        self.assertEquals((10482, 25333, 16), result)
+        self.assertEqual((10482, 25333, 16), result)
 
 
     def test_to_yahoo_aerial(self):
@@ -85,13 +85,13 @@ class YahooConvertTestCase(unittest.TestCase):
         Test column converstion to Yahoo aerial
         """
         result = toYahooAerial(0, 0, 1)
-        self.assertEquals((0, 0, 17), result)
+        self.assertEqual((0, 0, 17), result)
 
         result = toYahooAerial(10507, 25322, 16)
-        self.assertEquals((10507, 7445, 2), result)
+        self.assertEqual((10507, 7445, 2), result)
 
         result = toYahooAerial(10482, 25333, 16)
-        self.assertEquals((10482, 7434, 2), result)
+        self.assertEqual((10482, 7434, 2), result)
 
 
 # vim:et sts=4 sw=4:
