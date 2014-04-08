@@ -50,7 +50,7 @@ img = geotiler.render_map(mm)
 #
 # create cairo surface
 #
-buff = bytearray(img.convert('RGBA').tobytes())
+buff = bytearray(img.convert('RGBA').tobytes('raw', 'BGRA'))
 surface = cairo.ImageSurface.create_for_data(
     buff, cairo.FORMAT_ARGB32, width, height
 )
