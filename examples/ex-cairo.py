@@ -29,9 +29,9 @@
 Cairo example.
 """
 
-import cairo
+import cairocffi as cairo
 import logging
-import numpy
+import math
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -46,13 +46,28 @@ mm = geotiler.Map(extent=bbox, zoom=18)
 width, height = mm.size
 
 img = geotiler.render_map(mm)
-buff = bytearray(img.tobytes())
 
-# raises "not implemented error", implemented in pycairo git...
+#
+# create cairo surface
+#
+buff = bytearray(img.convert('RGBA').tobytes())
 surface = cairo.ImageSurface.create_for_data(
     buff, cairo.FORMAT_ARGB32, width, height
 )
+cr = cairo.Context(surface)
 
-# ... so that's all folks at the moment
+#
+# plot 3 custom points
+#
+x0, y0 = 11.78816, 46.48114 # http://www.openstreetmap.org/search?query=46.48114%2C11.78816
+x1, y1 = 11.78771, 46.48165 # http://www.openstreetmap.org/search?query=46.48165%2C11.78771
+points = ((x0, y0), (x1, y1))
+points = (mm.rev_geocode(p) for p in points)
+for x, y in points:
+    cr.set_source_rgba(0.0, 0.0, 1.0, 0.1)
+    cr.arc(x, y, 30, 0, 2 * math.pi)
+    cr.fill()
+
+surface.write_to_png('ex-cairo.png')
 
 # vim: sw=4:et:ai
