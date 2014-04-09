@@ -39,7 +39,7 @@ can be used with other toolkits like matplotlib or Cairo to render
 additional map information, i.e. points of interests, GPS positions, text,
 etc, see :ref:`integrate` section.
 
-Alternatively, the map image can be simply saved to a file::
+Alternatively, the map image can be simply saved as a file::
 
     >>> image.save('map.png') # doctest: +SKIP
 
