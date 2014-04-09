@@ -57,7 +57,7 @@ The list of available map providers is presented in the table below.
      Stamen Toner              stamen-toner        `Creative Commons Attribution (CC BY 3.0) license <http://maps.stamen.com/>`_
      Stamen Terrain            stamen-terrain      as above
      Stamen Water Color        stamen-watercolor   as above
-     Modest Maps Blue Marble   bluemarble          see NASA `guidelines <http://www.nasa.gov/audience/formedia/features/MP_Photo_Guidelines.html>`_
+     Modest Maps Blue Marble   bluemarble          see `NASA guideline <http://www.nasa.gov/audience/formedia/features/MP_Photo_Guidelines.html>`_
     ========================= =================== ==================
 
 The default map provider is OpenStreetMap.
