@@ -25,6 +25,7 @@ Table of Contents
    :maxdepth: 3
 
    intro
+   usage
    api
    changelog
 
