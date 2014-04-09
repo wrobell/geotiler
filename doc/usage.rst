@@ -95,8 +95,8 @@ tiles, but the cache is not persistent - once a program or script exits,
 the map tiles are discarded.
 
 The default cache can be replaced with cache based on
-`Redis <http://redis.io/>`_ store. While it requires Redis server installed
-and Python `Redis module <https://pypi.python.org/pypi/redis/>`_, it
+`Redis <http://redis.io/>`_ store. While it requires Redis server and
+Python `Redis module <https://pypi.python.org/pypi/redis/>`_ installed, it
 provides map tiles persistence and advanced cache management.
 
 The :download:`Redis cache example <../examples/ex-redis-cache.py>`
