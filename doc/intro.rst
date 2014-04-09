@@ -32,6 +32,7 @@ The GeoTiler project initial focus has been on
 
 * library API improvements
 * simplifying library design
+* user documentation
 * ensuring OpenStreetMap, Stamen and Blue Marble map providers work
 * reimplementing default map tiles caching to use LRU cache
 * implementing Redis based map tiles cache
