@@ -91,7 +91,7 @@ Caching
 GeoTiler caches map tiles with simple LRU cache, which advantage is that it
 requires no setup or additional software. Multiple calls to
 :py:func:`geotiler.render_map` function will reuse already downloaded map
-tiles, but the cache is not persistent - once a program or script exists,
+tiles, but the cache is not persistent - once a program or script exits,
 the map tiles are discarded.
 
 The default cache can be replaced with cache based on
