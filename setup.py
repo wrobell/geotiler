@@ -26,11 +26,11 @@
 #   License: BSD
 #
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='geotiler',
-    packages=['geotiler'],
+    packages=find_packages('.'),
     version='0.1.0',
     description='GeoTiler - library to create maps using tiles'
         ' from a map provider',
