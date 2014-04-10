@@ -35,9 +35,9 @@ Having map object, it can be rendered as an image with
 .. figure:: map-osm.png
 
 The rendered image is an instance of :py:class:`PIL.Image` class. Map image
-can be used with other toolkits like matplotlib or Cairo to render
+can be used with other library like matplotlib or Cairo to render
 additional map information, i.e. points of interests, GPS positions, text,
-etc, see :ref:`integrate` section.
+etc. See :ref:`integrate` section for examples.
 
 Alternatively, the map image can be simply saved as a file::
 
@@ -74,10 +74,11 @@ constructor::
 
 .. _integrate:
 
-Toolkits Integration
---------------------
-Map image rendered by GeoTiler can be used with other toolkit, i.e. to draw
-additional map information or use the map in data analysis graph.
+3rd Party Libraries
+-------------------
+Map image rendered by GeoTiler can be used with other library like
+matplotlib or Cairo to draw additional map information or use the map in
+data analysis graphs.
 
 GeoTiler implements various examples of such integration. The list of the
 examples is
