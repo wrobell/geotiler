@@ -2,6 +2,8 @@
 
 div.wy-nav-content {
     background-image: url('bluemarble.png');
+    background-repeat: repeat-y;
+    background-position: center;
 }
 
 div.diagram pre {
