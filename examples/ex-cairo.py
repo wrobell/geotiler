@@ -40,7 +40,7 @@ import geotiler
 bbox = 11.78560, 46.48083, 11.79067, 46.48283
 
 #
-# download background map using OpenStreetMap
+# download background map using default map tiles provider - OpenStreetMap
 #
 mm = geotiler.Map(extent=bbox, zoom=18)
 width, height = mm.size
@@ -57,7 +57,7 @@ surface = cairo.ImageSurface.create_for_data(
 cr = cairo.Context(surface)
 
 #
-# plot 3 custom points
+# plot circles around custom points
 #
 x0, y0 = 11.78816, 46.48114 # http://www.openstreetmap.org/search?query=46.48114%2C11.78816
 x1, y1 = 11.78771, 46.48165 # http://www.openstreetmap.org/search?query=46.48165%2C11.78771
