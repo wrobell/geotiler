@@ -1,5 +1,9 @@
 @import url('css/theme.css');
 
+div.wy-nav-content {
+    background-image: url('bluemarble.png');
+}
+
 div.diagram pre {
     font-family: monospace;
     font-size: 12px;
