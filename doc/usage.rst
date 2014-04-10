@@ -33,6 +33,7 @@ Having map object, it can be rendered as an image with
     >>> image = geotiler.render_map(map) # doctest: +SKIP
 
 .. figure:: map-osm.png
+   :align: center
 
 The rendered image is an instance of :py:class:`PIL.Image` class. Map image
 can be used with other library like matplotlib or Cairo to render
@@ -71,6 +72,7 @@ constructor::
     >>> image = geotiler.render_map(map) # doctest: +SKIP
 
 .. figure:: map-stamen-toner.png
+   :align: center
 
 .. _integrate:
 
@@ -95,6 +97,7 @@ For example::
     # geotiler-lint -c -6.069 53.390 -z 8 -s 512 512 bluemarble map-bluemarble.png
 
 .. figure:: map-bluemarble.png
+   :align: center
 
 Caching
 -------
