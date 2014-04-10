@@ -16,7 +16,7 @@ GeoTiler features are
 
 Installation
 ------------
-To install GeoTiler use `pip`::
+To install GeoTiler use `pip <http://www.pip-installer.org/>`_::
 
     pip install --user geotiler
 
