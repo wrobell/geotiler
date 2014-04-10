@@ -87,6 +87,15 @@ examples is
 - :download:`matplotlib <../examples/ex-matplotlib.py>`
 - :download:`Matplotlib Basemap Toolkit <../examples/ex-basemap.py>`
 
+GeoTiler Lint Script
+--------------------
+
+For example::
+
+    # geotiler-lint -c -6.069 53.390 -z 8 -s 512 512 bluemarble map-bluemarble.png
+
+.. figure:: map-bluemarble.png
+
 Caching
 -------
 GeoTiler caches map tiles with simple LRU cache, which advantage is that it
