@@ -82,12 +82,23 @@ Map image rendered by GeoTiler can be used with other library like
 matplotlib or Cairo to draw additional map information or use the map in
 data analysis graphs.
 
-GeoTiler implements various examples of such integration. The list of the
-examples is
+GeoTiler implements various examples of such integration. The examples are
+presented in the sub sections below.
 
-- :download:`Cairo <../examples/ex-cairo.py>`
-- :download:`matplotlib <../examples/ex-matplotlib.py>`
-- :download:`Matplotlib Basemap Toolkit <../examples/ex-basemap.py>`
+Cairo Example
+~~~~~~~~~~~~~
+.. literalinclude:: ../examples/ex-cairo.py
+   :lines: 32-71
+
+matplotlib Example
+~~~~~~~~~~~~~~~~~~
+.. literalinclude:: ../examples/ex-matplotlib.py
+   :lines: 32-62
+
+Matplotlib Basemap Toolkit
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. literalinclude:: ../examples/ex-basemap.py
+   :lines: 32-72
 
 GeoTiler Lint Script
 --------------------
@@ -112,7 +123,10 @@ The default cache can be replaced with cache based on
 Python `Redis module <https://pypi.python.org/pypi/redis/>`_ installed, it
 provides map tiles persistence and advanced cache management.
 
-The :download:`Redis cache example <../examples/ex-redis-cache.py>`
-illustrates how default cache can be replaced with Redis based one.
+The Redis cache example illustrates how default cache can be replaced with
+Redis based one.
+
+.. literalinclude:: ../examples/ex-redis-cache.py
+   :lines: 32-61
 
 .. vim: sw=4:et:ai
