@@ -1,9 +1,7 @@
 #
-# geoTiler - library to create maps using tiles from a map provider
+# GeoTiler - library to create maps using tiles from a map provider
 #
-# NOTE: The code contains BSD licensed code from Modest Maps project.
-#
-# Copyright (C) 2013-2014 by Artur Wroblewski <wrobell@pld-linux.org>
+# Copyright (C) 2014 by Artur Wroblewski <wrobell@pld-linux.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,6 +15,14 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#
+# This file incorporates work covered by the following copyright and
+# permission notice (restored, based on setup.py file from
+# https://github.com/stamen/modestmaps-py):
+#
+#   Copyright (C) 2007-2013 by Michal Migurski and other contributors
+#   License: BSD
 #
 
 """
@@ -35,7 +41,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 downloader = DEFAULT_TILE_DOWNLOADER
 
-# create the cache
+# create the cache connecting to local Redis server
 client = redis.Redis('localhost')
 cache = RedisCache(client, downloader)
 

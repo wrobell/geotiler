@@ -50,7 +50,7 @@ img = geotiler.render_map(mm)
 ax.imshow(img)
 
 #
-# plot 3 custom points
+# plot custom points
 #
 x0, y0 = 11.78816, 46.48114 # http://www.openstreetmap.org/search?query=46.48114%2C11.78816
 x1, y1 = 11.78771, 46.48165 # http://www.openstreetmap.org/search?query=46.48165%2C11.78771
