@@ -25,7 +25,7 @@
 #   License: BSD
 #
 
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 from .map import Map, render_map
 from .provider.conf import find_provider
