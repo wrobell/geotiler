@@ -61,6 +61,8 @@ def find_provider(key):
     """
     Find map tiles provider.
 
+    The function returns instance of a map provider.
+
     :param key: Map provider string id.
     """
     cls = PROVIDERS[key]
