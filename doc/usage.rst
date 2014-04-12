@@ -95,8 +95,8 @@ matplotlib Example
 .. literalinclude:: ../examples/ex-matplotlib.py
    :lines: 32-62
 
-Matplotlib Basemap Toolkit
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Matplotlib Basemap Toolkit Example
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. literalinclude:: ../examples/ex-basemap.py
    :lines: 32-72
 
