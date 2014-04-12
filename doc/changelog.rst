@@ -2,6 +2,7 @@ Changelog
 =========
 0.2.0
 -----
+- improved error handling of map tiles downloading
 - fixed geotiler-lint script installation issue
 - documentation for geotiler-lint script added
 - documented map tiles licensing information
