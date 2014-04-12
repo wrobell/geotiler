@@ -225,6 +225,8 @@ def render_tiles(provider, zoom, size, tiles, downloader=None):
     for tile in tile_req:
         try:
             for img in tile.images:
+                # no image, so there was error when downloading a tile
+                # draw error message in such case
                 if not img:
                     w, h = provider.tile_width, provider.tile_height
                     img = PIL.Image.new('RGBA', (w, h))
