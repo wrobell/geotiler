@@ -40,10 +40,13 @@ from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 import http.client
 import io
+import sys
+import traceback
 import urllib.parse
 import logging
 
 import PIL.Image
+import PIL.ImageDraw
 
 logger = logging.getLogger(__name__)
 
@@ -113,17 +116,17 @@ class TileDownloader(object):
                 tile.done = True
 
             if __debug__:
-                logger.debug('Received {}'.format(urls))
+                logger.debug('received {}'.format(urls))
 
         except Exception as ex:
-            logger.warn('Failed {}'.format(urls))
-            logger.exception(ex)
+            # on error log the information and set downloaded images to
+            # null; the renderer will handle this
+            msg = 'failed to download tile at {}'.format(urls)
+            logger.warning(msg)
+            msg = ''.join(traceback.format_exception(*sys.exc_info()))
+            logger.debug(msg)
 
             images = [None for url in urls]
-            raise ex # FIXME: figure out better error handling strategy
-                     # before making another download attempt to avoid
-                     # unnecessary server request while dealing with
-                     # ModestMaps errors
 
         tile.images = images
 
@@ -222,9 +225,17 @@ def render_tiles(provider, zoom, size, tiles, downloader=None):
     for tile in tile_req:
         try:
             for img in tile.images:
-                image.paste(img, (int(tile.offset[0]), int(tile.offset[1])), img)
+                if not img:
+                    w, h = provider.tile_width, provider.tile_height
+                    img = PIL.Image.new('RGBA', (w, h))
+                    draw = PIL.ImageDraw.Draw(img)
+                    msg = 'Map tile download error.'
+                    tw, th = draw.textsize(msg)
+                    draw.text(((w - tw) // 2, (h - th) // 2), msg, 'red')
+
+                image.paste(img, tile.offset, img)
         except Exception as ex:
-            logger.warn('tile rendering error')
+            logger.warning('tile rendering error')
             logger.exception(ex)
 
     return image
