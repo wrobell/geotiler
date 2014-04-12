@@ -23,3 +23,12 @@ div.figure p.caption:before {
     content: 'Figure: ';
     font-weight: bold;
 }
+
+p.homepage-header {
+    width: auto;
+    text-align: center;
+    font-variant: small-caps;
+    font-size: large;
+    border-bottom: 1px solid #d3d3d3;
+    padding-bottom: 2ex;
+}

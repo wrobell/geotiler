@@ -1,9 +1,8 @@
-.. rst-class:: align-center
+.. rst-class:: homepage-header
 
-   .. `NEWS <https://freecode.com/projects/geotiler/announcements>`_
-   `DOWNLOAD <http://pypi.python.org/pypi/geotiler>`_
-   | `BUGS <https://github.com/wrobell/geotiler/issues>`_
-   | `SOURCE CODE <https://github.com/wrobell/geotiler>`_
+   `Download <http://pypi.python.org/pypi/geotiler>`_
+   | `Bugs <https://github.com/wrobell/geotiler/issues>`_
+   | `Source Code <https://github.com/wrobell/geotiler>`_
 
 GeoTiler is a library to create maps using tiles from a map provider.
 
