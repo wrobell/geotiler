@@ -51,7 +51,7 @@ import PIL.ImageDraw
 logger = logging.getLogger(__name__)
 
 HEADERS = {
-    'User-Agent': 'GeoTiler/0.2.0',
+    'User-Agent': 'GeoTiler/0.3.0',
 }
 
 MAX_ATTEMPTS = 5 # how many times to retry a failing tile
