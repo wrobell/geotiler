@@ -50,6 +50,7 @@ PROVIDERS = {
     'cloudmade-paledawn': cloudmade.PaleDawnProvider,
     'cloudmade-midnightcommander': cloudmade.MidnightCommanderProvider,
     'stamen-toner': stamen.TonerProvider,
+    'stamen-toner-lite': stamen.TonerLiteProvider,
     'stamen-terrain': stamen.TerrainProvider,
     'stamen-watercolor': stamen.WatercolorProvider,
 }

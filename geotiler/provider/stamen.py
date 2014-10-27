@@ -70,6 +70,10 @@ class TonerProvider(BaseProvider):
         BaseProvider.__init__(self, 'toner', 'png')
 
 
+class TonerLiteProvider(BaseProvider):
+    def __init__(self):
+        BaseProvider.__init__(self, 'toner-lite', 'png')
+
 
 class TerrainProvider(BaseProvider):
     def __init__(self):
