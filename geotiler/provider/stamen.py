@@ -26,7 +26,7 @@
 #
 
 """
->>> p = BaseProvider('toner')
+>>> p = BaseProvider('toner', 'png')
 >>> p.get_tile_urls((10507, 25322), 16) #doctest: +ELLIPSIS
 ('http://tile.stamen.com/toner/16/10507/25322.png',)
 
@@ -36,11 +36,11 @@
 
 >>> p = TerrainProvider()
 >>> p.get_tile_urls((10507, 25322), 16) #doctest: +ELLIPSIS
-('http://tile.stamen.com/terrain/16/10507/25322.png',)
+('http://tile.stamen.com/terrain/16/10507/25322.jpg',)
 
 >>> p = WatercolorProvider()
 >>> p.get_tile_urls((10507, 25322), 16) #doctest: +ELLIPSIS
-('http://tile.stamen.com/watercolor/16/10507/25322.png',)
+('http://tile.stamen.com/watercolor/16/10507/25322.jpg',)
 """
 
 from math import pi
@@ -48,37 +48,38 @@ from math import pi
 from ..geo import MercatorProjection, deriveTransformation
 from .base import IMapProvider
 
+URL_FMT = 'http://tile.stamen.com/{style}/{{zoom}}/{{col}}/{{row}}.{ext}'
 
 class BaseProvider(IMapProvider):
-    def __init__(self, style):
+    def __init__(self, style, ext):
         # the spherical mercator world tile covers (-π, -π) to (π, π)
         t = deriveTransformation(-pi, pi, 0, 0, pi, pi, 1, 0, -pi, -pi, 0, 1)
         self.projection = MercatorProjection(0, t)
 
-        self.style = style
+        self.url_fmt = URL_FMT.format(style=style, ext=ext)
 
 
     def get_tile_urls(self, tile_coord, zoom):
         column, row = tile_coord
-        return ('http://tile.stamen.com/%s/%d/%d/%d.png' % (self.style, zoom, column, row),)
+        return (self.url_fmt.format(zoom=zoom, col=column, row=row),)
 
 
 
 class TonerProvider(BaseProvider):
     def __init__(self):
-        BaseProvider.__init__(self, 'toner')
+        BaseProvider.__init__(self, 'toner', 'png')
 
 
 
 class TerrainProvider(BaseProvider):
     def __init__(self):
-        BaseProvider.__init__(self, 'terrain')
+        BaseProvider.__init__(self, 'terrain', 'jpg')
 
 
 
 class WatercolorProvider(BaseProvider):
     def __init__(self):
-        BaseProvider.__init__(self, 'watercolor')
+        BaseProvider.__init__(self, 'watercolor', 'jpg')
 
 
 # vim:et sts=4 sw=4:
