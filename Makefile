@@ -8,7 +8,7 @@ RSYNC=rsync -zcav \
 doc: .sphinx-stamp
 
 upload-doc:
-	$(RSYNC) build/doc/ wrobell@maszyna.it-zone.org:~/public_html/geotiler
+	$(RSYNC) build/doc/ wrobell@wrobell.it-zone.org:~/public_html/geotiler
 
 .sphinx-stamp: .map-stamp
 	sphinx-build doc build/doc
