@@ -29,33 +29,30 @@
 GeoTiler example to use Redis based cache for map tiles.
 """
 
+import functools
 import redis
 
-from geotiler.tilenet import DEFAULT_TILE_DOWNLOADER
-from geotiler.cache.redis import RedisCache
-
 import geotiler
+from geotiler.cache import redis_downloader
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-downloader = DEFAULT_TILE_DOWNLOADER
-
-# create the cache connecting to local Redis server
+# create tile downloader with Redis client as cache
 client = redis.Redis('localhost')
-cache = RedisCache(client, downloader)
+downloader = redis_downloader(client)
 
-# override cache of default downloader
-downloader.set_cache(cache)
+# use map renderer with new downloader
+render_map = functools.partial(geotiler.render_map, downloader=downloader)
 
 bbox = 11.78560, 46.48083, 11.79067, 46.48283
 mm = geotiler.Map(extent=bbox, zoom=18)
 
 # render the map for the first time...
-img = geotiler.render_map(mm)
+img = render_map(mm)
 
 # ... and second time to demonstrate use of the cache
-img = geotiler.render_map(mm)
+img = render_map(mm)
 
 # show some recent keys
 print('recent cache keys {}'.format(client.keys()[:10]))

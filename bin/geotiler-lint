@@ -109,16 +109,14 @@ elif args.provider.startswith('file://'):
 else:
     provider = geotiler.find_provider(args.provider)
 
+downloader = None # use default downloader
+
 if args.cache == 'redis':
     import redis
-    from geotiler.tilenet import DEFAULT_TILE_DOWNLOADER
-    from geotiler.cache.redis import RedisCache
-
-    downloader = DEFAULT_TILE_DOWNLOADER
+    from geotiler.cache import redis_downloader
 
     client = redis.Redis('localhost')
-    cache = RedisCache(client, downloader)
-    downloader.set_cache(cache)
+    downloader = redis_downloader(client)
 
 map = geotiler.Map(
     extent=args.extent,
@@ -128,7 +126,7 @@ map = geotiler.Map(
     provider=provider
 )
 
-img = geotiler.render_map(map)
+img = geotiler.render_map(map, downloader=downloader)
 img.save(outfile)
 
 # vim:et sts=4 sw=4:
