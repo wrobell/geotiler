@@ -56,7 +56,7 @@ The list of available map providers is presented in the table below.
      OpenStreetMap             osm                   `Open Data Commons Open Database License <http://www.openstreetmap.org/copyright>`_
      OpenStreetMap Cycle       osm-cycle             as above
      Stamen Toner              stamen-toner          `Creative Commons Attribution (CC BY 3.0) license <http://maps.stamen.com/>`_
-     Stamen Toner Lite         stamen-terrain-lite   as above
+     Stamen Toner Lite         stamen-toner-lite     as above
      Stamen Terrain            stamen-terrain        as above
      Stamen Water Color        stamen-watercolor     as above
      Modest Maps Blue Marble   bluemarble            see `NASA guideline <http://www.nasa.gov/audience/formedia/features/MP_Photo_Guidelines.html>`_
