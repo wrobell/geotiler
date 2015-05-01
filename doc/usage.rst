@@ -102,22 +102,20 @@ Matplotlib Basemap Toolkit Example
 
 Caching
 -------
-GeoTiler caches map tiles with simple LRU cache, which advantage is that it
-requires no setup or additional software. Multiple calls to
-:py:func:`geotiler.render_map` function will reuse already downloaded map
-tiles, but the cache is not persistent - once a program or script exits,
-the map tiles are discarded.
+GeoTiler allows to cache map tiles. The
+:py:func:`geotiler.cache.caching_downloader` function enables us to adapt
+any caching strategy.
 
-The default cache can be replaced with cache based on
-`Redis <http://redis.io/>`_ store. While it requires Redis server and
-Python `Redis module <https://pypi.python.org/pypi/redis/>`_ installed, it
-provides map tiles persistence and advanced cache management.
+Beside generic caching downloader adapter, GeoTiler provides `Redis store
+<http://redis.io/>`_ adapter.  While it requires Redis server and Python
+`Redis module <https://pypi.python.org/pypi/redis/>`_ installed, such
+solution gives map tiles persistence and advanced cache management.
 
-The Redis cache example illustrates how default cache can be replaced with
-Redis based one.
+The Redis cache example illustrates how Redis can be user for map tiles
+caching.
 
 .. literalinclude:: ../examples/ex-redis-cache.py
-   :lines: 32-61
+   :lines: 32-58
 
 GeoTiler Lint Script
 --------------------
@@ -127,7 +125,7 @@ image from commandline.
 For example, to create a map image using Blue Marble map tiles provider,
 map center, zoom and map image size::
 
-    # geotiler-lint -c -6.069 53.390 -z 8 -s 512 512 bluemarble map-bluemarble.png
+    geotiler-lint -c -6.069 53.390 -z 8 -s 512 512 bluemarble map-bluemarble.png
 
 .. figure:: map-bluemarble.png
    :align: center
