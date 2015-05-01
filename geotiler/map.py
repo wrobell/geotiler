@@ -327,7 +327,7 @@ def render_map(map, downloader=None, loop=None, **kw):
     Download map tiles and render map image.
 
     If `downloader` is null, then default map tiles downloader is used
-    (:py:func:`geotiler.io.fetch_tiles`).
+    (:py:func:`geotiler.tile.io.fetch_tiles`).
 
     The function returns an image (instance of `PIL.Image` class).
 
@@ -349,7 +349,7 @@ def render_map_async(map, downloader=None, loop=None, **kw):
     image.
 
     If `downloader` is null, then default map tiles downloader is used
-    (:py:func:`geotiler.io.fetch_tiles`).
+    (:py:func:`geotiler.tile.io.fetch_tiles`).
 
     The function returns an image (instance of `PIL.Image` class).
 
