@@ -1,5 +1,11 @@
 Changelog
 =========
+0.4.0
+-----
+- use asyncio to download map tiles
+- implemented `render_map_async` function to download map asynchronously
+- no default caching
+
 0.3.0
 -----
 - implemented stamen-toner-lite map provider
