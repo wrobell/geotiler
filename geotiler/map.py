@@ -29,13 +29,15 @@
 GeoTiler map functionality.
 """
 
+import asyncio
 import itertools
 import math
 import logging
 
 from .provider.conf import DEFAULT_PROVIDER
 from .geo import zoom_to
-from .tilenet import render_tiles
+from .tile.io import fetch_tiles
+from .tile.img import render_image
 
 logger = logging.getLogger(__name__)
 
@@ -320,24 +322,54 @@ class Map(object):
         return location
 
 
-
-def render_map(map, downloader=None):
+def render_map(map, downloader=None, loop=None, **kw):
     """
-    Render map image.
+    Download map tiles and render map image.
 
-    If `downloader` is null, then default map tiles downloader is used.
+    If `downloader` is null, then default map tiles downloader is used
+    (:py:func:`geotiler.io.fetch_tiles`).
 
-    The function returns an image (instance of PIL.Image class).
+    The function returns an image (instance of `PIL.Image` class).
 
     :param map: Map instance.
     :param downloader: Map tiles downloader.
+    :param loop: Asyncio loop (used default one if `None`).
+    :param kw: Parameters passed to default downloader.
     """
+    task = render_map_async(map, downloader=downloader, loop=loop, **kw)
+    if loop is None:
+        loop = asyncio.get_event_loop()
+    return loop.run_until_complete(task)
+
+
+@asyncio.coroutine
+def render_map_async(map, downloader=None, loop=None, **kw):
+    """
+    Asyncio coroutine to download map tiles asynchronously and render map
+    image.
+
+    If `downloader` is null, then default map tiles downloader is used
+    (:py:func:`geotiler.io.fetch_tiles`).
+
+    The function returns an image (instance of `PIL.Image` class).
+
+    :param map: Map instance.
+    :param downloader: Map tiles downloader.
+    :param loop: Asyncio loop (used default one if `None`).
+    :param kw: Parameters passed to default downloader.
+    """
+    get_url = map.provider.get_tile_urls
+    if downloader is None:
+        downloader = fetch_tiles
+
     coord, corner = _find_top_left_tile(map)
-    tiles = _find_tiles(map, coord, corner)
-    img = render_tiles(
-        map.provider, map.zoom, map.size, tiles, downloader=downloader
-    )
-    return img
+    tile_input = _find_tiles(map, coord, corner)
+    coords, offsets = zip(*tile_input)
+    urls = tuple(get_url(c, map.zoom)[0] for c in coords)
+
+    tile_data = yield from downloader(urls, **kw)
+
+    return render_image(map, tile_data, offsets)
 
 
 def _find_tiles(map, tile_coord, corner):
