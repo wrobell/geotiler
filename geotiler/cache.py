@@ -84,10 +84,10 @@ def caching_downloader(get, set, downloader, urls, **kw):
 
 def redis_downloader(client, downloader=None, timeout=3600 * 24 * 7):
     """
-    Create caching downloader using Redis API.
+    Create downloader using Redis as cache for map tiles.
 
     :param client: Redis client object.
-    :param downloader: Map tiles downloader, use `None` for default.
+    :param downloader: Map tiles downloader, use `None` for default downloader.
     :param timeout: Map tile data expiry timeout, default 1 week.
     """
     if downloader is None:
