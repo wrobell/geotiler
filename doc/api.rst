@@ -6,6 +6,7 @@ Map Rendering
 
    geotiler.Map
    geotiler.render_map
+   geotiler.render_map_async
    geotiler.find_provider
 
 .. autoclass:: geotiler.Map
@@ -13,25 +14,20 @@ Map Rendering
    :special-members:
 
 .. autofunction:: geotiler.render_map
+.. autofunction:: geotiler.render_map_async
 .. autofunction:: geotiler.find_provider
 
 
-Tile Management
----------------
+Tile Downloading and Caching
+----------------------------
 .. autosummary::
 
-   geotiler.tilenet.TileDownloader
-   geotiler.tilenet.TileThreadDownloader
-   geotiler.cache.redis.RedisCache
+   geotiler.cache.caching_downloader
+   geotiler.cache.redis_downloader
+   geotiler.tile.io.fetch_tiles
 
-
-.. autoclass:: geotiler.tilenet.TileDownloader
-   :members:
-
-.. autoclass:: geotiler.tilenet.TileThreadDownloader
-   :members:
-
-.. autoclass:: geotiler.cache.redis.RedisCache
-   :members:
+.. autofunction:: geotiler.cache.caching_downloader
+.. autofunction:: geotiler.cache.redis_downloader
+.. autofunction:: geotiler.tile.io.fetch_tiles
 
 .. vim: sw=4:et:ai

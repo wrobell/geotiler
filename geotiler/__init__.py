@@ -27,7 +27,7 @@
 
 __version__ = '0.3.0'
 
-from .map import Map, render_map
+from .map import Map, render_map, render_map_async
 from .provider.conf import find_provider
 
 # vim: sw=4:et:ai
