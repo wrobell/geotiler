@@ -2,9 +2,11 @@ Changelog
 =========
 0.4.0
 -----
+- caching API has changed
 - use asyncio to download map tiles
-- implemented `render_map_async` function to download map asynchronously
-- no default caching
+- implemented :py:func:`geotiler.render_map_async` function to download map
+  asynchronously
+- default LRU caching is gone
 
 0.3.0
 -----
