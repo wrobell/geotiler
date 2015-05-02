@@ -27,8 +27,8 @@ After creating a map object, map can be controlled with `extent`, `center`,
 changing `extent` will change map size. Refer to the :py:class:`geotiler.Map`
 class documentation for details.
 
-Having map object, it can be rendered as an image with
-:py:func:`geotiler.render_map` function::
+Having map object, the map tiles can be downloaded and rendered as an image
+with :py:func:`geotiler.render_map` function::
 
     >>> image = geotiler.render_map(map) # doctest: +SKIP
 
@@ -43,6 +43,33 @@ etc. See :ref:`integrate` section for examples.
 Alternatively, the map image can be simply saved as a file::
 
     >>> image.save('map.png') # doctest: +SKIP
+
+Asynchronous Map Rendering
+--------------------------
+The `asyncio` Python framework enables programmers to write asynchronous,
+concurrent programs using coroutines.
+
+GeoTiler allows to asynchronously download map tiles and render map image
+with :py:func:`geotiler.render_map_async` `asyncio` coroutine.
+
+Very simple example to download a map using `asyncio` framework::
+
+    >>> coro = geotiler.render_map_async(map)  # doctest: +SKIP
+    >>> loop = asyncio.get_event_loop()        # doctest: +SKIP
+    >>> image = loop.run_until_complete(coro)  # doctest: +SKIP
+
+We include more complex example below. It reads location data from `gpsd
+<http://www.catb.org/gpsd/>`_ daemon, renders the map at the centre of
+current position and saves map to a file. There are two concurrent tasks
+running concurrently
+
+- location reading
+- and map tiles downloading and rendering
+
+The tasks communication is done via a queue holding current position.
+
+.. literalinclude:: ../examples/ex-async-gps.py
+   :lines: 51-89
 
 Map Providers
 -------------
