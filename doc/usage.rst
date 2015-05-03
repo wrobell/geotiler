@@ -64,7 +64,7 @@ current position and saves map to a file. There are two concurrent tasks
 running concurrently
 
 - location reading
-- and map tiles downloading and rendering
+- map tiles downloading and rendering
 
 The tasks communication is done via a queue holding current position.
 
