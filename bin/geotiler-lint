@@ -79,7 +79,7 @@ parser.add_argument(
 
 parser.add_argument('-k', '--apikey', dest='apikey')
 parser.add_argument(
-    '--cache', dest='cache', choices=['lru', 'redis'], default='lru',
+    '--cache', dest='cache', choices=['redis'], default=None,
     help='specify caching strategy'
 )
 parser.add_argument('output', help='Output file')
