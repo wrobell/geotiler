@@ -10,7 +10,8 @@ GeoTiler features are
 #. Supported multiple map tiles providers, i.e. OpenStreetMap, Stamen and
    Blue Marble.
 #. Asynchronous and synchronous map tiles downloader.
-#. Map tiles caching support, i.e. LRU, Redis.
+#. Map tiles caching support with Redis and custom caching strategies are
+   supported.
 #. The library design supports extensibility. Implement custom map tiles
    providers, tiles downloading or caching strategies within minutes.
 
@@ -37,7 +38,8 @@ The GeoTiler project initial focus has been on
 * simplifying library design
 * user documentation
 * ensuring OpenStreetMap, Stamen and Blue Marble map providers work
-* reimplementing default map tiles caching to use LRU cache
+* reimplementing default map tiles caching to use LRU cache (and now we
+  switched to no cache by default)
 * implementing Redis based map tiles cache
 * moving docstrings tests to unit test modules
 * Python 3 support
@@ -48,7 +50,9 @@ You can help by
 * testing map providers and reporting bugs
 * providing more examples, i.e. how to integrate GeoTiler with various GUI
   toolkits
-* implementing new caching strategies, i.e. memcached
+* implementing new caching strategies, i.e.
+  `memcached <http://www.tummy.com/software/python-memcached/>`_
+  or `PyLRU <https://github.com/jlhutch/pylru>`_
 * working on unit tests
 * making code even more PEP-8 compliant
 
