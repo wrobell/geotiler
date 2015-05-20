@@ -55,7 +55,7 @@ def render_image(map, tile_data, offsets):
     :param offsets: Tile offset within map image for each tile data item.
     """
     provider = map.provider
-    image = PIL.Image.new('RGB', map.size)
+    image = PIL.Image.new('RGBA', map.size)
     error = _error_image(provider.tile_width, provider.tile_height)
     for tile, offset in zip(tile_data, offsets):
         img = _tile_image(tile) if tile else error
