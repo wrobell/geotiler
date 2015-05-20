@@ -1,5 +1,11 @@
 Changelog
 =========
+0.5.0
+-----
+- format of rendered map image is changed from RGB to RGBA
+- implemented example Qt application to show map centered at current
+  position read from GPS; it uses asyncio and `quamash` library
+
 0.4.0
 -----
 - caching API has changed
