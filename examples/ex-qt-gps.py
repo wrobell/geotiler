@@ -155,7 +155,9 @@ def show_map(event, executor, widget, positions):
         pos = positions[-1]
         size = widget.map_size
         img = yield from update_map(map, pos, size)
-        yield from loop.run_in_executor(executor, update_image, widget, img, positions)
+        yield from loop.run_in_executor(
+            executor, update_image, widget, img, tuple(positions)
+        )
 
 
 class MapWindow(QLabel):
