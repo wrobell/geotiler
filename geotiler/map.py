@@ -261,7 +261,7 @@ class Map(object):
 
 
     def __str__(self):
-        return 'Map(%(provider)s, %(_size)s, %(coordinate)s, %(offset)s)' % self.__dict__
+        return 'Map({provider}, {_size}, {origin}, {offset})'.format(**self.__dict__)
 
 
     def rev_geocode(self, location):
