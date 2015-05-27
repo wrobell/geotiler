@@ -1,5 +1,10 @@
 Changelog
 =========
+0.6.0
+-----
+- map rendering performance improved
+- Qt application example simplified and its performance improved
+
 0.5.0
 -----
 - format of rendered map image is changed from RGB to RGBA
