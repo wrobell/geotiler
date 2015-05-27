@@ -5,13 +5,12 @@ Features
 --------
 GeoTiler features are
 
-#. Non-complex map API, which can be easily integrated with other libraries,
-   i.e. matplotlib, Cairo, etc.
+#. Very easy map API, which can be used in interactive and non-interactive
+   way with other libraries, i.e. matplotlib, Cairo, Qt, etc.
 #. Supported multiple map tiles providers, i.e. OpenStreetMap, Stamen and
    Blue Marble.
 #. Asynchronous and synchronous map tiles downloader.
-#. Map tiles caching support with Redis and custom caching strategies are
-   supported.
+#. Map tiles caching with Redis and support for custom caching strategies.
 #. The library design supports extensibility. Implement custom map tiles
    providers, tiles downloading or caching strategies within minutes.
 
