@@ -36,7 +36,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 HEADERS = {
-    'User-Agent': 'GeoTiler/0.5.0',
+    'User-Agent': 'GeoTiler/0.6.0',
 }
 
 FMT_DOWNLOAD_LOG = 'Cannot download a tile due to error: {}'.format
