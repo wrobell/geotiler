@@ -59,6 +59,8 @@ from geotiler.cache import redis_downloader
 
 logging.getLogger('geotiler').setLevel(logging.DEBUG)
 logging.basicConfig()
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 def scroll_map(widget, pos):
@@ -124,7 +126,9 @@ def refresh_map(widget):
         yield from event.wait()
         event.clear()
 
+        logger.debug('fetching map image...')
         img = yield from render_map(map)
+        logger.debug('got map image')
         pixmap = QPixmap.fromImage(ImageQt(img))
         widget.item.setPixmap(pixmap)
 
@@ -230,8 +234,13 @@ asyncio.set_event_loop(loop)
 
 g = app.desktop().screenGeometry()
 size = g.width() + 256 * 2, g.height() + 256 * 2
+
+pos = (0, 0)
+if len(sys.argv) == 3:
+    pos = float(sys.argv[1]), float(sys.argv[2])
+
 provider = geotiler.find_provider('osm')
-mm = geotiler.Map(size=size, center=(0, 0), zoom=18, provider=provider)
+mm = geotiler.Map(size=size, center=pos, zoom=18, provider=provider)
 
 window = MapWindow(mm)
 window.show()
@@ -242,6 +251,7 @@ t2 = locate(window, queue)
 t3 = refresh_map(window)
 task = asyncio.gather(t1, t2, t3)
 
+window.refresh_map.set()
 loop.run_until_complete(task)
 
 # vim: sw=4:et:ai
