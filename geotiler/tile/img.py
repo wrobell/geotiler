@@ -59,7 +59,7 @@ def render_image(map, tile_data, offsets):
     error = _error_image(provider.tile_width, provider.tile_height)
     for tile, offset in zip(tile_data, offsets):
         img = _tile_image(tile) if tile else error
-        image.paste(img, offset, img)
+        image.paste(img, offset)
 
     return image
 
