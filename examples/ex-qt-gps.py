@@ -28,9 +28,8 @@
 """
 Read data from GPS and show map centered at the position.
 
-1. The last 120 positions are stored in a queue and plotted on the map.
-2. Use keys like '+', '-', 'n', 'p' to zoom in, zoom out and change map
-   provider.
+Use keys like '+', '-', 'n', 'p' to zoom in, zoom out and change map
+provider.
 
 Requirements:
 
@@ -47,13 +46,13 @@ import redis
 import sys
 from collections import deque
 
-import PIL.ImageDraw
 from PIL.ImageQt import ImageQt
 
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QApplication, QProgressBar, QLabel
-from PyQt5.QtGui import QPixmap, QImage
-from quamash import QEventLoop, QThreadExecutor
+from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, \
+    QGraphicsPixmapItem, QGraphicsEllipseItem
+from PyQt5.QtGui import QPixmap, QPen, QColor
+from quamash import QEventLoop
 
 import geotiler
 from geotiler.cache import redis_downloader
@@ -61,23 +60,37 @@ from geotiler.cache import redis_downloader
 logging.getLogger('geotiler').setLevel(logging.DEBUG)
 logging.basicConfig()
 
-# use redis to cache map tiles
-client = redis.Redis('localhost')
-downloader = redis_downloader(client)
-render_map = functools.partial(
-    geotiler.render_map_async, downloader=downloader
-)
+
+def scroll_map(widget, pos):
+    """
+    Update map center with position and download new map image.
+
+    :param map: Geotiler map object.
+    :param pos: New center of the map (longitude, latitude).
+    """
+    map = widget.map
+    widget.position = pos
+
+    w1, h1 = widget.width() / 2, widget.height() / 2
+    w2, h2 = map.size
+    x, y = map.rev_geocode(widget.position)
+
+    within = 0 <= x - w1 and x + w1 < w2 \
+         and 0 <= y - h1 and y + h1 < h2
+    if not within:
+        map.center = pos
+        widget.refresh_map.set()
+        x, y = w2 / 2, h2 / 2
+
+    widget.item.setOffset(w1 - x, h1 - y)
 
 
 @asyncio.coroutine
-def read_gps(event, positions):
+def read_gps(queue):
     """
     Read postion from gpsd daemon and put it to positions queue.
 
-    The map rendering event is set when a position is put to the queue.
-
-    :param event: Map rendering event.
-    :param positions: Queue of positions.
+    :param queue: Queue of GPS positions.
     """
     reader, writer = yield from asyncio.open_connection(port=2947)
     writer.write('?WATCH={"enable":true,"json":true}\n'.encode())
@@ -85,102 +98,88 @@ def read_gps(event, positions):
         line = yield from reader.readline()
         data = json.loads(line.decode())
         if 'lon' in data:
-            positions.append((data['lon'], data['lat']))
-            event.set()
-
-
-
-def update_image(widget, img, positions):
-    """
-    Update map widget with new map image.
-
-    The positions are rendered on the map image as well.
-
-    :param widget: Map widget.
-    :param img: New map image.
-    :param positions: Collection of positions.
-    """
-    map = widget.map
-    pos = positions[-1]
-    draw = PIL.ImageDraw.Draw(img)
-    msg = '{:.6f},{:.6f}'.format(*pos)
-    tw, th = draw.textsize(msg)
-    width, height = map.size
-    draw.text(((width - tw), (height - th)), msg, 'red')
-
-    x, y = width / 2, height / 2
-    draw.ellipse((x - 10, y - 10, x + 10, y + 10), outline='green')
-
-    points = [map.rev_geocode(p) for p in positions]
-    draw.point(points, fill='blue')
-
-    qimg = ImageQt(img)
-    pixmap = QPixmap.fromImage(qimg)
-    widget.setPixmap(pixmap)
+            yield from queue.put((data['lon'], data['lat']))
 
 
 @asyncio.coroutine
-def update_map(map, pos, size):
+def refresh_map(widget):
     """
-    Update map center with position, change map size and download new map
-    image.
+    Refresh map when map widget refresh event is set.
 
-    :param map: Geotiler map object.
-    :param pos: New center of the map (longitude, latitude).
-    :param size: New size of map image (width, height).
-    """
-    map.center = pos
-    map.size = size
-    img = yield from render_map(map)
-    return img
-    
-
-@asyncio.coroutine
-def show_map(event, executor, widget, positions):
-    """
     This is asyncio coroutine.
 
-    :param event: Map rendering event.
-    :param executor: Executor running map update in the map widget.
     :param widget: Map widget.
-    :param positions: Queue of positions obtained from GPS.
     """
+    event = widget.refresh_map
     map = widget.map
+
+    # use redis to cache map tiles
+    client = redis.Redis('localhost')
+    downloader = redis_downloader(client)
+    render_map = functools.partial(
+        geotiler.render_map_async, downloader=downloader
+    )
+
     while True:
         yield from event.wait()
         event.clear()
-        if not positions:
-            continue
 
-        pos = positions[-1]
-        size = widget.map_size
-        img = yield from update_map(map, pos, size)
-        yield from loop.run_in_executor(
-            executor, update_image, widget, img, tuple(positions)
-        )
+        img = yield from render_map(map)
+        pixmap = QPixmap.fromImage(ImageQt(img))
+        widget.item.setPixmap(pixmap)
 
 
-class MapWindow(QLabel):
+@asyncio.coroutine
+def locate(widget, queue):
     """
-    Qt widget based on QLabel to display map image and control application
+    Read position from the queue and update map position.
+
+    This is asyncio coroutine.
+
+    :param widget: Map widget.
+    :param queue: Queue of GPS positions.
+    """
+    while True:
+        pos = yield from queue.get()
+        scroll_map(widget, pos)
+
+
+class MapWindow(QGraphicsView):
+    """
+    Qt widget based on QGraphicsView to display map image and control map
     with keyboard.
+
+    :var map: Map object.
+    :var position: Current position on the map.
     """
-    def __init__(self, map, event, *args):
+    def __init__(self, map, *args):
         super().__init__(*args)
         self.map = map
-        self.event = event
+        self.position = map.center
+
         self.providers = deque([
             'osm', 'osm-cycle', 'stamen-terrain', 'stamen-toner-lite', 'stamen-toner',
             'stamen-watercolor', 'ms-aerial', 'ms-hybrid', 'ms-road', 'bluemarble',
         ])
 
-    @property
-    def map_size(self):
-        """
-        Get size of the map image window.
-        """
-        size = self.size()
-        return size.width(), size.height()
+        self.refresh_map = asyncio.Event()
+
+        scene = QGraphicsScene()
+        self.scene = scene
+        self.setScene(scene)
+        self.item = QGraphicsPixmapItem()
+        scene.addItem(self.item)
+
+        self.circle = QGraphicsEllipseItem(0, 0, 20, 20)
+        pen = QPen(QColor(255, 0, 0, 128))
+        pen.setWidth(2)
+        self.circle.setPen(pen)
+        scene.addItem(self.circle)
+
+        self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.setResizeAnchor(QGraphicsView.AnchorViewCenter)
+        self.setTransformationAnchor(QGraphicsView.AnchorViewCenter)
 
 
     def keyPressEvent(self, event):
@@ -192,7 +191,7 @@ class MapWindow(QLabel):
         - 'n' to use next map provider
         - 'p' to use previous map provider
         - 'q' to quit
-        
+
         """
         key = event.key()
         if key == QtCore.Qt.Key_Minus:
@@ -209,35 +208,40 @@ class MapWindow(QLabel):
             self.providers.rotate(1)
             p = self.providers[0]
             self.map.provider = geotiler.find_provider(p)
-        self.event.set()
+        scroll_map(self, self.position)
+        self.refresh_map.set()
 
 
     def resizeEvent(self, event):
         """
         On resize event redraw the map.
         """
-        self.event.set()
+        w = self.width()
+        h = self.height()
+        self.circle.setRect(w / 2 - 10, h / 2 - 10, 20, 20)
+        scroll_map(self, self.position)
 
 
-
-size = 800, 800
-start = 0, 0
-provider = geotiler.find_provider('osm')
-mm = geotiler.Map(size=size, center=start, zoom=19, provider=provider)
 
 # bind Qt application with Python asyncio loop
 app = QApplication(sys.argv)
 loop = QEventLoop(app)
-qt_exec = QThreadExecutor()
 asyncio.set_event_loop(loop)
 
-event = asyncio.Event() # map rendering event, set the event to redraw the map
-window = MapWindow(mm, event)
+g = app.desktop().screenGeometry()
+size = g.width() + 256 * 2, g.height() + 256 * 2
+provider = geotiler.find_provider('osm')
+mm = geotiler.Map(size=size, center=(0, 0), zoom=18, provider=provider)
+
+window = MapWindow(mm)
 window.show()
 
-positions = deque([], maxlen=120)
-t1 = show_map(event, qt_exec, window, positions)
-t2 = read_gps(event, positions)
-task = asyncio.gather(t1, t2)
+queue = asyncio.Queue()
+t1 = read_gps(queue)
+t2 = locate(window, queue)
+t3 = refresh_map(window)
+task = asyncio.gather(t1, t2, t3)
 
 loop.run_until_complete(task)
+
+# vim: sw=4:et:ai
