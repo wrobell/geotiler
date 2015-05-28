@@ -65,10 +65,10 @@ logger.setLevel(logging.DEBUG)
 
 def scroll_map(widget, pos):
     """
-    Update map center with position and download new map image.
+    Center map image on current position.
 
     :param map: Geotiler map object.
-    :param pos: New center of the map (longitude, latitude).
+    :param pos: Current position (longitude, latitude).
     """
     map = widget.map
     widget.position = pos
@@ -90,7 +90,7 @@ def scroll_map(widget, pos):
 @asyncio.coroutine
 def read_gps(queue):
     """
-    Read postion from gpsd daemon and put it to positions queue.
+    Read location from gpsd daemon and put it into positions queue.
 
     :param queue: Queue of GPS positions.
     """
