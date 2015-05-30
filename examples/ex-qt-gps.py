@@ -28,8 +28,8 @@
 """
 Read data from GPS and show map centered at the position.
 
-Use keys like '+', '-', 'n', 'p' to zoom in, zoom out and change map
-provider.
+Use keys like '+', '-', 'n', 'p', 'r' to zoom in, zoom out, change map
+provider and refresh map.
 
 Requirements:
 
@@ -84,7 +84,7 @@ def scroll_map(widget, pos):
         widget.refresh_map.set()
         x, y = w2 / 2, h2 / 2
 
-    widget.item.setOffset(w1 - x, h1 - y)
+    widget.centerOn(x, y)
 
 
 @asyncio.coroutine
@@ -129,8 +129,10 @@ def refresh_map(widget):
         logger.debug('fetching map image...')
         img = yield from render_map(map)
         logger.debug('got map image')
+
         pixmap = QPixmap.fromImage(ImageQt(img))
-        widget.item.setPixmap(pixmap)
+        widget.map_layer.setPixmap(pixmap)
+        scroll_map(widget, map.center)
 
 
 @asyncio.coroutine
@@ -171,8 +173,8 @@ class MapWindow(QGraphicsView):
         scene = QGraphicsScene()
         self.scene = scene
         self.setScene(scene)
-        self.item = QGraphicsPixmapItem()
-        scene.addItem(self.item)
+        self.map_layer = QGraphicsPixmapItem()
+        scene.addItem(self.map_layer)
 
         self.circle = QGraphicsEllipseItem(0, 0, 20, 20)
         pen = QPen(QColor(255, 0, 0, 128))
@@ -182,8 +184,15 @@ class MapWindow(QGraphicsView):
 
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.setResizeAnchor(QGraphicsView.AnchorViewCenter)
-        self.setTransformationAnchor(QGraphicsView.AnchorViewCenter)
+
+
+    def centerOn(self, x, y):
+        """
+        Center on (x, y) coordinates, which reflect current map position
+        and draw current position marker.
+        """
+        super().centerOn(x, y)
+        self.circle.setRect(x - 10, y - 10, 20, 20)
 
 
     def keyPressEvent(self, event):
@@ -194,35 +203,37 @@ class MapWindow(QGraphicsView):
         - '+'/'=' to zoom in
         - 'n' to use next map provider
         - 'p' to use previous map provider
+        - 'r' to refresh map
         - 'q' to quit
 
         """
         key = event.key()
         if key == QtCore.Qt.Key_Minus:
             self.map.zoom -= 1
+            self.refresh_map.set()
         elif key == QtCore.Qt.Key_Plus or key == QtCore.Qt.Key_Equal:
             self.map.zoom += 1
+            self.refresh_map.set()
         elif key == QtCore.Qt.Key_Q:
             loop.stop()
         elif key == QtCore.Qt.Key_N:
             self.providers.rotate(-1)
             p = self.providers[0]
             self.map.provider = geotiler.find_provider(p)
+            self.refresh_map.set()
         elif key == QtCore.Qt.Key_P:
             self.providers.rotate(1)
             p = self.providers[0]
             self.map.provider = geotiler.find_provider(p)
-        scroll_map(self, self.position)
-        self.refresh_map.set()
+            self.refresh_map.set()
+        elif key == QtCore.Qt.Key_R:
+            self.refresh_map.set()
 
 
     def resizeEvent(self, event):
         """
         On resize event redraw the map.
         """
-        w = self.width()
-        h = self.height()
-        self.circle.setRect(w / 2 - 10, h / 2 - 10, 20, 20)
         scroll_map(self, self.position)
 
 
