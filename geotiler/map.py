@@ -385,17 +385,16 @@ def _find_tiles(map, tile_coord, corner):
     :param tile_coord: Coordinate of top-left map tile.
     :param corner: Top-left map tile position on map image.
     """
-    tiles = []
-
     w, h = map.size
     cols = range(corner[0], w, map.provider.tile_width)
     rows = range(corner[1], h, map.provider.tile_height)
 
     # go by rows
     positions = itertools.product(enumerate(rows), enumerate(cols))
-    for (i, y), (j, x) in positions:
-        coord = tile_coord[0] + j, tile_coord[1] + i
-        tiles.append((coord, (x, y)))
+    tiles = [
+        ((tile_coord[0] + j, tile_coord[1] + i), (x, y))
+        for (i, y), (j, x) in positions
+    ]
 
     return tiles
 
