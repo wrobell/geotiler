@@ -66,7 +66,7 @@ def caching_downloader(get, set, downloader, urls, **kw):
     if __debug__:
         items = (u for u, v in data.items() if v is not None)
         for u in items:
-            logger.debug('Cache hit for {}'.format(u))
+            logger.debug('cache hit for {}'.format(u))
 
     # download missing tiles, keep the order of urls
     missing = tuple(u for u in urls if data[u] is None)

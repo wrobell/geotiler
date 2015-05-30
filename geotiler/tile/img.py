@@ -31,9 +31,12 @@ Render map image using map tile data.
 
 import io
 import functools
+import logging
 
 import PIL.Image
 import PIL.ImageDraw
+
+logger = logging.getLogger(__name__)
 
 
 def render_image(map, tile_data, offsets):
@@ -54,6 +57,9 @@ def render_image(map, tile_data, offsets):
     :param tile_data: Collection of tile data.
     :param offsets: Tile offset within map image for each tile data item.
     """
+    if __debug__:
+        logger.debug('combining tiles')
+
     provider = map.provider
     image = PIL.Image.new('RGBA', map.size)
     error = _error_image(provider.tile_width, provider.tile_height)

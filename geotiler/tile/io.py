@@ -74,8 +74,14 @@ def fetch_tiles(urls, loop=None):
 
     :param urls: Collection of URLs.
     """
+    if __debug__:
+        logger.debug('fetching tiles...')
+
     tasks = (fetch_tile(u) for u in urls)
     data = yield from asyncio.gather(*tasks, loop=loop, return_exceptions=True)
+
+    if __debug__:
+        logger.debug('fetching tiles done')
 
     # log missing tiles
     in_error = (t for t in data if isinstance(t, Exception))
