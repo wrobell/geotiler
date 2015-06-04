@@ -25,7 +25,7 @@
 #   License: BSD
 #
 
-from geotiler.map import Map, _find_top_left_tile, _find_tiles
+from geotiler.map import Map, _find_top_left_tile, _tile_coords, _tile_offsets
 
 import unittest
 
@@ -224,9 +224,9 @@ class MapTestCase(unittest.TestCase):
         self.assertEqual((-238, -194), map.offset)
 
 
-    def test_map_corner_calculation(self):
+    def test_map_top_left_offset_calculation(self):
         """
-        Test calculation of map corner
+        Test calculation of offset of top-left map tile
         """
         center = 11.788137, 46.481832
         zoom = 17
@@ -238,15 +238,15 @@ class MapTestCase(unittest.TestCase):
         assert map.origin == (69827, 46376), map.origin
         assert map.offset == (-238, -194), map.offset
 
-        coord, corner = _find_top_left_tile(map)
+        coord, offset = _find_top_left_tile(map)
         self.assertEqual(69822.000, coord[0])
         self.assertEqual(46370.000, coord[1])
-        self.assertEqual((-18, -230), corner)
+        self.assertEqual((-18, -230), offset)
 
 
-    def test_map_corner_calculation_12(self):
+    def test_map_top_left_offset_calculation_12(self):
         """
-        Test calculation of map corner (zoom 12)
+        Test calculation of offset of top-left map tile (zoom 12)
         """
         center = 11.788137, 46.481832
         zoom = 12
@@ -258,44 +258,60 @@ class MapTestCase(unittest.TestCase):
         assert map.origin == (2182, 1449), map.origin
         assert map.offset == (-31, -70), map.offset
 
-        coord, corner = _find_top_left_tile(map)
+        coord, offset = _find_top_left_tile(map)
         self.assertEqual(2178, coord[0], coord)
         self.assertEqual(1445, coord[1], coord)
-        self.assertEqual((-55, -94), corner)
+        self.assertEqual((-55, -94), offset)
 
 
-    def test_map_tiles(self):
+    def test_map_tile_coords(self):
         """
-        Test map tiles calculation
+        Test calculation of coordinates of map tiles
         """
         center = 11.788137, 46.481832
         zoom = 17
         size = 300, 300
         map = Map(center=center, zoom=zoom, size=size)
 
-        coord, corner = _find_top_left_tile(map)
-        tiles = _find_tiles(map, coord, corner)
+        assert map.origin == (69827, 46376), map.origin
+        assert map.offset == (-238, -194), map.offset
 
-        self.assertEqual(4, len(tiles))
+        coord, offset = _find_top_left_tile(map)
+        coords = tuple(_tile_coords(map, coord, offset))
+
+        c1, c2, c3, c4 = coords
+
+        # first col
+        self.assertEqual((69827, 46376), c1, coords)
+        self.assertEqual((69827, 46377), c2, coords)
+        # second col
+        self.assertEqual((69828, 46376), c3, coords)
+        self.assertEqual((69828, 46377), c4, coords)
+
+
+    def test_map_tile_offsets(self):
+        """
+        Test calculation of image offsets of map tiles
+        """
+        center = 11.788137, 46.481832
+        zoom = 17
+        size = 300, 300
+        map = Map(center=center, zoom=zoom, size=size)
 
         assert map.origin == (69827, 46376), map.origin
         assert map.offset == (-238, -194), map.offset
 
-        t1, t2, t3, t4 = tiles
+        coord, offset = _find_top_left_tile(map)
+        offsets = tuple(_tile_offsets(map, offset))
 
-        # first row
-        self.assertEqual((69827, 46376), t1[0], t1[0])
-        self.assertEqual((-88, -44), t1[1])
+        o1, o2, o3, o4 = offsets
 
-        self.assertEqual((69828, 46376), t2[0], t2[0])
-        self.assertEqual((-88 + 256, -44), t2[1])
-
-        # second row
-        self.assertEqual((69827, 46377), t3[0], t3[0])
-        self.assertEqual((-88, -44 + 256), t3[1])
-
-        self.assertEqual((69828, 46377), t4[0], t4[0])
-        self.assertEqual((-88 + 256, -44 + 256), t4[1])
+        # first col
+        self.assertEqual((-88, -44), o1, offsets)
+        self.assertEqual((-88, -44 + 256), o2, offsets)
+        # second col
+        self.assertEqual((-88 + 256, -44), o3, offsets)
+        self.assertEqual((-88 + 256, -44 + 256), o4, offsets)
 
 
     def test_rev_geocode(self):

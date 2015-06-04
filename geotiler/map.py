@@ -358,53 +358,58 @@ def render_map_async(map, downloader=None, loop=None, **kw):
     :param loop: Asyncio loop (used default one if `None`).
     :param kw: Parameters passed to default downloader.
     """
-    get_url = map.provider.get_tile_urls
     if downloader is None:
         downloader = fetch_tiles
 
-    coord, corner = _find_top_left_tile(map)
-    tile_input = _find_tiles(map, coord, corner)
-    coords, offsets = zip(*tile_input)
+    get_url = map.provider.get_tile_urls
+
+    # NOTE: consider having origin tile at top-left tile instead of the
+    # center, then we could skip this step
+    coord, offset = _find_top_left_tile(map)
+
+    coords = _tile_coords(map, coord, offset)
     urls = tuple(get_url(c, map.zoom)[0] for c in coords)
 
     tile_data = yield from downloader(urls, **kw)
 
+    offsets = _tile_offsets(map, offset)
     return render_image(map, tile_data, offsets)
 
 
-def _find_tiles(map, tile_coord, corner):
+def _tile_coords(map, coord, offset):
     """
-    Calculate all map tiles required to render a map.
+    Create grid of coordinates of map tiles.
 
-    For each tile a tuple of two items is created
-
-    - tile coordinates
-    - position of a tile within map image
-
-    :param map: Map instance.
-    :param tile_coord: Coordinate of top-left map tile.
-    :param corner: Top-left map tile position on map image.
+    :param map: Geotiler map instance.
+    :param coord: Coordinate of top-left tile.
+    :param offset: Map image offset of top-left tile.
     """
     w, h = map.size
-    cols = range(corner[0], w, map.provider.tile_width)
-    rows = range(corner[1], h, map.provider.tile_height)
 
-    # go by rows
-    positions = itertools.product(enumerate(rows), enumerate(cols))
-    tiles = [
-        ((tile_coord[0] + j, tile_coord[1] + i), (x, y))
-        for (i, y), (j, x) in positions
-    ]
+    n = (w - offset[0]) // map.provider.tile_width + 1
+    m = (h - offset[1]) // map.provider.tile_height + 1
+    cols = range(coord[0], coord[0] + n)
+    rows = range(coord[1], coord[1] + m)
+    return itertools.product(cols, rows)
 
-    return tiles
+
+def _tile_offsets(map, offset):
+    """
+    Create grid of offsets of map tiles.
+
+    :param map: Geotiler map instance.
+    :param offset: Map image offset of top-left tile.
+    """
+    w, h = map.size
+    cols = range(offset[0], w, map.provider.tile_width)
+    rows = range(offset[1], h, map.provider.tile_height)
+    return itertools.product(cols, rows)
 
 
 def _find_top_left_tile(map):
     """
-    Find coordinate of top-left tile of the map.
-
-    The function calculate the tile coordinate and its position relative to
-    top-left corner of the map image.
+    Calculate the tile coordinate and its position relative to top-left
+    offset of the map image.
 
     :param map: Map instance.
     """
@@ -421,14 +426,15 @@ def _find_top_left_tile(map):
 
     px -= dx * tw
     py -= dy * th
+    offset = px, py
 
     coord = origin[0] - dx, origin[1] - dy
 
-    # if corner position not in ((-tw, -th), (0, 0)], then map image does
+    # if offset position not in ((-tw, -th), (0, 0)], then map image does
     # not contain the map properly
-    assert -tw < px <= 0 and -th < py <= 0, (px, py)
+    assert -tw < offset[0] <= 0 and -th < offset[1] <= 0, offset
 
-    return coord, (px, py)
+    return coord, offset
 
 
 def calculateMapCenter(provider, tile_coord):
