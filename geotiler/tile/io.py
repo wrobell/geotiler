@@ -29,6 +29,7 @@
 Functions and coroutines to download map tiles.
 """
 
+import os
 import aiohttp
 import asyncio
 import logging
@@ -53,7 +54,13 @@ def fetch_tile(url):
 
     :param url: URL of map tile.
     """
-    response = yield from aiohttp.request('GET', url, headers=HEADERS)
+    if os.getenv('http_proxy'):
+        conn = aiohttp.ProxyConnector(proxy=os.getenv('http_proxy'))
+    else:
+        conn = None
+
+    response = yield from aiohttp.request('GET', url, headers=HEADERS,
+                                          connector=conn)
     if response.status != 200:
         fmt = 'Unable to download {} (HTTP status {})'.format
         raise ValueError(fmt(url, response.status))
