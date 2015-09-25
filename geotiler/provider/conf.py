@@ -51,6 +51,7 @@ PROVIDERS = {
     'cloudmade-midnightcommander': cloudmade.MidnightCommanderProvider,
     'stamen-toner': stamen.TonerProvider,
     'stamen-toner-lite': stamen.TonerLiteProvider,
+    'stamen-toner-background': stamen.TonerBackgroundProvider,
     'stamen-terrain': stamen.TerrainProvider,
     'stamen-watercolor': stamen.WatercolorProvider,
 }
