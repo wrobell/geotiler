@@ -29,37 +29,39 @@
 Functions and coroutines to download map tiles.
 """
 
-import aiohttp
 import asyncio
+import urllib.request
 import logging
+
+from functools import partial
 
 logger = logging.getLogger(__name__)
 
 HEADERS = {
-    'User-Agent': 'GeoTiler/0.6.0',
+    'User-Agent': 'GeoTiler/0.7.0',
 }
 
 FMT_DOWNLOAD_LOG = 'Cannot download a tile due to error: {}'.format
 
-@asyncio.coroutine
 def fetch_tile(url):
     """
-    Fetch map tile with HTTP protocol.
-
-    This is asyncio coroutine.
+    Fetch map tile.
 
     If response status is not HTTP OK (`200`), then `ValueError` exception
     is raised.
 
     :param url: URL of map tile.
     """
-    response = yield from aiohttp.request('GET', url, headers=HEADERS)
+    request = urllib.request.Request(url)
+    for k, v in HEADERS.items():
+        request.add_header(k, v)
+
+    response = urllib.request.urlopen(request)
     if response.status != 200:
         fmt = 'Unable to download {} (HTTP status {})'.format
         raise ValueError(fmt(url, response.status))
 
-    data = yield from response.read_and_close()
-    return data
+    return response.read()
 
 
 @asyncio.coroutine
@@ -77,7 +79,15 @@ def fetch_tiles(urls, loop=None):
     if __debug__:
         logger.debug('fetching tiles...')
 
-    tasks = (fetch_tile(u) for u in urls)
+    if loop is None:
+        loop = asyncio.get_event_loop()
+
+    # TODO: is it possible to call `urllib.request` in real async mode
+    # without executor by creating appropriate opener? running in executor
+    # sucks, but thanks to `urllib.request` we get all the goodies like
+    # automatic proxy handling and various protocol support
+    f = partial(loop.run_in_executor, None, fetch_tile)
+    tasks = (f(u) for u in urls)
     data = yield from asyncio.gather(*tasks, loop=loop, return_exceptions=True)
 
     if __debug__:
