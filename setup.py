@@ -32,7 +32,7 @@ setup(
     name='geotiler',
     packages=find_packages('.'),
     scripts=('bin/geotiler-lint',),
-    version='0.6.0',
+    version='0.7.0',
     description='GeoTiler - library to create maps using tiles'
         ' from a map provider',
     author='Artur Wroblewski',
