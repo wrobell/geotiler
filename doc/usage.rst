@@ -75,7 +75,7 @@ Map Providers
 -------------
 GeoTiler supports multiple map providers.
 
-The list of available map providers is presented in the table below.
+The list of supported map providers is presented in the table below.
 
     ========================= ===================== ==================
          Provider                Provider Id           License
@@ -90,6 +90,10 @@ The list of available map providers is presented in the table below.
     ========================= ===================== ==================
 
 The default map provider is OpenStreetMap.
+
+GeoTiler implements more map providers. Some of them will be fully
+supported in next GeoTiler releases. The :py:mod:`geotiler.provider.conf` module
+lists all implemented map providers.
 
 A map provider instance can be created with :py:func:`geotiler.find_provider`
 function and the instance can be passed to :py:class:`geotiler.Map` class
