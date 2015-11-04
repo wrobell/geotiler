@@ -29,8 +29,8 @@
 Map tile downloading unit tests.
 """
 
-import aiohttp
 import asyncio
+import urllib.request
 from contextlib import contextmanager
 from functools import wraps
 
@@ -47,8 +47,7 @@ class MapTileDownloadingTestCase(unittest.TestCase):
     @contextmanager
     def run_fetch_tile(self, status, *urls):
         """
-        Mock aiohttp request and response for `fetch_tile` coroutine and
-        run the coroutine.
+        Mock `urllib.request.urlopen` call and run `fetch_tile` function.
 
         The `status` parameter is HTTP error code, but can be exception as
         well. If exception, then it is raised during request.
@@ -56,25 +55,18 @@ class MapTileDownloadingTestCase(unittest.TestCase):
         :param status: HTTP error code (i.e. 200) or an exception.
         :param urls: Collection of urls.
         """
-        @asyncio.coroutine
-        def mock_read_and_close(*args, **kwargs):
-            return 'image'
+        response = mock.MagicMock()
+        response.read.return_value = 'image'
+        response.status = status
 
-        @asyncio.coroutine
-        def mock_request(*args, **kwargs):
+        with mock.patch.object(urllib.request, 'Request') as _, \
+                mock.patch.object(urllib.request, 'urlopen') as f:
+
             if isinstance(status, Exception):
-                raise status
-
-            response = mock.MagicMock()
-            response.status = status
-            response.read_and_close = mock_read_and_close
-            return response
-
-        with mock.patch.object(aiohttp, 'request', mock_request) as request:
-            coros = (fetch_tile(u) for u in urls)
-            task = asyncio.gather(*coros, return_exceptions=True)
-            loop = asyncio.get_event_loop()
-            result = loop.run_until_complete(task)
+                f.side_effect = status
+            else:
+                f.return_value = response
+            result = [fetch_tile(u) for u in urls]
             yield result
 
 
@@ -117,23 +109,11 @@ class MapTileDownloadingTestCase(unittest.TestCase):
         If HTTP error code is different than 200 for a tile, then we expect
         ValueError to be raised.
         """
-        with self.run_fetch_tile(400, 'a', 'b') as result:
-            self.assertEqual(2, len(result))
-            expected = all(isinstance(v, ValueError) for v in result)
-            self.assertTrue(expected, result)
-
-
-    def test_fetch_tile_original_error(self):
-        """
-        Test original error when fetching tile
-
-        We expect original error to be preserved by `fetch_tile` coroutine.
-        For example if there was OSError, then OSError is returned.
-        """
-        with self.run_fetch_tile(OSError(), 'a', 'b') as result:
-            self.assertEqual(2, len(result))
-            expected = all(isinstance(v, OSError) for v in result)
-            self.assertTrue(expected, result)
+        try:
+            with self.run_fetch_tile(400, 'a', 'b') as result:
+                pass
+        except ValueError as ex:
+            self.assertTrue(str(ex).startswith('Unable to download'))
 
 
     def test_fetching_tiles_error(self):
