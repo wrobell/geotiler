@@ -1,5 +1,11 @@
 Changelog
 =========
+0.7.0
+-----
+- use :py:mod:`urllib` Python standard library to fetch map tiles, which
+  allows us to support proxies; :py:mod:`aiohttp` is no longer used
+- implemented ChartBundle map providers
+
 0.6.0
 -----
 - map rendering performance improved
