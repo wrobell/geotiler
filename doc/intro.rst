@@ -23,7 +23,6 @@ To install GeoTiler use `pip <http://www.pip-installer.org/>`_::
 Requirements
 
 - `Pillow <https://pypi.python.org/pypi/Pillow/>`_ library
-- `aiohttp <http://aiohttp.readthedocs.org/>`_ library
 - Python 3.4 or later
 
 Project Status
