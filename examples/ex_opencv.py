@@ -1,6 +1,18 @@
 #
 # Opencv example using geotiler
 #
+"""
+Create an object containing a geotiler object and convert the resulting
+image to an opencv image in order to show it.
+Also contains functions to plot points on the resulting map
+Zooming is also possible with the mousewheel and + and - keys
+
+Requirements:
+
+- geotiler
+- opencv
+- numpy (also required by opencv)
+"""
 
 import geotiler
 import cv2
