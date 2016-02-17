@@ -1,5 +1,9 @@
 Changelog
 =========
+0.8.0
+-----
+- implemented `geotiler-route` script to draw GPX track on a map
+
 0.7.0
 -----
 - use :py:mod:`urllib` Python standard library to fetch map tiles, which
