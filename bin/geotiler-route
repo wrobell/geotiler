@@ -67,13 +67,19 @@ def read_positions(filename):
 #
 # parse arguments
 #
-providers = list(sorted(geotiler.provider.conf.PROVIDERS.keys()))
+desc = """
+Read positions from set of GPX files and draw them on a map.
 
-parser = argparse.ArgumentParser()
+The map size is set to 1920x1080 and can be changed with commandline
+parameter. The zoom and extents of the map are calculated automatically.
+"""
+
+parser = argparse.ArgumentParser(description=desc)
 parser.add_argument(
     '-v', '--verbose', dest='verbose', help='Make a bunch of noise',
     action='store_true'
 )
+providers = list(sorted(geotiler.provider.conf.PROVIDERS.keys()))
 parser.add_argument(
     '-p', '--provider', dest='provider', choices=providers, default='osm',
     help='Map provider or URL template like "http://example.com/{z}/{x}/{y}.png".'
