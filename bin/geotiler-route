@@ -67,25 +67,25 @@ def read_positions(filename):
 #
 # parse arguments
 #
-#parser = argparse.ArgumentParser(description=desc)
-parser = argparse.ArgumentParser()
+providers = list(sorted(geotiler.provider.conf.PROVIDERS.keys()))
 
+parser = argparse.ArgumentParser()
 parser.add_argument(
     '-v', '--verbose', dest='verbose', help='Make a bunch of noise',
     action='store_true'
 )
-
-providers = list(sorted(geotiler.provider.conf.PROVIDERS.keys()))
 parser.add_argument(
     '-p', '--provider', dest='provider', choices=providers, default='osm',
     help='Map provider or URL template like "http://example.com/{z}/{x}/{y}.png".'
 )
-
+parser.add_argument(
+    '-s', '--size', dest='size', nargs=2, type=int, default=(1920, 1080),
+    help='Size of map image'
+)
 parser.add_argument(
     '--cache', dest='cache', choices=['redis'], default='redis',
     help='specify caching strategy'
 )
-
 parser.add_argument('filename', nargs='+', help='GPX file')
 parser.add_argument('output', help='Output PNG file')
 
@@ -110,7 +110,7 @@ extent = min(x), min(y), max(x), max(y)
 # render map image
 #
 provider = geotiler.find_provider(args.provider)
-mm = geotiler.Map(size=(2880, 1620), extent=extent, provider=provider)
+mm = geotiler.Map(size=args.size, extent=extent, provider=provider)
 if mm.zoom > 18: # FIXME: max zoom in API missing
     mm = geotiler.Map(zoom=18, extent=extent)
 
