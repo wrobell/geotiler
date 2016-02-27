@@ -49,19 +49,19 @@ import numpy as np
 RED = (0, 0, 255)
 
 
-class MapObject:
+class Map:
     """
     OpenCV compatible map image.
 
     After creating the object the map can be displayed with:
 
-        cv2.imShow('window name', MapObject.img)
+        kaart = Map((0.0, 51.47879))
+        cv2.imShow('window name', Map)
         cv2.waitKey(10)
 
     :var markers: List of map markers.
     """
-    def __init__(self, center: tuple=(0.0, 51.47879),
-                 zoom: int=15, size: tuple=(1900, 1000)):
+    def __init__(self, center, zoom=15, size=(1900, 1000)):
         """
         Create OpenCV compatible map image.
 
@@ -162,7 +162,7 @@ class MapObject:
 
 
 # Create the map object (`kaart` is map in Dutch)
-kaart = MapObject()
+kaart = Map((0.0, 51.47879))
 
 # Create a window and adjust its size automatically
 cv2.namedWindow('window', cv2.WINDOW_AUTOSIZE)
