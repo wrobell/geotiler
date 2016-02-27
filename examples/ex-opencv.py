@@ -83,8 +83,11 @@ class MapObject:
 
     def draw_map(self):
         """
-        Draw the map again, to redownload the maptiles use update_map()
-        If you want to draw things on the map, call your function from here
+        Fetch map tiles and draw the map.
+
+        The map markers are being plotted as well.
+
+        Any additional drawing operations should be performed here.
         """
         data = np.array(self.pil_image)[:, :, :3]
         self.img = cv2.cvtColor(data, cv2.COLOR_RGB2BGR)
