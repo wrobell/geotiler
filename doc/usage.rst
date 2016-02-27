@@ -115,7 +115,7 @@ matplotlib or Cairo to draw additional map information or use the map in
 data analysis graphs.
 
 GeoTiler implements various examples of such integration. The examples are
-presented in the sub sections below.
+presented in the subsections below.
 
 Cairo Example
 ~~~~~~~~~~~~~
