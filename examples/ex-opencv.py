@@ -161,20 +161,24 @@ class MapObject:
 
 
 
-# Create the map object and call it "kaart" (dutch for map)
+# Create the map object (`kaart` is map in Dutch)
 kaart = MapObject()
-# Create a window called window and have it adjust in size automatically
+
+# Create a window and adjust its size automatically
 cv2.namedWindow('window', cv2.WINDOW_AUTOSIZE)
-# Create the mousecallback in the window called "window"
+
+# Create the mousec allback in the window
 cv2.setMouseCallback('window', kaart.mouse_callback)
 
 while 1:
-    # Show the image in "window"
+    # Show the image in the window
     cv2.imshow('window', kaart.img)
-    # OpenCV doesn't show anything untill the waitKey function is called
+
+    # OpenCV doesn't show anything until the `waitKey` function is called
     key = cv2.waitKey(20)
+
     # when Esc is pressed: close all opencv windows and break
-    if (key == 27):
+    if key == 27:
         cv2.destroyAllWindows()
         break
     elif key == 43:  # "+" key
