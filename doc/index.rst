@@ -25,6 +25,7 @@ Table of Contents
 
    intro
    usage
+   cmd
    api
    changelog
 
