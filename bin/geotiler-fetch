@@ -1,0 +1,91 @@
+#!/usr/bin/env python
+#
+# GeoTiler - library to create maps using tiles from a map provider
+#
+# Copyright (C) 2014-2016 by Artur Wroblewski <wrobell@pld-linux.org>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#
+# This file incorporates work covered by the following copyright and
+# permission notice (restored, based on setup.py file from
+# https://github.com/stamen/modestmaps-py):
+#
+#   Copyright (C) 2007-2013 by Michal Migurski and other contributors
+#   License: BSD
+#
+
+import argparse
+import functools
+import logging
+import sys
+
+import geotiler
+
+desc = """
+Request map of specified coverage on range of zoom levels and save map
+tiles in cache. Optionally save map image for each zoom level to a file.
+"""
+
+parser = argparse.ArgumentParser(description=desc)
+parser.add_argument(
+    '-v', '--verbose', dest='verbose', help='explain what is being done',
+    action='store_true'
+)
+providers = list(sorted(geotiler.provider.conf.PROVIDERS.keys()))
+parser.add_argument(
+    'provider', choices=providers, help='map provider name'
+)
+parser.add_argument(
+    '--cache', dest='cache', choices=['redis'], default='redis',
+    help='specify caching strategy'
+)
+parser.add_argument(
+    '-x', '--min-zoom', dest='min_zoom', default=1, help='minmal zoom value'
+)
+parser.add_argument(
+    '-z', '--max-zoom', dest='max_zoom', default=19, help='maximum zoom value'
+)
+parser.add_argument(
+    '-f', '--file', dest='file', default=None,
+    help='map image file name format, i.e. `map-image-{:02d}.png`'
+)
+parser.add_argument(
+    'extent', nargs=4, type=float, help='geographical map extent'
+)
+
+args = parser.parse_args()
+
+if args.verbose:
+    logging.basicConfig(level=logging.DEBUG)
+
+provider = geotiler.find_provider(args.provider)
+
+if args.cache == 'redis':
+    import redis
+    from geotiler.cache import redis_downloader
+
+    client = redis.Redis('localhost')
+    downloader = redis_downloader(client)
+
+
+render_map = functools.partial(geotiler.render_map, downloader=downloader)
+for zoom in range(args.min_zoom, args.max_zoom + 1):
+    map = geotiler.Map(extent=args.extent, zoom=zoom, provider=provider)
+    map.zoom = zoom
+    img = render_map(map)
+    if args.file:
+        img.save(args.file.format(zoom))
+
+# vim:et sts=4 sw=4:
