@@ -17,3 +17,4 @@ upload-doc:
 	./bin/geotiler-lint --cache redis -c -6.069 53.390 -s 512 512 -z 15 osm doc/map-osm.png
 	./bin/geotiler-lint --cache redis -c -6.069 53.390 -s 512 512 -z 15 stamen-toner doc/map-stamen-toner.png
 	./bin/geotiler-lint --cache redis -c -6.069 53.390 -z 8 -s 512 512 bluemarble doc/map-bluemarble.png
+	./bin/geotiler-route --cache redis data/path.gpx map-path.png
