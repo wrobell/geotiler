@@ -50,73 +50,93 @@ RED = (0, 0, 255)
 
 
 class MapObject:
+    """
+    OpenCV compatible map image.
+
+    After creating the object the map can be displayed with:
+
+        cv2.imShow('window name', MapObject.img)
+        cv2.waitKey(10)
+
+    """
     def __init__(self, center: tuple=(0.0, 51.47879),
                  zoom: int=15, size: tuple=(1900, 1000)):
         """
-            MapObject constructor
-            Creates a open cv compatible map image of requested size,
-            zoom level and coordinates.
-            After creating the object the map can be displayed using
-            cv2.imShow('window name',MapObject.img) and cv2.waitKey(10)
-            Keyword arguments:
-                center (Optional[tuple]) -- center coordinates of the map tuple
-                (lon,lat) (default 0.0,51.47879) (Greenwich)
-                zoom (Optional[int]) -- zoom level of the map, int between
-                3 and 19 (default 15)
-                size (Optional[int]) -- resolution of the resulting image
-                (default (1900,1000)) (good for full HD monitor)
+        Create OpenCV compatible map image.
+
+        :param center: Center of the map (longitude and latitude).
+        :param zoom: Zoom level of the map.
+        :param size: Resolution of the resulting image.
         """
         self.mm = geotiler.Map(center=center, zoom=zoom, size=size)
         self.mapmarkers = []
         self.updatemap()
 
+
     def updatemap(self):
         """
-            Download new maptiles and redraw everyting on the map
+        Download new map tiles and redraw everyting on the map.
         """
         self.pilImage = geotiler.render_map(self.mm)
         self.drawMap()
 
+
     def drawMap(self):
         """
-            Draw the map again, to redownload the maptiles use updatemap()
-            If you want to draw things on the map, call your function from here
+        Draw the map again, to redownload the maptiles use updatemap()
+        If you want to draw things on the map, call your function from here
         """
-        self.img = cv2.cvtColor(np.array(self.pilImage)[:, :, :3],
-                                cv2.COLOR_RGB2BGR)
+        data = np.array(self.pilImage)[:, :, :3]
+        self.img = cv2.cvtColor(data, cv2.COLOR_RGB2BGR)
         self.plotPoint(self.mapmarkers)
+
 
     def zoomIn(self):
         """
-            Zoom in, this functions downloads a new map
+        Zoom in.
+
+        Calling this function might fetch new tiles.
         """
         if self.mm.zoom < 19:
             self.mm.zoom += 1
         self.updatemap()
 
+
     def zoomOut(self):
         """
-            Zoom out, this function dowmloads a new map
+        Zoom out.
+
+        Calling this function might fetch new tiles.
         """
         if self.mm.zoom > 3:
             self.mm.zoom -= 1
         self.updatemap()
 
+
     def plotPoint(self, markers):
         """
-            Draws a circle at all the points in the list self.mapmarkers[]
+        Draws all markers on the map.
+
+        :param markers: Collection of map markers.
         """
         for lon, lat in markers:
             x, y = self.mm.rev_geocode((lon, lat))
             cv2.circle(self.img, center=(int(x), int(y)), radius=5,
                        color=RED, thickness=-1)
 
+
     def mouse_callback(self, event, x, y, flag=0, param=None):
         """
-            mouse_callback function for use with the cv2.setMouseCallback()
-            Left-clicking in the windows will add a point to self.mapmarkers[]
-            Richt-clicking will remove a point from self.mapmarkers[]
-            Scrolling will zoom in or outat the location the mouse is pointing
+        Mouse events callback.
+
+        Events handled
+
+        left-click
+            add map marker
+        right-click
+            remove map marker
+        scroll
+            zoom in or out at the location of the mouse pointer
         """
         if event == cv2.EVENT_MOUSEWHEEL:
             if flag > 0:  # Scroll up
