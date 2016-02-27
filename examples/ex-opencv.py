@@ -58,6 +58,7 @@ class MapObject:
         cv2.imShow('window name', MapObject.img)
         cv2.waitKey(10)
 
+    :var markers: List of map markers.
     """
     def __init__(self, center: tuple=(0.0, 51.47879),
                  zoom: int=15, size: tuple=(1900, 1000)):
@@ -69,7 +70,7 @@ class MapObject:
         :param size: Resolution of the resulting image.
         """
         self.mm = geotiler.Map(center=center, zoom=zoom, size=size)
-        self.map_markers = []
+        self.markers = []
         self.update_map()
 
 
@@ -91,7 +92,7 @@ class MapObject:
         """
         data = np.array(self.pil_image)[:, :, :3]
         self.img = cv2.cvtColor(data, cv2.COLOR_RGB2BGR)
-        self.plot_markers(self.map_markers)
+        self.plot_markers()
 
 
     def zoom_in(self):
@@ -116,16 +117,16 @@ class MapObject:
         self.update_map()
 
 
-    def plot_markers(self, markers):
+    def plot_markers(self):
         """
         Draws all markers on the map.
 
         :param markers: Collection of map markers.
         """
-        for lon, lat in markers:
-            x, y = self.mm.rev_geocode((lon, lat))
-            cv2.circle(self.img, center=(int(x), int(y)), radius=5,
-                       color=RED, thickness=-1)
+        positions = (self.mm.rev_geocode(p) for p in self.markers)
+        positions = ((int(lon), int(lat)) for lon, lat in positions)
+        for pos in positions:
+            cv2.circle(self.img, center=pos, radius=5, color=RED, thickness=-1)
 
 
     def mouse_callback(self, event, x, y, flag=0, param=None):
@@ -149,11 +150,11 @@ class MapObject:
                 self.mm.center = self.mm.geocode((x, y))
                 self.zoom_out()
         elif event == cv2.EVENT_LBUTTONUP:
-            self.map_markers.append(self.mm.geocode((x, y)))
+            self.markers.append(self.mm.geocode((x, y)))
             self.draw_map()
         elif event == cv2.EVENT_RBUTTONUP:
-            if self.map_markers:
-                del self.map_markers[-1]
+            if self.markers:
+                del self.markers[-1]
                 self.draw_map()
             else:
                 print('Nothing to delete')
