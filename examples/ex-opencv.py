@@ -69,29 +69,29 @@ class MapObject:
         :param size: Resolution of the resulting image.
         """
         self.mm = geotiler.Map(center=center, zoom=zoom, size=size)
-        self.mapmarkers = []
-        self.updatemap()
+        self.map_markers = []
+        self.update_map()
 
 
-    def updatemap(self):
+    def update_map(self):
         """
         Download new map tiles and redraw everyting on the map.
         """
-        self.pilImage = geotiler.render_map(self.mm)
-        self.drawMap()
+        self.pil_image = geotiler.render_map(self.mm)
+        self.draw_map()
 
 
-    def drawMap(self):
+    def draw_map(self):
         """
-        Draw the map again, to redownload the maptiles use updatemap()
+        Draw the map again, to redownload the maptiles use update_map()
         If you want to draw things on the map, call your function from here
         """
-        data = np.array(self.pilImage)[:, :, :3]
+        data = np.array(self.pil_image)[:, :, :3]
         self.img = cv2.cvtColor(data, cv2.COLOR_RGB2BGR)
-        self.plotPoint(self.mapmarkers)
+        self.plot_markers(self.map_markers)
 
 
-    def zoomIn(self):
+    def zoom_in(self):
         """
         Zoom in.
 
@@ -99,10 +99,10 @@ class MapObject:
         """
         if self.mm.zoom < 19:
             self.mm.zoom += 1
-        self.updatemap()
+        self.update_map()
 
 
-    def zoomOut(self):
+    def zoom_out(self):
         """
         Zoom out.
 
@@ -110,10 +110,10 @@ class MapObject:
         """
         if self.mm.zoom > 3:
             self.mm.zoom -= 1
-        self.updatemap()
+        self.update_map()
 
 
-    def plotPoint(self, markers):
+    def plot_markers(self, markers):
         """
         Draws all markers on the map.
 
@@ -141,28 +141,28 @@ class MapObject:
         if event == cv2.EVENT_MOUSEWHEEL:
             if flag > 0:  # Scroll up
                 self.mm.center = self.mm.geocode((x, y))
-                self.zoomIn()
+                self.zoom_in()
             elif flag < 0:    # Scroll down
                 self.mm.center = self.mm.geocode((x, y))
-                self.zoomOut()
+                self.zoom_out()
         elif event == cv2.EVENT_LBUTTONUP:
-            self.mapmarkers.append(self.mm.geocode((x, y)))
-            self.drawMap()
+            self.map_markers.append(self.mm.geocode((x, y)))
+            self.draw_map()
         elif event == cv2.EVENT_RBUTTONUP:
-            if len(self.mapmarkers) > 0:
-                del self.mapmarkers[-1]
-                self.drawMap()
+            if self.map_markers:
+                del self.map_markers[-1]
+                self.draw_map()
             else:
                 print('Nothing to delete')
 
 
-# Create the map object and call it "kaart"(dutch for map)
+
+# Create the map object and call it "kaart" (dutch for map)
 kaart = MapObject()
 # Create a window called window and have it adjust in size automatically
 cv2.namedWindow('window', cv2.WINDOW_AUTOSIZE)
 # Create the mousecallback in the window called "window"
 cv2.setMouseCallback('window', kaart.mouse_callback)
-
 
 while 1:
     # Show the image in "window"
@@ -174,6 +174,8 @@ while 1:
         cv2.destroyAllWindows()
         break
     elif key == 43:  # "+" key
-        kaart.zoomIn()
+        kaart.zoom_in()
     elif key == 45:   # "-" key
-        kaart.zoomOut()
+        kaart.zoom_out()
+
+# vim: sw=4:et:ai
