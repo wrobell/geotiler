@@ -75,8 +75,8 @@ def _error_image(width, height):
     """
     Create error tile image.
 
-    The error tile image is PIL image object showing message that a map tail
-    could not be downloaded.
+    The error tile image is PIL image object showing message that a map
+    tile could not be downloaded.
 
     :param width: Width of tile image.
     :param height: Height of tile image.
