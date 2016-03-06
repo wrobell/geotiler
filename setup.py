@@ -31,7 +31,7 @@ from setuptools import setup, find_packages
 setup(
     name='geotiler',
     packages=find_packages('.'),
-    scripts=('bin/geotiler-lint', 'bin/geotiler-route'),
+    scripts=('bin/geotiler-lint', 'bin/geotiler-route', 'bin/geotiler-fetch'),
     version='0.8.0',
     description='GeoTiler - library to create maps using tiles'
         ' from a map provider',
