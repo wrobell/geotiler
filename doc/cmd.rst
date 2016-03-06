@@ -44,6 +44,6 @@ saved to a file for each zoom level.
 To fetch OSM Cycle map tiles and save map images into files named
 `map-01.png', `map-02.png`, ..., `map-19.png`::
 
-    geotiler-fetch -p osm-cycle -f 'map-{02d}.png' -6.068 53.389 -6.070 53.340
+    geotiler-fetch -p osm-cycle -f 'map-{:02d}.png' -6.0759 53.3830 -6.0584 53.3945
 
 .. vim: sw=4:et:ai

@@ -45,17 +45,20 @@ parser.add_argument(
 )
 providers = list(sorted(geotiler.provider.conf.PROVIDERS.keys()))
 parser.add_argument(
-    'provider', choices=providers, help='map provider name'
+    '-p', '--provider', dest='provider', choices=providers, default='osm',
+    help='map provider name'
 )
 parser.add_argument(
     '--cache', dest='cache', choices=['redis'], default='redis',
     help='specify caching strategy'
 )
 parser.add_argument(
-    '-x', '--min-zoom', dest='min_zoom', default=1, help='minmal zoom value'
+    '-x', '--min-zoom', dest='min_zoom', default=1, type=int,
+    help='minmal zoom value'
 )
 parser.add_argument(
-    '-z', '--max-zoom', dest='max_zoom', default=19, help='maximum zoom value'
+    '-z', '--max-zoom', dest='max_zoom', default=19, type=int,
+    help='maximum zoom value'
 )
 parser.add_argument(
     '-f', '--file', dest='file', default=None,
@@ -84,6 +87,13 @@ render_map = functools.partial(geotiler.render_map, downloader=downloader)
 for zoom in range(args.min_zoom, args.max_zoom + 1):
     map = geotiler.Map(extent=args.extent, zoom=zoom, provider=provider)
     map.zoom = zoom
+    if map.size[0] < 256 or map.size[1] < 256:
+        print(
+            'map image size for zoom {} is less than 256x256,' \
+            ' skipping'.format(zoom),
+            file=sys.stderr
+        )
+        continue
     img = render_map(map)
     if args.file:
         img.save(args.file.format(zoom))
