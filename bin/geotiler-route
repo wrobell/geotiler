@@ -89,6 +89,14 @@ parser.add_argument(
     help='Size of map image'
 )
 parser.add_argument(
+    '-r', '--radius', dest='radius', type=float, default=0.5,
+    help='Radius of drawn point of a position'
+)
+parser.add_argument(
+    '-a', '--alpha', dest='alpha', type=float, default=0.5,
+    help='Color alpha of drawn point of a position'
+)
+parser.add_argument(
     '--cache', dest='cache', choices=['redis'], default='redis',
     help='specify caching strategy'
 )
@@ -135,8 +143,9 @@ cr = cairo.Context(surface)
 
 points = (mm.rev_geocode(p) for p in positions)
 for x, y in points:
-    cr.set_source_rgba(1.0, 0.0, 0.0, 0.5)
-    cr.arc(x, y, 0.5, 0, 2 * math.pi)
+    cr.set_source_rgba(1.0, 0.0, 0.0, args.alpha)
+    cr.arc(x, y, args.radius, 0, 2 * math.pi)
+    cr.fill()
     cr.stroke()
 
 surface.write_to_png(args.output)
