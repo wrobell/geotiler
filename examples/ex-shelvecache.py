@@ -24,6 +24,7 @@
 #   Copyright (C) 2007-2013 by Michal Migurski and other contributors
 #   License: BSD
 #
+
 import geotiler
 from functools import partial
 from geotiler.cache import caching_downloader
@@ -32,30 +33,30 @@ import shelve
 import time
 
 
-class Cache():
+class Cache:
     """
-    Simple Cache class which uses the python shelve module to store stuff,
-    it provides the functions get() set() needed for the cashing_dowloader
+    Cache based on Python's `shelve` module to keep map tiles.
 
-    Warning, there is nothing that prevents this database from growing very
-    large and also nothing which determines if the data is recent (however the
-    time at the moment something is placed in the database is saved)
+    WARNING: There is nothing that prevents cache from growing very large
+    and also nothing which determines if the data is recent (however the
+    time at the moment something is placed in the database is saved).
     """
     def __init__(self, filename):
         """
-        Opens an existing shelve, if it does not exist create a new one
+        Opens an existing shelve and create new one if it does not exist.
 
-        :param filename: Filename for the shelve
+        :param filename: Filename for the shelve.
         """
         self.cache = shelve.open(filename, writeback=True)
 
+
     def get(self, key):
         """
-        Gets a value from the cache
+        Get map tile from cache.
 
-        :param key: Key used to retrieve data from the cache
+        Null is returned if key does not exist.
 
-        returns None if key doens't exist
+        :param key: Key used to retrieve data from the cache.
         """
         try:
             data = self.cache[key][0]
@@ -63,24 +64,27 @@ class Cache():
             data = None
         return data
 
+
     def set(self, key, data):
         """
-        Stores data in the shelve
-        The data is stored as a tuple with the current time, this time could be
-        used to determine if the data is recent (not implemented)
+        Stores map tile in cache.
 
-        :param key: Key used to identify the data
-        :param data: data to be stored
+        The data is stored as (tile data, time) tuple.
+
+        :param key: Key used to identify the data.
+        :param data: Map tile data.
         """
         if key not in self.cache:
             self.cache[key] = (data, time.time())
         return
 
+
     def close(self):
         """
-        Closes the shelf
+        Close the shelve used to cache the data.
         """
         self.cache.close()
+
 
 # Create a cache instance
 cache = Cache("test")
@@ -105,5 +109,7 @@ t3 = time.time()
 # Close the cache
 cache.close()
 
-print("time for first render:%6.5f seconds" % (t2-t1))
-print("time for second render:%6.5f seconds" % (t3-t2))
+print('time for first render: {:6.5f} seconds'.format(t2 - t1))
+print('time for second render: {:6.5f} seconds'.format(t3 - t2))
+
+# vim: sw=4:et:ai
