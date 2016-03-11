@@ -33,6 +33,13 @@ import shelve
 import time
 
 
+#
+# Make it default GeoTiler cache? We need to
+#
+# - create shelve file per map provider in ~/.geotiler/ directory
+# - figure out key timestamp issue
+# - unit tests
+#
 class Cache:
     """
     Cache based on Python's `shelve` module to keep map tiles.
