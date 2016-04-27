@@ -50,6 +50,7 @@ from .base import IMapProvider
 
 URL_FMT = 'http://tile.stamen.com/{style}/{{zoom}}/{{col}}/{{row}}.{ext}'
 
+
 class BaseProvider(IMapProvider):
     def __init__(self, style, ext):
         # the spherical mercator world tile covers (-π, -π) to (π, π)
@@ -58,11 +59,9 @@ class BaseProvider(IMapProvider):
 
         self.url_fmt = URL_FMT.format(style=style, ext=ext)
 
-
     def get_tile_urls(self, tile_coord, zoom):
         column, row = tile_coord
         return (self.url_fmt.format(zoom=zoom, col=column, row=row),)
-
 
 
 class TonerProvider(BaseProvider):
@@ -75,10 +74,14 @@ class TonerLiteProvider(BaseProvider):
         BaseProvider.__init__(self, 'toner-lite', 'png')
 
 
+class TonerBackgroundProvider(BaseProvider):
+    def __init__(self):
+        BaseProvider.__init__(self, 'toner-background', 'png')
+
+
 class TerrainProvider(BaseProvider):
     def __init__(self):
         BaseProvider.__init__(self, 'terrain', 'jpg')
-
 
 
 class WatercolorProvider(BaseProvider):
