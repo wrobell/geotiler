@@ -29,7 +29,7 @@
 List of builtin map tiles providers.
 """
 
-from . import yahoo, ms, bluemarble, osm, cloudmade, mapquest, stamen, chartbundle
+from . import ms, bluemarble, osm, cloudmade, mapquest, stamen, chartbundle
 
 PROVIDERS = {
     'osm': osm.Provider,
