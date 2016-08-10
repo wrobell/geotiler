@@ -29,7 +29,7 @@
 List of builtin map tiles providers.
 """
 
-from . import ms, bluemarble, osm, cloudmade, mapquest, stamen, chartbundle
+from . import bluemarble, osm, cloudmade, mapquest, stamen, chartbundle
 
 PROVIDERS = {
     'osm': osm.Provider,
@@ -37,9 +37,6 @@ PROVIDERS = {
     'bluemarble': bluemarble.Provider,
     'mapquest-road': mapquest.RoadProvider,
     'mapquest-aerial': mapquest.AerialProvider,
-    'ms-road': ms.RoadProvider,
-    'ms-aerial': ms.AerialProvider,
-    'ms-hybrid': ms.HybridProvider,
     'cloudmade-original': cloudmade.OriginalProvider,
     'cloudmade-fineline': cloudmade.FineLineProvider,
     'cloudmade-tourist': cloudmade.TouristProvider,
