@@ -25,8 +25,32 @@
 #   License: BSD
 #
 
-"""
-Map tiles providers.
-"""
+from geotiler.provider import MapProvider
+
+def test_provider_init():
+    """
+    Test initialization of map provider.
+    """
+    data = {
+        'id': 'osm',
+        'name': 'OpenStreetMap',
+        'attribution': '© OpenStreetMap contributors\nhttp://www.openstreetmap.org/copyright',
+        'url': 'http://{subdomain}.tile.openstreetmap.org/{z}/{x}/{y}.{ext}',
+        'subdomains': ('a', 'b', 'c'),
+        'extension': 'png',
+        'limit': 2,
+    }
+    provider = MapProvider(data)
+
+    assert 'osm' == provider.id
+    assert 'OpenStreetMap' == provider.name
+    expected = '© OpenStreetMap contributors' \
+        + '\nhttp://www.openstreetmap.org/copyright'
+    assert expected == provider.attribution
+    expected =  'http://{subdomain}.tile.openstreetmap.org/{z}/{x}/{y}.{ext}'
+    assert expected == provider.url
+    assert ('a', 'b', 'c') == provider.subdomains
+    assert 'png' == provider.extension
+    assert 2 == provider.limit
 
 # vim:et sts=4 sw=4:

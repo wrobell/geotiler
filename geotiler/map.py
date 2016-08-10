@@ -34,7 +34,7 @@ import itertools
 import math
 import logging
 
-from .provider.conf import DEFAULT_PROVIDER
+from .provider import DEFAULT_PROVIDER
 from .geo import zoom_to
 from .tile.io import fetch_tiles
 from .tile.img import render_image
