@@ -50,15 +50,6 @@ class IMapProvider(object):
         return 256
 
 
-    def sourceCoordinate(self, tile_coord, zoom):
-        wrappedColumn = tile_coord[0] % pow(2, zoom)
-
-        while wrappedColumn < 0:
-            wrappedColumn += pow(2, zoom)
-
-        return wrappedColumn, tile_coord[1]
-
-
 
 class TemplatedMercatorProvider(IMapProvider):
     """ Convert URI templates into tile URLs, using a tileUrlTemplate identical to:
