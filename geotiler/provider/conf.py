@@ -29,14 +29,12 @@
 List of builtin map tiles providers.
 """
 
-from . import bluemarble, osm, cloudmade, mapquest, stamen, chartbundle
+from . import bluemarble, osm, cloudmade, stamen, chartbundle
 
 PROVIDERS = {
     'osm': osm.Provider,
     'osm-cycle': osm.CycleProvider,
     'bluemarble': bluemarble.Provider,
-    'mapquest-road': mapquest.RoadProvider,
-    'mapquest-aerial': mapquest.AerialProvider,
     'cloudmade-original': cloudmade.OriginalProvider,
     'cloudmade-fineline': cloudmade.FineLineProvider,
     'cloudmade-tourist': cloudmade.TouristProvider,
