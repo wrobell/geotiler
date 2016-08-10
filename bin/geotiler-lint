@@ -90,25 +90,7 @@ if args.verbose:
     logging.basicConfig(level=logging.DEBUG)
 
 outfile = args.output
-
-if args.provider.startswith('cloudmade-'):
-    if not args.apikey:
-        print(
-            'Cloudmade provider requires an API key. Register at' \
-            ' http://developers.cloudmade.com/',
-            file=sys.stderr
-        )
-        sys.exit(1)
-    provider = ModestMaps.builtinProviders[args.provider](args.apikey)
-elif args.provider.startswith('http://'):
-    provider = ModestMaps.Providers.TemplatedMercatorProvider(args.provider)
-elif args.provider.startswith('https://'):
-    provider = ModestMaps.Providers.TemplatedMercatorProvider(args.provider)
-elif args.provider.startswith('file://'):
-    args = ModestMaps.Providers.TemplatedMercatorProvider(args.provider)
-else:
-    provider = geotiler.find_provider(args.provider)
-
+provider = geotiler.find_provider(args.provider)
 downloader = None # use default downloader
 
 if args.cache == 'redis':
