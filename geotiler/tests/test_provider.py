@@ -27,9 +27,34 @@
 
 from geotiler.provider import MapProvider
 
-def test_provider_init():
+
+def test_provider_init_default():
     """
-    Test initialization of map provider.
+    Test initialization of map provider with default configuration values.
+    """
+    data = {
+        'id': 'osm',
+        'name': 'OpenStreetMap',
+        'attribution': '© OpenStreetMap contributors\nhttp://www.openstreetmap.org/copyright',
+        'url': 'http://{subdomain}.tile.openstreetmap.org/{z}/{x}/{y}.{ext}',
+    }
+    provider = MapProvider(data)
+
+    assert 'osm' == provider.id
+    assert 'OpenStreetMap' == provider.name
+    expected = '© OpenStreetMap contributors' \
+        + '\nhttp://www.openstreetmap.org/copyright'
+    assert expected == provider.attribution
+    expected =  'http://{subdomain}.tile.openstreetmap.org/{z}/{x}/{y}.{ext}'
+    assert expected == provider.url
+    assert () == provider.subdomains
+    assert 'png' == provider.extension
+    assert 1 == provider.limit
+
+def test_provider_init_default_override():
+    """
+    Test initialization of map provider when overriding default
+    configuration values.
     """
     data = {
         'id': 'osm',
@@ -37,7 +62,7 @@ def test_provider_init():
         'attribution': '© OpenStreetMap contributors\nhttp://www.openstreetmap.org/copyright',
         'url': 'http://{subdomain}.tile.openstreetmap.org/{z}/{x}/{y}.{ext}',
         'subdomains': ('a', 'b', 'c'),
-        'extension': 'png',
+        'extension': 'jpg',
         'limit': 2,
     }
     provider = MapProvider(data)
@@ -50,7 +75,7 @@ def test_provider_init():
     expected =  'http://{subdomain}.tile.openstreetmap.org/{z}/{x}/{y}.{ext}'
     assert expected == provider.url
     assert ('a', 'b', 'c') == provider.subdomains
-    assert 'png' == provider.extension
+    assert 'jpg' == provider.extension
     assert 2 == provider.limit
 
 # vim:et sts=4 sw=4:

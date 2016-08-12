@@ -37,12 +37,20 @@ ATTRIBUTES = 'id', 'name', 'attribution', 'url', 'subdomains', 'extension', \
 
 class MapProvider:
     def __init__(self, data):
-        # the spherical mercator world tile covers (-π, -π) to (π, π)
-        t = deriveTransformation(-pi, pi, 0, 0, pi, pi, 1, 0, -pi, -pi, 0, 1)
-        self.projection = MercatorProjection(0, t)
+        self.id = None
+        self.name = None
+        self.attribution = None
+        self.url = None
+        self.subdomains = tuple()
+        self.extension = 'png'
+        self.limit = 1
 
         attrs = ((n, data[n]) for n in ATTRIBUTES if n in data)
         self.__dict__.update(attrs)
+
+        # the spherical mercator world tile covers (-π, -π) to (π, π)
+        t = deriveTransformation(-pi, pi, 0, 0, pi, pi, 1, 0, -pi, -pi, 0, 1)
+        self.projection = MercatorProjection(0, t)
 
     @property
     def tile_width(self):
