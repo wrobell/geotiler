@@ -104,7 +104,7 @@ def find_provider(id):
     """
     Load map provider data from JSON file and create map provider.
 
-    :param id: Map provider id.
+    :param id: Map provider identificator.
     """
     fn = os.path.join(base_dir(), id + '.json')
     if __debug__:

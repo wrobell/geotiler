@@ -50,7 +50,7 @@ class Map(object):
     The extent, zoom, center and image size can be changed at any time with
     appropriate properties.
 
-    :var provider: Map tiles provider (default OpenStreetMap).
+    :var provider: Map tiles provider identificator (default `osm`).
     :var _zoom: Map zoom attribute accessed via `zoom` property.
     :var _size: Map image size accessed via `size` property.
     :var origin: Tile coordinates at map zoom level of base tile.
