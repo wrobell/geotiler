@@ -2,12 +2,13 @@ Changelog
 =========
 0.9.0
 -----
-- replace python based map providers configuration with JSON file
-  configuration (inspired by poor-maps project tile source definition
+- replace Python based map providers configuration with JSON file
+  configuration (inspired by `poor-maps` project tile source definition
   https://github.com/otsaloma/poor-maps/tree/master/tilesources)
 - `geotiler-lint` map provider argument is optional now
-- `geotiler.Map` provider constructor parameter should be string now
-- added caching example using `shelve` Python module (thanks to matthijs876)
+- `geotiler.Map` class constructor parameter for provider is changed to be
+  string instead of map provider instance
+- added caching example using `shelve` Python module (thanks to `matthijs876`)
 
 0.8.0
 -----
