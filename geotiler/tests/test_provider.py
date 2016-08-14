@@ -25,7 +25,9 @@
 #   License: BSD
 #
 
-from geotiler.provider import MapProvider
+from geotiler.provider import MapProvider, base_dir
+
+from unittest import mock
 
 
 def test_provider_init_default():
@@ -33,14 +35,12 @@ def test_provider_init_default():
     Test initialization of map provider with default configuration values.
     """
     data = {
-        'id': 'osm',
         'name': 'OpenStreetMap',
         'attribution': '© OpenStreetMap contributors\nhttp://www.openstreetmap.org/copyright',
         'url': 'http://{subdomain}.tile.openstreetmap.org/{z}/{x}/{y}.{ext}',
     }
     provider = MapProvider(data)
 
-    assert 'osm' == provider.id
     assert 'OpenStreetMap' == provider.name
     expected = '© OpenStreetMap contributors' \
         + '\nhttp://www.openstreetmap.org/copyright'
@@ -57,7 +57,6 @@ def test_provider_init_default_override():
     configuration values.
     """
     data = {
-        'id': 'osm',
         'name': 'OpenStreetMap',
         'attribution': '© OpenStreetMap contributors\nhttp://www.openstreetmap.org/copyright',
         'url': 'http://{subdomain}.tile.openstreetmap.org/{z}/{x}/{y}.{ext}',
@@ -67,7 +66,6 @@ def test_provider_init_default_override():
     }
     provider = MapProvider(data)
 
-    assert 'osm' == provider.id
     assert 'OpenStreetMap' == provider.name
     expected = '© OpenStreetMap contributors' \
         + '\nhttp://www.openstreetmap.org/copyright'
@@ -77,5 +75,12 @@ def test_provider_init_default_override():
     assert ('a', 'b', 'c') == provider.subdomains
     assert 'jpg' == provider.extension
     assert 2 == provider.limit
+
+def test_base_dir():
+    """
+    Test base dir retrieval.
+    """
+    fn = base_dir()
+    assert fn.endswith('/geotiler/source')
 
 # vim:et sts=4 sw=4:

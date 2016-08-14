@@ -28,6 +28,6 @@
 __version__ = '0.8.0'
 
 from .map import Map, render_map, render_map_async
-from .provider import find_provider
+from .provider import find_provider, providers
 
 # vim: sw=4:et:ai

@@ -25,8 +25,20 @@
 #   License: BSD
 #
 
+"""
+Load and create map providers.
+"""
+
+import glob
+import itertools
+import json
+import logging
+import os.path
+
 from math import pi
 from .geo import MercatorProjection, deriveTransformation
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_PROVIDER = 'osm'
 
@@ -51,6 +63,10 @@ class MapProvider:
         # the spherical mercator world tile covers (-π, -π) to (π, π)
         t = deriveTransformation(-pi, pi, 0, 0, pi, pi, 1, 0, -pi, -pi, 0, 1)
         self.projection = MercatorProjection(0, t)
+        if self.subdomains:
+            self.subdomain_cycler = itertools.cycle(self.subdomains)
+        else:
+            self.subdomain_cycler = itertools.cycle(('', ))
 
     @property
     def tile_width(self):
@@ -61,11 +77,45 @@ class MapProvider:
         return 256
 
     def get_tile_urls(self, tile_coord, zoom):
-        fmt = 'http://s3.amazonaws.com/com.modestmaps.bluemarble/{z}-r{y}-c{x}.jpg'
-        return (fmt.format(x=tile_coord[0], y=tile_coord[1], z=zoom),)
+        params = {
+            'subdomain': next(self.subdomain_cycler),
+            'x': tile_coord[0],
+            'y': tile_coord[1],
+            'z': zoom,
+            'ext': self.extension,
+        }
+        return self.url.format(**params)
 
 
-def find_provider():
-    pass
+def providers():
+    """
+    Get sorted list of all map providers.
+    """
+    path = os.path.join(base_dir(), '*.json')
+    if __debug__:
+        logger.debug('list map providers from {}'.format(path))
+    pid = lambda fn: os.path.splitext(os.path.basename(fn))[0]
+    return sorted(pid(fn) for fn in glob.iglob(path))
+
+def find_provider(id):
+    """
+    Load map provider data from JSON file and create map provider.
+
+    :param id: Map provider id.
+    """
+    fn = os.path.join(base_dir(), id + '.json')
+    if __debug__:
+        logger.debug('loading map provider "{}" from {}'.format(id, fn))
+    with open(fn) as f:
+        data = json.load(f)
+        provider = MapProvider(data)
+        return provider
+
+def base_dir():
+    """
+    Get map provider data base directory.
+    """
+    mod = __import__('geotiler')
+    return os.path.join(mod.__path__[0], 'source')
 
 # vim:et sts=4 sw=4:

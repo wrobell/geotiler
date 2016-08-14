@@ -34,7 +34,7 @@ import itertools
 import math
 import logging
 
-from .provider import DEFAULT_PROVIDER
+from .provider import DEFAULT_PROVIDER, find_provider
 from .geo import zoom_to
 from .tile.io import fetch_tiles
 from .tile.img import render_image
@@ -79,7 +79,7 @@ class Map(object):
         :param provider: Map tiles provider.
         """
         super().__init__()
-        self.provider = provider
+        self.provider = find_provider(provider)
         self.origin = None
         self.offset = None
 
@@ -368,8 +368,7 @@ def render_map_async(map, downloader=None, loop=None, **kw):
     coord, offset = _find_top_left_tile(map)
 
     coords = _tile_coords(map, coord, offset)
-    urls = tuple(get_url(c, map.zoom)[0] for c in coords)
-
+    urls = tuple(get_url(c, map.zoom) for c in coords)
     tile_data = yield from downloader(urls, **kw)
 
     offsets = _tile_offsets(map, offset)

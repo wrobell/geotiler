@@ -71,7 +71,7 @@ parser.add_argument(
     help='Size of map image'
 )
 
-providers = list(sorted(geotiler.provider.conf.PROVIDERS.keys()))
+providers = geotiler.providers()
 parser.add_argument(
     'provider', choices=providers,
     help='Map provider or URL template like "http://example.com/{z}/{x}/{y}.png".'
@@ -90,7 +90,6 @@ if args.verbose:
     logging.basicConfig(level=logging.DEBUG)
 
 outfile = args.output
-provider = geotiler.find_provider(args.provider)
 downloader = None # use default downloader
 
 if args.cache == 'redis':
@@ -105,7 +104,7 @@ map = geotiler.Map(
     center=args.center,
     zoom=args.zoom,
     size=args.size,
-    provider=provider
+    provider=args.provider
 )
 
 img = geotiler.render_map(map, downloader=downloader)
