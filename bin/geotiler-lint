@@ -48,33 +48,25 @@ There are three ways to set a map coverage area
 """
 
 parser = argparse.ArgumentParser(description=desc)
-
 parser.add_argument(
     '-v', '--verbose', dest='verbose', help='Make a bunch of noise',
     action='store_true'
 )
-
 parser.add_argument(
     '-c', '--center', dest='center', nargs=2, type=float,
-    help='Center of the map (lon, lat), e.g.: -122.263 37.804'
+    help='center of the map (lon, lat), e.g.: -122.263 37.804'
 )
-
 parser.add_argument(
     '-e', '--extent', dest='extent', nargs=4, type=float,
     help='Geographical map extent. Two lat, lon pairs'
 )
-
 parser.add_argument('-z', '--zoom', dest='zoom', type=int, help='Zoom level')
-
 parser.add_argument(
     '-s', '--size', dest='size', nargs=2, type=int,
-    help='Size of map image'
+    help='size of map image'
 )
-
-providers = geotiler.providers()
 parser.add_argument(
-    'provider', choices=providers,
-    help='Map provider or URL template like "http://example.com/{z}/{x}/{y}.png".'
+    'provider', choices=geotiler.providers(), help='map provider id'
 )
 
 parser.add_argument('-k', '--apikey', dest='apikey')

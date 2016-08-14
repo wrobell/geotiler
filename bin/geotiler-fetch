@@ -43,7 +43,7 @@ parser.add_argument(
     '-v', '--verbose', dest='verbose', help='explain what is being done',
     action='store_true'
 )
-providers = list(sorted(geotiler.provider.conf.PROVIDERS.keys()))
+providers = geotiler.providers()
 parser.add_argument(
     '-p', '--provider', dest='provider', choices=providers, default='osm',
     help='map provider name'
@@ -73,8 +73,6 @@ args = parser.parse_args()
 if args.verbose:
     logging.basicConfig(level=logging.DEBUG)
 
-provider = geotiler.find_provider(args.provider)
-
 if args.cache == 'redis':
     import redis
     from geotiler.cache import redis_downloader
@@ -85,7 +83,7 @@ if args.cache == 'redis':
 
 render_map = functools.partial(geotiler.render_map, downloader=downloader)
 for zoom in range(args.min_zoom, args.max_zoom + 1):
-    map = geotiler.Map(extent=args.extent, zoom=zoom, provider=provider)
+    map = geotiler.Map(extent=args.extent, zoom=zoom, provider=args.provider)
     map.zoom = zoom
     if map.size[0] < 256 or map.size[1] < 256:
         print(
