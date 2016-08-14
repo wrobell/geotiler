@@ -1,0 +1,6 @@
+{
+    "name": "Modest Maps Blue Marble",
+    "attribution": "NASA usage guideline: http://www.nasa.gov/multimedia/guidelines/index.html",
+    "url": "http://s3.amazonaws.com/com.modestmaps.bluemarble/{z}-r{y}-c{x}.{ext}",
+    "extension": "jpg"
+}
