@@ -4,7 +4,7 @@
 # render map via all supported map tiles providers; redis is required
 #
 
-PROVIDERS="osm osm-cycle stamen-toner bluemarble"
+PROVIDERS="osm osm-cycle stamen-toner stamen-toner-lite stamen-terrain stamen-watercolor bluemarble"
 EXTENT="-10.854492187499988 35.20972164522138 41.8798828125 71.37110941823617"
 CENTER="15.512695312500005 57.49221366670073"
 ZOOM=5
@@ -14,9 +14,9 @@ GEOTILER='./bin/geotiler-lint -v --cache redis'
 i=1
 for p in $PROVIDERS; do
     ii=$(printf "%03d" $i)
-    $GEOTILER -c $CENTER -z $ZOOM -s $SIZE $p test-all-$ii-$p-center-zoom-size.png
-    $GEOTILER -e $EXTENT -s $SIZE $p test-all-$ii-$p--extent-size.png
-    $GEOTILER -e $EXTENT -z $ZOOM $p test-all-$ii-$p-extent-zoom.png
+    $GEOTILER -c $CENTER -z $ZOOM -s $SIZE -p $p test-all-$ii-$p-center-zoom-size.png
+    $GEOTILER -e $EXTENT -s $SIZE -p $p test-all-$ii-$p--extent-size.png
+    $GEOTILER -e $EXTENT -z $ZOOM -p $p test-all-$ii-$p-extent-zoom.png
     i=$((i + 1))
 done
 gm montage -geometry '1200x1500>+2+2' -tile 3x test-all-*.png test-all.png

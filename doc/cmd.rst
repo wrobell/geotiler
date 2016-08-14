@@ -9,7 +9,7 @@ image from command line.
 For example, to create a map image using Blue Marble map tiles provider,
 map center, zoom and map image size::
 
-    geotiler-lint -c -6.069 53.390 -z 8 -s 512 512 bluemarble map-bluemarble.png
+    geotiler-lint -c -6.069 53.390 -z 8 -s 512 512 -p bluemarble map-bluemarble.png
 
 .. figure:: map-bluemarble.png
    :align: center

@@ -66,10 +66,9 @@ parser.add_argument(
     help='size of map image'
 )
 parser.add_argument(
-    'provider', choices=geotiler.providers(), help='map provider id'
+    '-p', '--provider', dest='provider', choices=geotiler.providers(),
+    default='osm', help='map provider id'
 )
-
-parser.add_argument('-k', '--apikey', dest='apikey')
 parser.add_argument(
     '--cache', dest='cache', choices=['redis'], default=None,
     help='specify caching strategy'

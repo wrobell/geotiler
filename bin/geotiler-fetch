@@ -46,7 +46,7 @@ parser.add_argument(
 providers = geotiler.providers()
 parser.add_argument(
     '-p', '--provider', dest='provider', choices=providers, default='osm',
-    help='map provider name'
+    help='map provider id'
 )
 parser.add_argument(
     '--cache', dest='cache', choices=['redis'], default='redis',
