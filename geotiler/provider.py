@@ -92,7 +92,7 @@ class MapProvider:
 
 def providers():
     """
-    Get sorted list of all map providers.
+    Get sorted list of all map providers identificators.
     """
     path = os.path.join(base_dir(), '*.json')
     if __debug__:

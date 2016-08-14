@@ -7,6 +7,7 @@ Map Rendering
    geotiler.Map
    geotiler.render_map
    geotiler.render_map_async
+   geotiler.providers
    geotiler.find_provider
 
 .. autoclass:: geotiler.Map
@@ -15,6 +16,7 @@ Map Rendering
 
 .. autofunction:: geotiler.render_map
 .. autofunction:: geotiler.render_map_async
+.. autofunction:: geotiler.providers
 .. autofunction:: geotiler.find_provider
 
 

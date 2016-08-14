@@ -91,16 +91,19 @@ The list of supported map providers is presented in the table below.
 
 The default map provider is OpenStreetMap.
 
-GeoTiler implements more map providers. Some of them will be fully
-supported in next GeoTiler releases. The :py:mod:`geotiler.provider.conf` module
-lists all implemented map providers.
-
-A map provider instance can be created with :py:func:`geotiler.find_provider`
-function and the instance can be passed to :py:class:`geotiler.Map` class
+Identificators of GeoTiler map providers can be listed with
+:py:func:`geotiler.providers` function. Map provider identificator can be
+used with :py:func:`geotiler.find_provider` function to create instance of
+map provider or it can be passed to :py:class:`geotiler.Map` class
 constructor::
 
-    >>> toner = geotiler.find_provider('stamen-toner')
-    >>> map = geotiler.Map(center=(-6.069, 53.390), zoom=16, size=(512, 512), provider=toner)
+    >>> map = geotiler.Map(center=(-6.069, 53.390), zoom=16, size=(512, 512), provider='stamen-toner')
+    >>> image = geotiler.render_map(map) # doctest: +SKIP
+
+    # or
+
+    >>> map = geotiler.Map(center=(-6.069, 53.390), zoom=16, size=(512, 512))
+    >>> map.provider = geotiler.find_provider('stamen-toner')
     >>> image = geotiler.render_map(map) # doctest: +SKIP
 
 .. figure:: map-stamen-toner.png
