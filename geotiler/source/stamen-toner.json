@@ -1,0 +1,6 @@
+{
+    "name": "Stamen Toner",
+    "attribution": "Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under ODbL.",
+    "url": "http://{subdomain}.tile.stamen.com/toner/{z}/{x}/{y}.{ext}",
+    "subdomains": ["a", "b", "c", "d"]
+}
