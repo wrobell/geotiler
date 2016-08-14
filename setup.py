@@ -33,7 +33,7 @@ setup(
     packages=find_packages('.'),
     include_package_data=True,
     scripts=('bin/geotiler-lint', 'bin/geotiler-route', 'bin/geotiler-fetch'),
-    version='0.8.0',
+    version='0.9.0',
     description='GeoTiler - library to create maps using tiles'
         ' from a map provider',
     author='Artur Wroblewski',
