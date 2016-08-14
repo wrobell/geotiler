@@ -84,7 +84,10 @@ class MapProvider:
             'z': zoom,
             'ext': self.extension,
         }
-        return self.url.format(**params)
+        url = self.url.format(**params)
+        if __debug__:
+            logger.debug('tile url: {}'.format(url))
+        return url
 
 
 def providers():
