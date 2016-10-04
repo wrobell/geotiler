@@ -109,7 +109,7 @@ def find_provider(id):
     fn = os.path.join(base_dir(), id + '.json')
     if __debug__:
         logger.debug('loading map provider "{}" from {}'.format(id, fn))
-    with open(fn) as f:
+    with open(fn, encoding='utf8') as f:
         data = json.load(f)
         provider = MapProvider(data)
         return provider
