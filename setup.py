@@ -33,14 +33,14 @@ setup(
     packages=find_packages('.'),
     include_package_data=True,
     scripts=('bin/geotiler-lint', 'bin/geotiler-route', 'bin/geotiler-fetch'),
-    version='0.9.0',
+    version='0.10.0',
     description='GeoTiler - library to create maps using tiles'
         ' from a map provider',
     author='Artur Wroblewski',
     author_email='wrobell@pld-linux.org',
     url='https://wrobell.dcmod.org/geotiler/',
     setup_requires = ['setuptools_git >= 1.0'],
-    install_requires=['Pillow'],
+    install_requires=['Pillow', 'typecheck-decorator'],
     classifiers=[
         'Topic :: Scientific/Engineering :: GIS',
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',

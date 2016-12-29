@@ -1,5 +1,9 @@
 Changelog
 =========
+0.10.0
+-----
+- added type check for map image size, which is tuple of two integer values 
+
 0.9.0
 -----
 - replace Python based map providers configuration with JSON file
