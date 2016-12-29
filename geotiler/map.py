@@ -33,6 +33,9 @@ import asyncio
 import itertools
 import math
 import logging
+import typing
+from functools import partial
+from typecheck import typecheck
 
 from .provider import DEFAULT_PROVIDER, find_provider
 from .geo import zoom_to
@@ -43,7 +46,11 @@ logger = logging.getLogger(__name__)
 
 MAX_ZOOM = 25
 
-class Map(object):
+typecheck = partial(typecheck, input_parameter_error=TypeError)
+Size = typing.Tuple[int, int]
+OptSize = typing.Optional[typing.Tuple[int, int]]
+
+class Map:
     """
     Map created from tiles and to be drawn as an image.
 
@@ -56,8 +63,9 @@ class Map(object):
     :var origin: Tile coordinates at map zoom level of base tile.
     :var offset: Position of base tile relative to map center.
     """
+    @typecheck
     def __init__(
-        self, extent=None, center=None, zoom=None, size=None,
+        self, extent=None, center=None, zoom=None, size: OptSize=None,
         provider=DEFAULT_PROVIDER
     ):
         """
@@ -212,7 +220,8 @@ class Map(object):
         """
         Size of the image containing map.
 
-        It is a tuple - width and height of the image.
+        It is a tuple of two integer values - width and height of the
+        image.
 
         Setting size of the image affects map geographical extent.
         """
@@ -220,7 +229,8 @@ class Map(object):
 
 
     @size.setter
-    def size(self, size):
+    @typecheck
+    def size(self, size: Size):
         self._size = size
 
 

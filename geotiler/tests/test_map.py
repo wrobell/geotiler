@@ -27,6 +27,7 @@
 
 from geotiler.map import Map, _find_top_left_tile, _tile_coords, _tile_offsets
 
+import pytest
 import unittest
 
 
@@ -323,5 +324,23 @@ class MapTestCase(unittest.TestCase):
         pos = map.rev_geocode(map.center)
         self.assertEqual((500, 500), pos)
 
+
+def test_map_create_error_size():
+    """
+    Test map instantiation error with size incorrect type
+    """
+    extent = 11.785390377044687, 46.4799402452901, 11.790883541107167, 46.48372275323265
+    size = (512.0, 512.0)
+    pytest.raises(TypeError, Map, extent=extent, size=size)
+
+def test_map_error_set_size():
+    """
+    Test if error is raised when size has wrong type on size override
+    """
+    extent = 11.785390377044687, 46.4799402452901, 11.790883541107167, 46.48372275323265
+    size = (512, 512)
+    map = Map(extent=extent, size=size)
+    with pytest.raises(TypeError):
+        map.size = (512.0, 512.0)
 
 # vim: sw=4:et:ai
