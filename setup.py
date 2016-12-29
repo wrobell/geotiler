@@ -38,7 +38,7 @@ setup(
         ' from a map provider',
     author='Artur Wroblewski',
     author_email='wrobell@pld-linux.org',
-    url='http://wrobell.it-zone.org/geotiler/',
+    url='https://wrobell.dcmod.org/geotiler/',
     setup_requires = ['setuptools_git >= 1.0'],
     install_requires=['Pillow'],
     classifiers=[
