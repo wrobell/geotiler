@@ -40,7 +40,7 @@ setup(
     author_email='wrobell@riseup.net',
     url='https://wrobell.dcmod.org/geotiler/',
     setup_requires = ['setuptools_git >= 1.0'],
-    install_requires=['Pillow', 'typecheck-decorator'],
+    install_requires=['Pillow', 'typecheck-decorator >= 1.3'],
     classifiers=[
         'Topic :: Scientific/Engineering :: GIS',
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
