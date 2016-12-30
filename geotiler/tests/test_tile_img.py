@@ -42,25 +42,6 @@ class MapImageRenderTestCase(unittest.TestCase):
     """
     Map image rendering tests.
     """
-    def test_render_image_error(self):
-        """
-        Test rendering map image with error tile
-        """
-        tile = PIL.Image.new('RGBA', (10, 10))
-        map = mock.MagicMock()
-        map.size = 30, 20
-        map.provider.tile_width = 10
-        map.provider.tile_height = 10
-
-        with mock.patch('geotiler.tile.img._tile_image') as tf:
-            tf.return_value = tile
-            data = (tile, tile, None, tile, None, tile)
-            offsets = ((0, 0), (10, 0), (20, 0), (0, 10), (10, 10), (20, 10))
-            image = tile_img.render_image(map, data, offsets)
-            self.assertEquals(4, tf.call_count)
-            tf.assert_called_with(tile)
-
-
     def test_render_error_tile(self):
         """
         Test rendering of error tile
@@ -93,5 +74,46 @@ class MapImageRenderTestCase(unittest.TestCase):
         img = tile_img._tile_image(f.getbuffer())
         self.assertEquals((12, 10), img.size)
 
+
+def test_render_image():
+    """
+    Test rendering map image
+    """
+    tile = PIL.Image.new('RGBA', (10, 10))
+    map = mock.MagicMock()
+    map.size = [30, 20]
+    map.provider.tile_width = 10
+    map.provider.tile_height = 10
+
+    with mock.patch('geotiler.tile.img._tile_image') as tf, \
+            mock.patch.object(PIL.Image, 'new') as img_new:
+
+        tf.return_value = tile
+        data = (tile, tile, tile, tile)
+        offsets = ((0, 0), (10, 0), (20, 0), (0, 10))
+
+        image = tile_img.render_image(map, data, offsets)
+
+        img_new.assert_called_once_with('RGBA', (30, 20))
+        assert 4 == tf.call_count
+        tf.assert_called_with(tile)
+
+def test_render_image_error():
+    """
+    Test rendering map image with error tile
+    """
+    tile = PIL.Image.new('RGBA', (10, 10))
+    map = mock.MagicMock()
+    map.size = 30, 20
+    map.provider.tile_width = 10
+    map.provider.tile_height = 10
+
+    with mock.patch('geotiler.tile.img._tile_image') as tf:
+        tf.return_value = tile
+        data = (tile, tile, None, tile, None, tile)
+        offsets = ((0, 0), (10, 0), (20, 0), (0, 10), (10, 10), (20, 10))
+        image = tile_img.render_image(map, data, offsets)
+        assert 4 == tf.call_count
+        tf.assert_called_with(tile)
 
 # vim: sw=4:et:ai

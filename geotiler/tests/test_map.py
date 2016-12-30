@@ -25,6 +25,7 @@
 #   License: BSD
 #
 
+import numpy as np
 from geotiler.map import Map, _find_top_left_tile, _tile_coords, _tile_offsets
 
 import pytest
@@ -54,26 +55,6 @@ class MapTestCase(unittest.TestCase):
         map = self.assertRaises(
             ValueError, Map, extent=extent, size=size, zoom=zoom
         )
-
-
-    def test_map_create_center_zoom_size(self):
-        """
-        Test map instantiation with center, zoom and size
-        """
-        center = 11.788137, 46.481832
-        zoom = 17
-        size = 512, 512
-        map = Map(center=center, zoom=zoom, size=size)
-        self.assertEqual((512, 512), map.size)
-        self.assertEqual(17, map.zoom)
-
-        expected = 11.785390377044687, 46.4799402452901, 11.790883541107167, 46.48372275323265
-        self.assertEqual(expected, map.extent)
-        self.assertAlmostEqual(11.788137, map.center[0], 6)
-        self.assertAlmostEqual(46.481832, map.center[1], 6)
-
-        self.assertEqual((69827, 46376), map.origin)
-        self.assertEqual((-238, -194), map.offset)
 
 
     def test_map_create_extent_size(self):
@@ -324,6 +305,44 @@ class MapTestCase(unittest.TestCase):
         pos = map.rev_geocode(map.center)
         self.assertEqual((500, 500), pos)
 
+
+def test_map_create_center_zoom_size():
+    """
+    Test map instantiation with center, zoom and size
+    """
+    center = 11.788137, 46.481832
+    zoom = 17
+    size = 512, 512
+    map = Map(center=center, zoom=zoom, size=size)
+    assert (512, 512) == map.size
+    assert 17 == map.zoom
+
+    expected = 11.785390377044687, 46.4799402452901, 11.790883541107167, 46.48372275323265
+    assert expected == map.extent
+    assert abs(map.center[0] - 11.788137) < 1e-6
+    assert abs(map.center[1] - 46.481832) < 1e-6
+
+    assert (69827, 46376) == map.origin
+    assert (-238, -194) == map.offset
+
+def test_map_create_center_zoom_size_numpy():
+    """
+    Test map instantiation with center, zoom and size using NumPy arrays
+    """
+    center = np.array([11.788137, 46.481832])
+    zoom = 17
+    size = np.array([512, 512])
+    map = Map(center=center, zoom=zoom, size=size)
+    assert np.all([512, 512] == map.size)
+    assert 17 == map.zoom
+
+    expected = 11.785390377044687, 46.4799402452901, 11.790883541107167, 46.48372275323265
+    assert expected == map.extent
+    assert abs(map.center[0] - 11.788137) < 1e-6
+    assert abs(map.center[1] - 46.481832) < 1e-6
+
+    assert (69827, 46376) == map.origin
+    assert (-238, -194) == map.offset
 
 def test_map_create_error_size():
     """

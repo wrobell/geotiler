@@ -32,10 +32,8 @@ GeoTiler map functionality.
 import asyncio
 import itertools
 import math
+import numbers
 import logging
-import typing
-from functools import partial
-from typecheck import typecheck
 
 from .provider import DEFAULT_PROVIDER, find_provider
 from .geo import zoom_to
@@ -45,10 +43,6 @@ from .tile.img import render_image
 logger = logging.getLogger(__name__)
 
 MAX_ZOOM = 25
-
-typecheck = partial(typecheck, input_parameter_error=TypeError)
-Size = typing.Tuple[int, int]
-OptSize = typing.Optional[typing.Tuple[int, int]]
 
 class Map:
     """
@@ -63,9 +57,8 @@ class Map:
     :var origin: Tile coordinates at map zoom level of base tile.
     :var offset: Position of base tile relative to map center.
     """
-    @typecheck
     def __init__(
-        self, extent=None, center=None, zoom=None, size: OptSize=None,
+        self, extent=None, center=None, zoom=None, size=None,
         provider=DEFAULT_PROVIDER
     ):
         """
@@ -87,6 +80,9 @@ class Map:
         :param provider: Map tiles provider.
         """
         super().__init__()
+
+        self._check_size(size)
+
         self.provider = find_provider(provider)
         self.origin = None
         self.offset = None
@@ -94,20 +90,20 @@ class Map:
         self._zoom = zoom
         self._size = size
 
-        if center and extent:
+        if center is not None and extent is not None:
             raise ValueError(
                 'Bad map coverage, center and extent can\'t both be set'
             )
-        elif extent and size and zoom:
+        elif extent is not None and size is not None and zoom is not None:
             raise ValueError(
                 'Bad map coverage, size and zoom can\'t be set together' \
                 ' with extent'
             )
-        elif center and zoom and size:
+        elif center is not None and zoom is not None and size is not None:
             self._change_center_zoom(center, zoom)
-        elif extent and size:
+        elif extent is not None and size is not None:
             self._change_extent_and_zoom(extent)
-        elif extent and zoom:
+        elif extent is not None and zoom is not None:
             self.extent = extent
         else:
             raise ValueError(
@@ -220,7 +216,7 @@ class Map:
         """
         Size of the image containing map.
 
-        It is a tuple of two integer values - width and height of the
+        It is a sequence of two integer values - width and height of the
         image.
 
         Setting size of the image affects map geographical extent.
@@ -229,10 +225,19 @@ class Map:
 
 
     @size.setter
-    @typecheck
-    def size(self, size: Size):
+    def size(self, size):
+        self._check_size(size)
         self._size = size
 
+    def _check_size(self, size):
+        """
+        Check if `size` parameter has correct type.
+        """
+        valid = size is None \
+            or len(size) == 2 \
+            and all(isinstance(v, numbers.Integral) for v in tuple(size))
+        if not valid:
+            raise TypeError('Size should be sequence of two integer values')
 
     def _change_center_zoom(self, center, zoom):
         """

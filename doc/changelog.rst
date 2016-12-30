@@ -2,7 +2,8 @@ Changelog
 =========
 0.10.0
 ------
-- added type check for map image size, which is tuple of two integer values
+- added type check for map image size, which is a sequence of two integer
+  values
 - read map configuration files using Unicode encoding
 
 0.9.0
