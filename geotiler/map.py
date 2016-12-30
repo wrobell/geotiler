@@ -376,7 +376,7 @@ def render_map_async(map, downloader=None, loop=None, **kw):
     if downloader is None:
         downloader = fetch_tiles
 
-    get_url = map.provider.get_tile_urls
+    get_url = map.provider.get_tile_url
 
     # NOTE: consider having origin tile at top-left tile instead of the
     # center, then we could skip this step
