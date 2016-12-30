@@ -76,7 +76,7 @@ class MapProvider:
     def tile_height(self):
         return 256
 
-    def get_tile_url(self, tile_coord, zoom):
+    def tile_url(self, tile_coord, zoom):
         params = {
             'subdomain': next(self.subdomain_cycler),
             'x': tile_coord[0],

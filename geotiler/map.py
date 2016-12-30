@@ -376,14 +376,14 @@ def render_map_async(map, downloader=None, loop=None, **kw):
     if downloader is None:
         downloader = fetch_tiles
 
-    get_url = map.provider.get_tile_url
+    tile_url = map.provider.tile_url
 
     # NOTE: consider having origin tile at top-left tile instead of the
     # center, then we could skip this step
     coord, offset = _find_top_left_tile(map)
 
     coords = _tile_coords(map, coord, offset)
-    urls = tuple(get_url(c, map.zoom) for c in coords)
+    urls = tuple(tile_url(c, map.zoom) for c in coords)
     tile_data = yield from downloader(urls, **kw)
 
     offsets = _tile_offsets(map, offset)
