@@ -67,7 +67,7 @@ class MapImageRenderTestCase(unittest.TestCase):
         """
         Test converting JPEG data into PIL image object
         """
-        tile = PIL.Image.new('RGBA', (12, 10))
+        tile = PIL.Image.new('RGB', (12, 10))
         f = io.BytesIO()
         tile.save(f, format='jpeg')
 

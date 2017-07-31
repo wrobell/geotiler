@@ -1,5 +1,10 @@
 Changelog
 =========
+0.11.0
+------
+- added support for stamen-terrain-background and stamen-terrain-lines map
+  providers
+
 0.10.0
 ------
 - added type check for map image size, which is a sequence of two integer
