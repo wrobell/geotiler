@@ -35,7 +35,7 @@ import math
 import numbers
 import logging
 
-from .provider import DEFAULT_PROVIDER, find_provider
+from .provider import DEFAULT_PROVIDER, find_provider, MapProvider
 from .geo import zoom_to
 from .tile.io import fetch_tiles
 from .tile.img import render_image
@@ -83,7 +83,10 @@ class Map:
 
         self._check_size(size)
 
-        self.provider = find_provider(provider)
+        if isinstance(provider, MapProvider):
+            self.provider = provider
+        else:
+            self.provider = find_provider(provider)
         self.origin = None
         self.offset = None
 
