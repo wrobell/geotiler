@@ -361,7 +361,7 @@ def render_map(map, downloader=None, loop=None, **kw):
 
 
 @asyncio.coroutine
-def render_map_async(map, downloader=None, loop=None, **kw):
+def render_map_async(map, downloader=None, **kw):
     """
     Asyncio coroutine to download map tiles asynchronously and render map
     image.
