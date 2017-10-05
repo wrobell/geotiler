@@ -25,7 +25,7 @@
 #   License: BSD
 #
 
-__version__ = '0.11.0'
+__version__ = '0.12.0'
 
 from .map import Map, render_map, render_map_async
 from .provider import find_provider, providers

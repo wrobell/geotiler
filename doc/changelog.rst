@@ -1,5 +1,11 @@
 Changelog
 =========
+0.12.0
+------
+- there is no OSM cycle map anymore, just OpenCycleMap by Thunderforest;
+  therefore the osm-cycle map provider is replaced with thunderforest-cycle
+  one
+
 0.11.0
 ------
 - added support for stamen-terrain-background and stamen-terrain-lines map
