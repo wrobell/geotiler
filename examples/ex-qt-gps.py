@@ -164,8 +164,9 @@ class MapWindow(QGraphicsView):
         self.position = map.center
 
         self.providers = deque([
-            'osm', 'osm-cycle', 'stamen-terrain', 'stamen-toner-lite', 'stamen-toner',
-            'stamen-watercolor', 'ms-aerial', 'ms-hybrid', 'ms-road', 'bluemarble',
+            'osm', 'stamen-terrain', 'stamen-toner-lite', 'stamen-toner',
+            'stamen-watercolor', 'ms-aerial', 'ms-hybrid', 'ms-road',
+            'bluemarble',
         ])
 
         self.refresh_map = asyncio.Event()

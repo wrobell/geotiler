@@ -4,7 +4,7 @@
 # render map via all supported map tiles providers; redis is required
 #
 
-PROVIDERS="osm osm-cycle stamen-toner stamen-toner-lite stamen-terrain stamen-watercolor bluemarble"
+PROVIDERS="osm stamen-toner stamen-toner-lite stamen-terrain stamen-watercolor bluemarble thunderforest-cycle"
 EXTENT="-10.854492187499988 35.20972164522138 41.8798828125 71.37110941823617"
 CENTER="15.512695312500005 57.49221366670073"
 ZOOM=5

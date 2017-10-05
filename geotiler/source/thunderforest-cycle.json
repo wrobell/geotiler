@@ -1,0 +1,7 @@
+{
+    "name": "ThunderForest OpenCycleMap",
+    "attribution": "Maps © Thunderforest\nhttp://www.thunderforest.com/\nData © OpenStreetMap contributors\nhttp://www.openstreetmap.org/copyright",
+    "url": "https://{subdomain}.tile.thunderforest.com/cycle/{z}/{x}/{y}.{ext}",
+    "subdomains": ["a", "b", "c"],
+    "limit": 2
+}

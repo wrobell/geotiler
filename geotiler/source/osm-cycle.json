@@ -1,7 +1,0 @@
-{
-    "name": "OpenCycleMap",
-    "attribution": "© OpenStreetMap contributors\nhttp://www.openstreetmap.org/copyright",
-    "url": "https://{subdomain}.tile.thunderforest.com/cycle/{z}/{x}/{y}.{ext}",
-    "subdomains": ["a", "b", "c"],
-    "limit": 2
-}
