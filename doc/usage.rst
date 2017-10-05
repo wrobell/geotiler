@@ -87,7 +87,7 @@ The list of supported map providers is presented in the table below.
      Stamen Terrain Background   stamen-terrain-background   as above
      Stamen Terrain Lines        stamen-terrain-lines        as above
      Stamen Water Color          stamen-watercolor           as above
-     Modest Maps Blue Marble     bluemarble                  see `NASA guideline <http://www.nasa.gov/audience/formedia/features/MP_Photo_Guidelines.html>`_
+     Modest Maps Blue Marble     bluemarble                  `NASA guideline <http://www.nasa.gov/audience/formedia/features/MP_Photo_Guidelines.html>`_
      OpenCycleMap                thunderforest-cycle         `Thunderforest Terms and Conditions <https://www.thunderforest.com/terms/>`_
     =========================== =========================== ==================
 
