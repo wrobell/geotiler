@@ -337,7 +337,7 @@ class Map:
         return location
 
 
-def render_map(map, downloader=None, loop=None, **kw):
+def render_map(map, downloader=None, **kw):
     """
     Download map tiles and render map image.
 
@@ -348,17 +348,15 @@ def render_map(map, downloader=None, loop=None, **kw):
 
     :param map: Map instance.
     :param downloader: Map tiles downloader.
-    :param loop: Asyncio loop (used default one if `None`).
     :param kw: Parameters passed to default downloader.
     """
-    task = render_map_async(map, downloader=downloader, loop=loop, **kw)
-    if loop is None:
-        loop = asyncio.get_event_loop()
+    task = render_map_async(map, downloader=downloader, **kw)
+    loop = asyncio.get_event_loop()
     return loop.run_until_complete(task)
 
 
 @asyncio.coroutine
-def render_map_async(map, downloader=None, loop=None, **kw):
+def render_map_async(map, downloader=None, **kw):
     """
     Asyncio coroutine to download map tiles asynchronously and render map
     image.
@@ -370,7 +368,6 @@ def render_map_async(map, downloader=None, loop=None, **kw):
 
     :param map: Map instance.
     :param downloader: Map tiles downloader.
-    :param loop: Asyncio loop (used default one if `None`).
     :param kw: Parameters passed to default downloader.
     """
     if downloader is None:

@@ -65,7 +65,7 @@ def fetch_tile(url):
 
 
 @asyncio.coroutine
-def fetch_tiles(urls, loop=None):
+def fetch_tiles(urls):
     """
     Download map tiles for the collection of URLs.
 
@@ -79,8 +79,7 @@ def fetch_tiles(urls, loop=None):
     if __debug__:
         logger.debug('fetching tiles...')
 
-    if loop is None:
-        loop = asyncio.get_event_loop()
+    loop = asyncio.get_event_loop()
 
     # TODO: is it possible to call `urllib.request` in real async mode
     # without executor by creating appropriate opener? running in executor
@@ -88,7 +87,7 @@ def fetch_tiles(urls, loop=None):
     # automatic proxy handling and various protocol support
     f = partial(loop.run_in_executor, None, fetch_tile)
     tasks = (f(u) for u in urls)
-    data = yield from asyncio.gather(*tasks, loop=loop, return_exceptions=True)
+    data = yield from asyncio.gather(*tasks, return_exceptions=True)
 
     if __debug__:
         logger.debug('fetching tiles done')
