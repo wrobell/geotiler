@@ -35,6 +35,7 @@ import itertools
 import json
 import logging
 import os.path
+import re
 
 from math import pi
 from .geo import MercatorProjection, deriveTransformation
@@ -43,6 +44,7 @@ from .errors import GeoTilerError
 logger = logging.getLogger(__name__)
 
 DEFAULT_PROVIDER = 'osm'
+RE_URL_OBFUSCATE = re.compile('(?<=apikey=)[a-z0-9-]+|(?<=api-key=)[a-z0-9-]+', re.I)
 
 # the attributes inspired by poor-maps project tile source definition
 # https://github.com/otsaloma/poor-maps/tree/master/tilesources
@@ -93,7 +95,7 @@ class MapProvider:
         }
         url = self.url.format(**params)
         if __debug__:
-            logger.debug('tile url: {}'.format(url))
+            logger.debug('tile url: {}'.format(obfuscate(url)))
         return url
 
 
@@ -168,5 +170,13 @@ def read_provider_data(id):
         data = json.load(f)
 
     return data
+
+def obfuscate(url):
+    """
+    Replace API key in a tile URL with "<apikey>" string.
+
+    :param url: Tile URL to obfuscate.
+    """
+    return RE_URL_OBFUSCATE.sub('<apikey>', url)
 
 # vim:et sts=4 sw=4:
