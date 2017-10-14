@@ -29,6 +29,7 @@
 Load and create map providers.
 """
 
+import configparser
 import glob
 import itertools
 import json
@@ -45,10 +46,10 @@ DEFAULT_PROVIDER = 'osm'
 # the attributes inspired by poor-maps project tile source definition
 # https://github.com/otsaloma/poor-maps/tree/master/tilesources
 ATTRIBUTES = 'id', 'name', 'attribution', 'url', 'subdomains', 'extension', \
-    'limit'
+    'limit', 'api-key-ref'
 
 class MapProvider:
-    def __init__(self, data):
+    def __init__(self, data, api_key=None):
         self.id = None
         self.name = None
         self.attribution = None
@@ -56,8 +57,12 @@ class MapProvider:
         self.subdomains = tuple()
         self.extension = 'png'
         self.limit = 1
+        self.api_key_ref = None
+        self.api_key = api_key
 
-        attrs = ((n, data[n]) for n in ATTRIBUTES if n in data)
+        # change a-b-c to a_b_c to allow python attribute access
+        norm = lambda n: n.replace('-', '_')
+        attrs = ((norm(n), data[n]) for n in ATTRIBUTES if n in data)
         self.__dict__.update(attrs)
 
         # the spherical mercator world tile covers (-π, -π) to (π, π)
@@ -83,6 +88,7 @@ class MapProvider:
             'y': tile_coord[1],
             'z': zoom,
             'ext': self.extension,
+            'api_key': self.api_key,
         }
         url = self.url.format(**params)
         if __debug__:
@@ -106,13 +112,19 @@ def find_provider(id):
 
     :param id: Map provider identificator.
     """
-    fn = os.path.join(base_dir(), id + '.json')
+    cp = read_config()
+    data = read_provider_data(id)
+
+    api_key_ref = data.get('api-key-ref')
+    api_key = cp['api-key'].get(api_key_ref) if api_key_ref else None
+
     if __debug__:
-        logger.debug('loading map provider "{}" from {}'.format(id, fn))
-    with open(fn, encoding='utf8') as f:
-        data = json.load(f)
-        provider = MapProvider(data)
-        return provider
+        logger.debug('map provider "{}" api key reference: {}'.format(
+            id, api_key_ref
+        ))
+
+    provider = MapProvider(data, api_key=api_key)
+    return provider
 
 def base_dir():
     """
@@ -120,5 +132,30 @@ def base_dir():
     """
     mod = __import__('geotiler')
     return os.path.join(mod.__path__[0], 'source')
+
+def read_config():
+    """
+    Read GeoTiler configuration file.
+    """
+    p = os.getenv('HOME', '')
+    fn = os.path.join(p, '.config/geotiler/geotiler.ini')
+    cp = configparser.ConfigParser()
+    cp.read(fn)
+    return cp
+
+def read_provider_data(id):
+    """
+    Read map provider data.
+
+    :param id: Map provider identificator.
+    """
+    fn = os.path.join(base_dir(), id + '.json')
+    if __debug__:
+        logger.debug('loading map provider "{}" from {}'.format(id, fn))
+
+    with open(fn, encoding='utf8') as f:
+        data = json.load(f)
+
+    return data
 
 # vim:et sts=4 sw=4:

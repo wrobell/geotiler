@@ -50,6 +50,7 @@ def test_provider_init_default():
     assert () == provider.subdomains
     assert 'png' == provider.extension
     assert 1 == provider.limit
+    assert provider.api_key_ref is None
 
 def test_provider_init_default_override():
     """
@@ -63,6 +64,7 @@ def test_provider_init_default_override():
         'subdomains': ('a', 'b', 'c'),
         'extension': 'jpg',
         'limit': 2,
+        'api-key-ref': 'a-b-c',
     }
     provider = MapProvider(data)
 
@@ -75,6 +77,34 @@ def test_provider_init_default_override():
     assert ('a', 'b', 'c') == provider.subdomains
     assert 'jpg' == provider.extension
     assert 2 == provider.limit
+    assert 'a-b-c' == provider.api_key_ref
+
+def test_provider_tile_url():
+    """
+    Test map provider tile url formatting.
+    """
+    data = {
+        'name': 'OpenStreetMap',
+        'attribution': '© OpenStreetMap contributors\nhttp://www.openstreetmap.org/copyright',
+        'url': 'http://{subdomain}.tile.openstreetmap.org/{z}/{x}/{y}.{ext}',
+    }
+    provider = MapProvider(data)
+    url = provider.tile_url((1, 2), 15)
+    assert 'http://.tile.openstreetmap.org/15/1/2.png' == url
+
+def test_provider_tile_url_api_key():
+    """
+    Test map provider tile url formatting with API key.
+    """
+    data = {
+        'name': 'OpenStreetMap',
+        'attribution': '© OpenStreetMap contributors\nhttp://www.openstreetmap.org/copyright',
+        'url': 'http://{subdomain}.tile.openstreetmap.org/{z}/{x}/{y}.{ext}?apikey={api_key}',
+        'api-key-ref': 'a-key-ref'
+    }
+    provider = MapProvider(data, api_key='a-key-ref')
+    url = provider.tile_url((1, 2), 15)
+    assert 'http://.tile.openstreetmap.org/15/1/2.png?apikey=a-key-ref' == url
 
 def test_base_dir():
     """
