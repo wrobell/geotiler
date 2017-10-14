@@ -5,6 +5,7 @@ Changelog
 - there is no OSM cycle map anymore, just OpenCycleMap by Thunderforest;
   therefore the osm-cycle map provider is replaced with thunderforest-cycle
   one
+- added support for map provider api keys
 
 0.11.0
 ------
