@@ -38,6 +38,7 @@ import os.path
 
 from math import pi
 from .geo import MercatorProjection, deriveTransformation
+from .errors import GeoTilerError
 
 logger = logging.getLogger(__name__)
 
@@ -116,7 +117,14 @@ def find_provider(id):
     data = read_provider_data(id)
 
     api_key_ref = data.get('api-key-ref')
-    api_key = cp['api-key'].get(api_key_ref) if api_key_ref else None
+    api_key = None
+    if api_key_ref:
+        # no api key for the api key reference, then raise fatal error; no
+        # api key means no access
+        if not cp.has_option('api-key', api_key_ref):
+            raise GeoTilerError('No API key for for reference "{}"'.format(api_key_ref))
+
+        api_key = cp.get('api-key', api_key_ref)
 
     if __debug__:
         logger.debug('map provider "{}" api key reference: {}'.format(
@@ -140,7 +148,10 @@ def read_config():
     p = os.getenv('HOME', '')
     fn = os.path.join(p, '.config/geotiler/geotiler.ini')
     cp = configparser.ConfigParser()
-    cp.read(fn)
+    if os.path.exists(fn):
+        cp.read(fn)
+    else:
+        logger.warning('configuration file {} does not exist'.format(fn))
     return cp
 
 def read_provider_data(id):
