@@ -29,7 +29,6 @@
 Caching strategies for GeoTiler.
 """
 
-import asyncio
 import logging
 from functools import partial
 
@@ -37,8 +36,7 @@ from geotiler.tile.io import fetch_tiles
 
 logger = logging.getLogger(__name__)
 
-@asyncio.coroutine
-def caching_downloader(get, set, downloader, urls, **kw):
+async def caching_downloader(get, set, downloader, urls, **kw):
     """
     Create caching map tiles downloader.
 
@@ -70,7 +68,7 @@ def caching_downloader(get, set, downloader, urls, **kw):
 
     # download missing tiles, keep the order of urls
     missing = tuple(u for u in urls if data[u] is None)
-    result = yield from downloader(missing, **kw)
+    result = await downloader(missing, **kw)
     data.update(zip(missing, result))
 
     # reset cache for new and old tiles

@@ -64,8 +64,7 @@ def fetch_tile(url):
     return response.read()
 
 
-@asyncio.coroutine
-def fetch_tiles(urls):
+async def fetch_tiles(urls):
     """
     Download map tiles for the collection of URLs.
 
@@ -87,7 +86,7 @@ def fetch_tiles(urls):
     # automatic proxy handling and various protocol support
     f = partial(loop.run_in_executor, None, fetch_tile)
     tasks = (f(u) for u in urls)
-    data = yield from asyncio.gather(*tasks, return_exceptions=True)
+    data = await asyncio.gather(*tasks, return_exceptions=True)
 
     if __debug__:
         logger.debug('fetching tiles done')

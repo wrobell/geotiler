@@ -355,8 +355,7 @@ def render_map(map, downloader=None, **kw):
     return loop.run_until_complete(task)
 
 
-@asyncio.coroutine
-def render_map_async(map, downloader=None, **kw):
+async def render_map_async(map, downloader=None, **kw):
     """
     Asyncio coroutine to download map tiles asynchronously and render map
     image.
@@ -381,7 +380,7 @@ def render_map_async(map, downloader=None, **kw):
 
     coords = _tile_coords(map, coord, offset)
     urls = tuple(tile_url(c, map.zoom) for c in coords)
-    tile_data = yield from downloader(urls, **kw)
+    tile_data = await downloader(urls, **kw)
 
     offsets = _tile_offsets(map, offset)
     return render_image(map, tile_data, offsets)
