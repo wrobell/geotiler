@@ -94,7 +94,7 @@ async def fetch_tiles(urls):
     # log missing tiles
     in_error = (t for t in data if isinstance(t, Exception))
     for t in in_error:
-        logger.warning(FMT_DOWNLOAD_LOG(t))
+        raise t
 
     return (None if isinstance(t, Exception) else t for t in data)
 
