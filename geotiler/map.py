@@ -38,7 +38,7 @@ from collections import namedtuple
 
 from .provider import DEFAULT_PROVIDER, find_provider
 from .geo import zoom_to
-from .tile.io import fetch_tiles
+from .tile.io import fetch_tiles as _fetch_tiles
 from .tile.img import render_image
 
 logger = logging.getLogger(__name__)
@@ -352,9 +352,12 @@ class Map:
         return location
 
 
-def render_map(map, downloader=None, **kw):
+def render_map(map, tiles=None, downloader=None, **kw):
     """
     Download map tiles and render map image.
+
+    If tiles are specified, then the provided tiles are used to render map.
+    Otherwise, map tiles are downloaded from map provider.
 
     If `downloader` is null, then default map tiles downloader is used
     (:py:func:`geotiler.tile.io.fetch_tiles`).
@@ -362,6 +365,7 @@ def render_map(map, downloader=None, **kw):
     The function returns an image (instance of `PIL.Image` class).
 
     :param map: Map instance.
+    :param tiles: Optional map tiles.
     :param downloader: Map tiles downloader.
     :param kw: Parameters passed to the downloader.
     """
@@ -369,11 +373,13 @@ def render_map(map, downloader=None, **kw):
     loop = asyncio.get_event_loop()
     return loop.run_until_complete(task)
 
-
-async def render_map_async(map, downloader=None, **kw):
+async def render_map_async(map, tiles=None, downloader=None, **kw):
     """
     Asyncio coroutine to download map tiles asynchronously and render map
     image.
+
+    If tiles are specified, then the provided tiles are used to render map.
+    Otherwise, map tiles are downloaded from map provider.
 
     If `downloader` is null, then default map tiles downloader is used
     (:py:func:`geotiler.tile.io.fetch_tiles`).
@@ -381,11 +387,24 @@ async def render_map_async(map, downloader=None, **kw):
     The function returns an image (instance of `PIL.Image` class).
 
     :param map: Map instance.
+    :param tiles: Optional map tiles.
+    :param downloader: Map tiles downloader.
+    :param kw: Parameters passed to the downloader.
+    """
+    if not tiles:
+        tiles = await fetch_tiles(map, downloader, **kw)
+    return render_image(map, tiles)
+
+async def fetch_tiles(map, downloader=None, **kw):
+    """
+    Create and fetch map tiles.
+
+    :param map: Map instance.
     :param downloader: Map tiles downloader.
     :param kw: Parameters passed to the downloader.
     """
     if downloader is None:
-        downloader = fetch_tiles
+        downloader = _fetch_tiles
 
     tile_url = map.provider.tile_url
 
@@ -395,8 +414,7 @@ async def render_map_async(map, downloader=None, **kw):
     urls = (tile_url(c, map.zoom) for c in coords)
     tiles = (Tile(u, o, None, None) for u, o in zip(urls, offsets))
     tiles = await downloader(tiles, **kw)
-    return render_image(map, tiles)
-
+    return tiles
 
 def _tile_coords(map, coord, offset):
     """

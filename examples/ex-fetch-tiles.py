@@ -25,9 +25,28 @@
 #   License: BSD
 #
 
-__version__ = '0.12.0'
+"""
+Example of downloading map tiles and then rendering them as a map.
+"""
 
-from .map import Map, render_map, render_map_async, fetch_tiles
-from .provider import find_provider, providers
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
+import asyncio
+import geotiler
+
+async def fetch(mm):
+    tiles = await geotiler.fetch_tiles(mm)
+    img = await geotiler.render_map_async(mm, tiles=tiles)
+    return img
+
+
+bbox = 11.78560, 46.48083, 11.79067, 46.48283
+mm = geotiler.Map(extent=bbox, zoom=18)
+
+loop = asyncio.get_event_loop()
+
+img = loop.run_until_complete(fetch(mm))
+img.save('ex-fetch-tiles.png', 'png')
 
 # vim: sw=4:et:ai
