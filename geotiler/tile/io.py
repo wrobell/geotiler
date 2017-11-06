@@ -42,38 +42,39 @@ HEADERS = {
 }
 
 FMT_DOWNLOAD_LOG = 'Cannot download a tile due to error: {}'.format
+FMT_DOWNLOAD_ERROR = 'Unable to download {} (HTTP status {})'.format
 
-def fetch_tile(url):
+def fetch_tile(tile):
     """
     Fetch map tile.
 
-    If response status is not HTTP OK (`200`), then `ValueError` exception
-    is raised.
-
-    :param url: URL of map tile.
+    :param tile: Map tile.
     """
-    request = urllib.request.Request(url)
+    request = urllib.request.Request(tile.url)
     for k, v in HEADERS.items():
         request.add_header(k, v)
 
-    response = urllib.request.urlopen(request)
-    if response.status != 200:
-        fmt = 'Unable to download {} (HTTP status {})'.format
-        raise ValueError(fmt(url, response.status))
+    try:
+        response = urllib.request.urlopen(request)
+    except urllib.error.HTTPError as ex:
+        error = ValueError(FMT_DOWNLOAD_ERROR(tile.url, ex.code))
+        tile = tile._replace(img=None, error=error)
+    else:
+        tile = tile._replace(img=response.read(), error=None)
 
-    return response.read()
+    return tile
 
-
-async def fetch_tiles(urls):
+async def fetch_tiles(tiles):
     """
-    Download map tiles for the collection of URLs.
+    Download map tiles.
 
     This is asyncio coroutine.
 
-    Tile data for each URL is returned. If there was an error while
-    downloading a tile, then None is returned for given URL.
+    A collection of tiles is returned. Each successfully downloaded tile
+    has `Tile.img` attribute set. If there was an error while downloading
+    a tile, then `Tile.img` is set to null and `Tile.error` to a value error.
 
-    :param urls: Collection of URLs.
+    :param tiles: Collection of tiles.
     """
     if __debug__:
         logger.debug('fetching tiles...')
@@ -85,18 +86,17 @@ async def fetch_tiles(urls):
     # sucks, but thanks to `urllib.request` we get all the goodies like
     # automatic proxy handling and various protocol support
     f = partial(loop.run_in_executor, None, fetch_tile)
-    tasks = (f(u) for u in urls)
-    data = await asyncio.gather(*tasks, return_exceptions=True)
+    tasks = (f(t) for t in tiles)
+    tiles = await asyncio.gather(*tasks, return_exceptions=True)
 
     if __debug__:
         logger.debug('fetching tiles done')
 
     # log missing tiles
-    in_error = (t for t in data if isinstance(t, Exception))
-    for t in in_error:
-        logger.warning(FMT_DOWNLOAD_LOG(t))
+    for t in tiles:
+        if t.error:
+            logger.warning(FMT_DOWNLOAD_LOG(t.error))
 
-    return (None if isinstance(t, Exception) else t for t in data)
-
+    return tiles
 
 # vim: sw=4:et:ai

@@ -31,12 +31,13 @@ Caching strategies for GeoTiler.
 
 import logging
 from functools import partial
+from cytoolz.itertoolz import groupby
 
 from geotiler.tile.io import fetch_tiles
 
 logger = logging.getLogger(__name__)
 
-async def caching_downloader(get, set, downloader, urls, **kw):
+async def caching_downloader(get, set, downloader, tiles, **kw):
     """
     Create caching map tiles downloader.
 
@@ -44,41 +45,40 @@ async def caching_downloader(get, set, downloader, urls, **kw):
 
     The code flow is
 
-    - caching downloader gets tiles from cache using URLs
-    - the original downloader is used to download missing tiles
-    - cache is updated with all existing tiles
+    - caching downloader gets tile data from cache using URLs
+    - the original downloader is used to download missing tile data
+    - cache is updated with all existing tile data
 
     The cache getter function (`get` parameter) should return `None` if
     tile data is not in cache for given URL.
 
-    The collection of tile data is returned for each input URL (or `None`
-    if tile data could not be obtained).
+    A collection of tiles is returned.
 
-    :param get: Function to get a tile from cache.
-    :param set: Function to put a tile in cache.
+    :param get: Function to get a tile data from cache.
+    :param set: Function to put a tile data in cache.
     :param downloader: Original tiles downloader (asyncio coroutine).
-    :param urls: Collection of URLs of tiles.
+    :param tiles: Collection tiles to fetch.
     :param kw: Parameters passed to downloader coroutine.
     """
-    data = {u: get(u) for u in urls}
+    # fetch map tile images from cache
+    tiles = (t._replace(img=get(t.url)) for t in tiles)
+
     if __debug__:
-        items = (u for u, v in data.items() if v is not None)
-        for u in items:
-            logger.debug('cache hit for {}'.format(u))
+        tiles = list(tiles)
+        cached = (t for t in tiles if t.img is not None)
+        for t in cached:
+            logger.debug('cache hit for {}'.format(t.url))
 
-    # download missing tiles, keep the order of urls
-    missing = tuple(u for u in urls if data[u] is None)
-    result = await downloader(missing, **kw)
-    data.update(zip(missing, result))
+    missing = groupby(lambda t: t.img is None, tiles)
+    result = await downloader(missing.get(True, []), **kw)
 
+    result.extend(missing.get(False, []))
     # reset cache for new and old tiles
-    existing = ((u, t) for u, t in data.items() if t)
-    for u, t in existing:
-        set(u, t)
+    existing = (t for t in result if t.img is not None)
+    for t in existing:
+        set(t.url, t.img)
 
-    # keep the original order
-    return (data[u] for u in urls)
-
+    return result
 
 def redis_downloader(client, downloader=None, timeout=3600 * 24 * 7):
     """

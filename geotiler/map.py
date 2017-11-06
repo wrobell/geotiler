@@ -34,6 +34,7 @@ import itertools
 import math
 import numbers
 import logging
+from collections import namedtuple
 
 from .provider import DEFAULT_PROVIDER, find_provider
 from .geo import zoom_to
@@ -43,6 +44,20 @@ from .tile.img import render_image
 logger = logging.getLogger(__name__)
 
 MAX_ZOOM = 25
+
+Tile = namedtuple('Tile', ['url', 'offset', 'img', 'error'])
+Tile.__doc__ = """
+Map tile.
+
+If a tile download succeeded, then `Tile.img` contain map tile image data.
+Otherwise, it is set to null and `Tile.error` is set to tile download
+error.
+
+:var url: Tile URL.
+:var offset: Tile offest in a map image.
+:var img: Tile image data.
+:var error: Tile error information.
+"""
 
 class Map:
     """
@@ -374,16 +389,13 @@ async def render_map_async(map, downloader=None, **kw):
 
     tile_url = map.provider.tile_url
 
-    # NOTE: consider having origin tile at top-left tile instead of the
-    # center, then we could skip this step
     coord, offset = _find_top_left_tile(map)
-
     coords = _tile_coords(map, coord, offset)
-    urls = tuple(tile_url(c, map.zoom) for c in coords)
-    tile_data = await downloader(urls, **kw)
-
     offsets = _tile_offsets(map, offset)
-    return render_image(map, tile_data, offsets)
+    urls = (tile_url(c, map.zoom) for c in coords)
+    tiles = (Tile(u, o, None, None) for u, o in zip(urls, offsets))
+    tiles = await downloader(tiles, **kw)
+    return render_image(map, tiles)
 
 
 def _tile_coords(map, coord, offset):
