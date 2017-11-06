@@ -399,6 +399,8 @@ async def fetch_tiles(map, downloader=None, **kw):
     """
     Create and fetch map tiles.
 
+    This is asyncio coroutine.
+
     :param map: Map instance.
     :param downloader: Map tiles downloader.
     :param kw: Parameters passed to the downloader.
