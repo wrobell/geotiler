@@ -37,6 +37,10 @@ import geotiler
 
 async def fetch(mm):
     tiles = await geotiler.fetch_tiles(mm)
+    in_error = (t for t in tiles if t.error)
+    for t in in_error:
+        print('tile {} error: {}'.format(t.url, t.error))
+
     img = await geotiler.render_map_async(mm, tiles=tiles)
     return img
 
