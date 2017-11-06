@@ -1,5 +1,11 @@
 Changelog
 =========
+0.13.0
+------
+- implemented function `geotiler.fetch_tiles` to allow processing of tiles
+  before map rendering
+- Python 3.6 is required
+
 0.12.0
 ------
 - there is no OSM cycle map anymore, just OpenCycleMap by Thunderforest;
