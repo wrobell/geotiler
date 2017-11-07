@@ -34,6 +34,7 @@ import urllib.request
 from contextlib import contextmanager
 from functools import wraps
 
+from geotiler.map import Tile
 from geotiler.tile.io import fetch_tile, fetch_tiles
 
 import unittest
@@ -45,7 +46,7 @@ class MapTileDownloadingTestCase(unittest.TestCase):
     Map tile downloading unit tests.
     """
     @contextmanager
-    def run_fetch_tile(self, status, *urls):
+    def run_fetch_tile(self, status, *tiles):
         """
         Mock `urllib.request.urlopen` call and run `fetch_tile` function.
 
@@ -53,7 +54,7 @@ class MapTileDownloadingTestCase(unittest.TestCase):
         well. If exception, then it is raised during request.
 
         :param status: HTTP error code (i.e. 200) or an exception.
-        :param urls: Collection of urls.
+        :param tiles: Collection of map tiles.
         """
         response = mock.MagicMock()
         response.read.return_value = 'image'
@@ -62,32 +63,32 @@ class MapTileDownloadingTestCase(unittest.TestCase):
         with mock.patch.object(urllib.request, 'Request') as _, \
                 mock.patch.object(urllib.request, 'urlopen') as f:
 
-            if isinstance(status, Exception):
+            if isinstance(status, urllib.error.HTTPError):
                 f.side_effect = status
             else:
                 f.return_value = response
-            result = [fetch_tile(u) for u in urls]
+            result = [fetch_tile(t) for t in tiles]
             yield result
 
 
     @contextmanager
-    def run_fetch_tiles(self, *tile_url):
+    def run_fetch_tiles(self, *tile_data):
         """
         Mock `asyncio.gather` call for `fetch_tiles` coroutine and run the
         coroutine.
 
-        The `tile_url` is pair of URL and tile data (tile data can be
+        The `tile_data` is pair of URL and tile data (tile data can be
         replaced with an exception). Tile data is to be returned by the
         'asyncio.gather` mock.
 
-        :param tile_url: Pair of URL and tile data.
+        :param tile_data: Pair of URL and tile data.
         """
         @asyncio.coroutine
         def mock_gather(*args, **kwargs):
-            return [code for url, code in tile_url]
+            return [code for url, code in tile_data]
 
         with mock.patch.object(asyncio, 'gather', mock_gather) as f:
-            urls = [url for url, code in tile_url]
+            urls = [url for url, code in tile_data]
             task = fetch_tiles(urls)
             loop = asyncio.get_event_loop()
             result = loop.run_until_complete(task)
@@ -98,22 +99,27 @@ class MapTileDownloadingTestCase(unittest.TestCase):
         """
         Test fetching of tiles
         """
-        with self.run_fetch_tile(200, 'a', 'b') as result:
-            self.assertEqual(['image'] * 2, result)
+        a = Tile('a', None, None, None)
+        b = Tile('b', None, None, None)
+        with self.run_fetch_tile(200, a, b) as result:
+            self.assertEqual(['image'] * 2, [t.img for t in result])
 
 
     def test_fetch_tile_error(self):
         """
         Test error when fetching tile
-
-        If HTTP error code is different than 200 for a tile, then we expect
-        ValueError to be raised.
         """
-        try:
-            with self.run_fetch_tile(400, 'a', 'b') as result:
-                pass
-        except ValueError as ex:
-            self.assertTrue(str(ex).startswith('Unable to download'))
+        a = Tile('http://a', 'x', 'y', 'z')
+        b = Tile('http://b', 'x', 'y', 'z')
+        error = urllib.error.HTTPError('x', 403, 'a', 'b', 'c')
+        with self.run_fetch_tile(error, a, b) as result:
+            # image data is set to null
+            self.assertEqual([None] * 2, [t.img for t in result])
+
+            # tile error is set
+            err1 = 'Unable to download http://a (HTTP status 403)'
+            err2 = 'Unable to download http://b (HTTP status 403)'
+            self.assertEqual({err1, err2}, {str(t.error) for t in result})
 
 
     def test_fetching_tiles_error(self):
