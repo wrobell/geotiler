@@ -32,97 +32,38 @@ Caching downloader unit tests.
 import asyncio
 from functools import partial
 
+from geotiler.map import Tile
 from geotiler.cache import caching_downloader, redis_downloader
 
-import unittest
 from unittest import mock
 
-class CachingDownloaderTestCase(unittest.TestCase):
+def test_redis_downloader_and_cache():
     """
-    Caching downloader tests.
+    Test Redis downloader and cache functions.
     """
-    def test_caching_all(self):
-        """
-        Test caching downloader for all tiles to be fetched
-        """
-        @asyncio.coroutine
-        def images(urls):
-            return 'img1', 'img2'
+    async def images(tiles):
+        tile = partial(Tile, error=None, offset=None)
+        return [tile(url=t.url, img='img') for t in tiles]
 
-        cache = mock.MagicMock()
-        downloader = partial(caching_downloader, cache.get, cache.set, images)
+    client = mock.MagicMock()
+    client.get.side_effect = ['c-img1', None, 'c-img3']
+    downloader = redis_downloader(client, downloader=images, timeout=10)
+    assert caching_downloader == downloader.func
 
-        loop = asyncio.get_event_loop()
+    urls = ['url1', 'url2', 'url3']
+    tiles = [Tile(url, None, None, None) for url in urls]
+    task = downloader(tiles)
+    loop = asyncio.get_event_loop()
+    result = loop.run_until_complete(task)
 
-        cache.get.side_effect = [None, None]
-        task = downloader(['url1', 'url2'])
-        result = loop.run_until_complete(task)
-        self.assertEqual(['img1', 'img2'], list(result))
+    args = [v[0][0] for v in client.get.call_args_list]
+    assert ['url1', 'url2', 'url3'] == args
 
-        args = [v[0][0] for v in cache.get.call_args_list]
-        self.assertEqual(['url1', 'url2'], args)
-
-
-    def test_caching_missing(self):
-        """
-        Test caching downloader for some tiles to be fetched
-        """
-        @asyncio.coroutine
-        def images(urls):
-            self.assertEqual(('url1', 'url4'), urls)
-            return 'img1', 'img4'
-
-        cache = mock.MagicMock()
-        downloader = partial(caching_downloader, cache.get, cache.set, images)
-
-        loop = asyncio.get_event_loop()
-
-        cache.get.side_effect = [None, 'img2', 'img3', None]
-        task = downloader(['url1', 'url2', 'url3', 'url4'])
-        result = loop.run_until_complete(task)
-        self.assertEqual(['img1', 'img2', 'img3', 'img4'], list(result))
-
-        args = [v[0][0] for v in cache.get.call_args_list]
-        self.assertEqual(['url1', 'url2', 'url3', 'url4'], args)
-
-        args = sorted(v[0] for v in cache.set.call_args_list)
-        self.assertEqual(4, len(args))
-        self.assertEqual(('url1', 'img1'), args[0])
-        self.assertEqual(('url2', 'img2'), args[1])
-        self.assertEqual(('url3', 'img3'), args[2])
-        self.assertEqual(('url4', 'img4'), args[3])
-
-
-
-class RedisCacheTestCase(unittest.TestCase):
-    """
-    Redis cache unit tests.
-    """
-    def test_redis_downloader(self):
-        """
-        Test creating Redis downloader
-        """
-        @asyncio.coroutine
-        def images(urls):
-            return 'img1', 'img2', 'img3'
-
-        client = mock.MagicMock()
-        client.get.side_effect = ['img1', 'img2', 'img3']
-        downloader = redis_downloader(client, downloader=images, timeout=10)
-        self.assertEqual(caching_downloader, downloader.func)
-
-        task = downloader(['url1', 'url2', 'url3'])
-        loop = asyncio.get_event_loop()
-        result = loop.run_until_complete(task)
-
-        args = [v[0][0] for v in client.get.call_args_list]
-        self.assertEqual(['url1', 'url2', 'url3'], args)
-
-        args = sorted(v[0] for v in client.setex.call_args_list)
-        self.assertEqual(3, len(args))
-        self.assertEqual(('url1', 'img1', 10), args[0])
-        self.assertEqual(('url2', 'img2', 10), args[1])
-        self.assertEqual(('url3', 'img3', 10), args[2])
+    args = sorted(v[0] for v in client.setex.call_args_list)
+    assert 3 == len(args)
+    assert ('url1', 'c-img1', 10) == args[0]
+    assert ('url2', 'img', 10) == args[1]
+    assert ('url3', 'c-img3', 10) == args[2]
 
 
 # vim: sw=4:et:ai
