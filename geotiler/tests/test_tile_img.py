@@ -32,6 +32,7 @@ Tests for rendering map image using map tile data.
 import io
 import PIL.Image
 
+from geotiler.map import Tile
 import geotiler.tile.img as tile_img
 
 import unittest
@@ -91,9 +92,9 @@ def test_render_image():
         tf.return_value = tile
         data = (tile, tile, tile, tile)
         offsets = ((0, 0), (10, 0), (20, 0), (0, 10))
+        tiles = [Tile(None, o, i, None) for o, i in zip(offsets, data)]
 
-        image = tile_img.render_image(map, data, offsets)
-
+        image = tile_img.render_image(map, tiles)
         img_new.assert_called_once_with('RGBA', (30, 20))
         assert 4 == tf.call_count
         tf.assert_called_with(tile)
@@ -112,7 +113,9 @@ def test_render_image_error():
         tf.return_value = tile
         data = (tile, tile, None, tile, None, tile)
         offsets = ((0, 0), (10, 0), (20, 0), (0, 10), (10, 10), (20, 10))
-        image = tile_img.render_image(map, data, offsets)
+        tiles = [Tile(None, o, i, None) for o, i in zip(offsets, data)]
+
+        image = tile_img.render_image(map, tiles)
         assert 4 == tf.call_count
         tf.assert_called_with(tile)
 
