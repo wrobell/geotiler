@@ -35,50 +35,42 @@ import PIL.Image
 from geotiler.map import Tile
 import geotiler.tile.img as tile_img
 
-import unittest
 from unittest import mock
 
 
-class MapImageRenderTestCase(unittest.TestCase):
+def test_render_error_tile():
     """
-    Map image rendering tests.
+    Test rendering of error tile.
     """
-    def test_render_error_tile(self):
-        """
-        Test rendering of error tile
-        """
-        tile_img._error_image.cache_clear()
-        img = tile_img._error_image(10, 10)
-        self.assertEqual((10, 10), img.size)
+    tile_img._error_image.cache_clear()
+    img = tile_img._error_image(10, 10)
+    assert (10, 10) == img.size
 
+def test_tile_image_png():
+    """
+    Test converting PNG data into PIL image object.
+    """
+    tile = PIL.Image.new('RGBA', (10, 11))
+    f = io.BytesIO()
+    tile.save(f, format='png')
 
-    def test_tile_image_png(self):
-        """
-        Test converting PNG data into PIL image object
-        """
-        tile = PIL.Image.new('RGBA', (10, 11))
-        f = io.BytesIO()
-        tile.save(f, format='png')
+    img = tile_img._tile_image(f.getbuffer())
+    assert (10, 11) == img.size
 
-        img = tile_img._tile_image(f.getbuffer())
-        self.assertEquals((10, 11), img.size)
+def test_tile_image_jpg():
+    """
+    Test converting JPEG data into PIL image object.
+    """
+    tile = PIL.Image.new('RGB', (12, 10))
+    f = io.BytesIO()
+    tile.save(f, format='jpeg')
 
-
-    def test_tile_image_jpg(self):
-        """
-        Test converting JPEG data into PIL image object
-        """
-        tile = PIL.Image.new('RGB', (12, 10))
-        f = io.BytesIO()
-        tile.save(f, format='jpeg')
-
-        img = tile_img._tile_image(f.getbuffer())
-        self.assertEquals((12, 10), img.size)
-
+    img = tile_img._tile_image(f.getbuffer())
+    assert (12, 10) == img.size
 
 def test_render_image():
     """
-    Test rendering map image
+    Test rendering map image.
     """
     tile = PIL.Image.new('RGBA', (10, 10))
     map = mock.MagicMock()
@@ -101,7 +93,7 @@ def test_render_image():
 
 def test_render_image_error():
     """
-    Test rendering map image with error tile
+    Test rendering map image with error tile.
     """
     tile = PIL.Image.new('RGBA', (10, 10))
     map = mock.MagicMock()
