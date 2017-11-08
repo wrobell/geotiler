@@ -32,8 +32,8 @@ Functions and coroutines to download map tiles.
 import asyncio
 import urllib.request
 import logging
-
-from functools import partial
+from concurrent import futures
+from functools import partial, lru_cache
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +64,7 @@ def fetch_tile(tile):
 
     return tile
 
-async def fetch_tiles(tiles):
+async def fetch_tiles(tiles, num_workers):
     """
     Download map tiles.
 
@@ -75,6 +75,8 @@ async def fetch_tiles(tiles):
     a tile, then `Tile.img` is set to null and `Tile.error` to a value error.
 
     :param tiles: Collection of tiles.
+    :param num_workers: Number of workers used to connect to a map provider
+        service.
     """
     if __debug__:
         logger.debug('fetching tiles...')
@@ -85,7 +87,8 @@ async def fetch_tiles(tiles):
     # without executor by creating appropriate opener? running in executor
     # sucks, but thanks to `urllib.request` we get all the goodies like
     # automatic proxy handling and various protocol support
-    f = partial(loop.run_in_executor, None, fetch_tile)
+    pool = create_pool(num_workers)
+    f = partial(loop.run_in_executor, pool, fetch_tile)
     tasks = (f(t) for t in tiles)
     tiles = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -98,5 +101,16 @@ async def fetch_tiles(tiles):
             logger.warning(FMT_DOWNLOAD_LOG(t.error))
 
     return tiles
+
+@lru_cache(maxsize=2)
+def create_pool(num):
+    """
+    Create thread pool executor with a number of workers.
+
+    :param num: Number of workers to create.
+    """
+    return futures.ThreadPoolExecutor(
+        max_workers=num, thread_name_prefix='geotiler'
+    )
 
 # vim: sw=4:et:ai

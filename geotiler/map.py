@@ -415,7 +415,7 @@ async def fetch_tiles(map, downloader=None, **kw):
     offsets = _tile_offsets(map, offset)
     urls = (tile_url(c, map.zoom) for c in coords)
     tiles = (Tile(u, o, None, None) for u, o in zip(urls, offsets))
-    tiles = await downloader(tiles, **kw)
+    tiles = await downloader(tiles, map.provider.limit, **kw)
     return tiles
 
 def _tile_coords(map, coord, offset):

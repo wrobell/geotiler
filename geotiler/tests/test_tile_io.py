@@ -99,7 +99,7 @@ def test_fetch_tiles():
     ]
     with mock_urlopen('image') as f:
         loop = asyncio.get_event_loop()
-        task = fetch_tiles(tiles)
+        task = fetch_tiles(tiles, 2)
         tiles = loop.run_until_complete(task)
 
         img = [tile.img for tile in tiles]

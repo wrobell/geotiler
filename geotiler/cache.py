@@ -37,7 +37,7 @@ from geotiler.tile.io import fetch_tiles
 
 logger = logging.getLogger(__name__)
 
-async def caching_downloader(get, set, downloader, tiles, **kw):
+async def caching_downloader(get, set, downloader, tiles, num_workers, **kw):
     """
     Create caching map tiles downloader.
 
@@ -58,6 +58,8 @@ async def caching_downloader(get, set, downloader, tiles, **kw):
     :param set: Function to put a tile data in cache.
     :param downloader: Original tiles downloader (asyncio coroutine).
     :param tiles: Collection tiles to fetch.
+    :param num_workers: Number of workers used to connect to a map provider
+        service.
     :param kw: Parameters passed to downloader coroutine.
     """
     # fetch map tile images from cache
@@ -70,7 +72,7 @@ async def caching_downloader(get, set, downloader, tiles, **kw):
             logger.debug('cache hit for {}'.format(t.url))
 
     missing = groupby(lambda t: t.img is None, tiles)
-    result = await downloader(missing.get(True, []), **kw)
+    result = await downloader(missing.get(True, []), num_workers, **kw)
 
     result.extend(missing.get(False, []))
     # reset cache for new and old tiles

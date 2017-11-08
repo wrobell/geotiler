@@ -41,7 +41,7 @@ def test_redis_downloader_and_cache():
     """
     Test Redis downloader and cache functions.
     """
-    async def images(tiles):
+    async def images(tiles, num_workers):
         tile = partial(Tile, error=None, offset=None)
         return [tile(url=t.url, img='img') for t in tiles]
 
@@ -52,7 +52,7 @@ def test_redis_downloader_and_cache():
 
     urls = ['url1', 'url2', 'url3']
     tiles = [Tile(url, None, None, None) for url in urls]
-    task = downloader(tiles)
+    task = downloader(tiles, 2)
     loop = asyncio.get_event_loop()
     result = loop.run_until_complete(task)
 

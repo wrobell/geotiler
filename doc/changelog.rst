@@ -4,6 +4,8 @@ Changelog
 ------
 - implemented function `geotiler.fetch_tiles` to allow processing of tiles
   before map rendering
+- use map provider download limit to honour map provider service connection
+  limits
 - Python 3.6 is required
 
 0.12.0
