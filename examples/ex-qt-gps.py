@@ -251,8 +251,7 @@ pos = (0, 0)
 if len(sys.argv) == 3:
     pos = float(sys.argv[1]), float(sys.argv[2])
 
-provider = geotiler.find_provider('osm')
-mm = geotiler.Map(size=size, center=pos, zoom=18, provider=provider)
+mm = geotiler.Map(size=size, center=pos, zoom=18)
 
 window = MapWindow(mm)
 window.show()
