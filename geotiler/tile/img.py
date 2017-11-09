@@ -38,7 +38,6 @@ import PIL.ImageDraw
 
 logger = logging.getLogger(__name__)
 
-
 async def render_image(map, tiles):
     """
     Redner map image using map tile data.
@@ -71,7 +70,6 @@ async def render_image(map, tiles):
 
     return image
 
-
 @functools.lru_cache(maxsize=4)
 def _error_image(width, height):
     """
@@ -89,7 +87,6 @@ def _error_image(width, height):
     tw, th = draw.textsize(msg)
     draw.text(((width - tw) // 2, (height - th) // 2), msg, 'red')
     return img
-
 
 def _tile_image(data):
     """

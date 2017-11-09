@@ -29,6 +29,7 @@
 Tests for rendering map image using map tile data.
 """
 
+import asyncio
 import io
 import PIL.Image
 
@@ -37,6 +38,25 @@ import geotiler.tile.img as tile_img
 
 from unittest import mock
 
+
+def _run_render_image(map, tiles):
+    """
+    Run coroutine rendering map image using the map tiles.
+
+    :param map: Map object.
+    :param tiles: Asynchronous generator of tiles.
+    """
+    loop = asyncio.get_event_loop()
+    task = tile_img.render_image(map, tiles)
+    image = loop.run_until_complete(task)
+    return image
+
+async def _tile_generator(offsets, data):
+    """
+    Create asynchronous generator of map tiles.
+    """
+    for o, i in zip(offsets, data):
+        yield Tile(None, o, i, None)
 
 def test_render_error_tile():
     """
@@ -84,9 +104,8 @@ def test_render_image():
         tf.return_value = tile
         data = (tile, tile, tile, tile)
         offsets = ((0, 0), (10, 0), (20, 0), (0, 10))
-        tiles = [Tile(None, o, i, None) for o, i in zip(offsets, data)]
-
-        image = tile_img.render_image(map, tiles)
+        tiles = _tile_generator(offsets, data)
+        image = _run_render_image(map, tiles)
         img_new.assert_called_once_with('RGBA', (30, 20))
         assert 4 == tf.call_count
         tf.assert_called_with(tile)
@@ -105,9 +124,8 @@ def test_render_image_error():
         tf.return_value = tile
         data = (tile, tile, None, tile, None, tile)
         offsets = ((0, 0), (10, 0), (20, 0), (0, 10), (10, 10), (20, 10))
-        tiles = [Tile(None, o, i, None) for o, i in zip(offsets, data)]
-
-        image = tile_img.render_image(map, tiles)
+        tiles = _tile_generator(offsets, data)
+        image = _run_render_image(map, tiles)
         assert 4 == tf.call_count
         tf.assert_called_with(tile)
 
