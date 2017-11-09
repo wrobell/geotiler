@@ -43,7 +43,11 @@ def test_redis_downloader_and_cache():
     """
     async def images(tiles, num_workers):
         tile = partial(Tile, error=None, offset=None)
-        return [tile(url=t.url, img='img') for t in tiles]
+        for t in tiles:
+            yield tile(url=t.url, img='img')
+
+    async def as_list(tiles):
+        return [t async for t in tiles]
 
     client = mock.MagicMock()
     client.get.side_effect = ['c-img1', None, 'c-img3']
@@ -52,9 +56,10 @@ def test_redis_downloader_and_cache():
 
     urls = ['url1', 'url2', 'url3']
     tiles = [Tile(url, None, None, None) for url in urls]
-    task = downloader(tiles, 2)
+
     loop = asyncio.get_event_loop()
-    result = loop.run_until_complete(task)
+    tiles = downloader(tiles, 2)
+    result = loop.run_until_complete(as_list(tiles))
 
     args = [v[0][0] for v in client.get.call_args_list]
     assert ['url1', 'url2', 'url3'] == args
