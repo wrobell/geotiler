@@ -91,6 +91,9 @@ def test_fetch_tiles():
     """
     Test fetching map tiles.
     """
+    async def as_list(tiles):
+        return [t async for t in tiles]
+
     tiles = [
         Tile('http://a.b.c/1', 'a', 'b', 'c'),
         Tile('http://a.b.c/2', 'a', 'b', 'c'),
@@ -99,8 +102,8 @@ def test_fetch_tiles():
     ]
     with mock_urlopen('image') as f:
         loop = asyncio.get_event_loop()
-        task = fetch_tiles(tiles, 2)
-        tiles = loop.run_until_complete(task)
+        tiles = fetch_tiles(tiles, 2)
+        tiles = loop.run_until_complete(as_list(tiles))
 
         img = [tile.img for tile in tiles]
         assert ['image'] * 4 == img, tiles
