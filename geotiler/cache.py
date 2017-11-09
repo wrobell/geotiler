@@ -31,17 +31,29 @@ Caching strategies for GeoTiler.
 
 import logging
 from functools import partial
-from cytoolz.itertoolz import groupby
+from cytoolz.itertoolz import groupby, partition_all
 
+from .util import log_tiles
 from geotiler.tile.io import fetch_tiles
 
 logger = logging.getLogger(__name__)
 
+def log_tile_cache_hit(tile):
+    if tile.img:
+        logger.debug('cache hit for: {}'.format(tile.url))
+    return tile
+
+def fetch_from_cache(get, tiles):
+    tiles = (t._replace(img=get(t.url)) for t in tiles)
+    if __debug__:
+        tiles = log_tiles(log_tile_cache_hit, tiles)
+    return tiles
+
 async def caching_downloader(get, set, downloader, tiles, num_workers, **kw):
     """
-    Create caching map tiles downloader.
+    Download tiles from cache and missing tiles with the downloader.
 
-    This is asyncio coroutine.
+    Asynchronous generator of map tiles is returned.
 
     The code flow is
 
@@ -62,25 +74,20 @@ async def caching_downloader(get, set, downloader, tiles, num_workers, **kw):
         service.
     :param kw: Parameters passed to downloader coroutine.
     """
-    # fetch map tile images from cache
-    tiles = (t._replace(img=get(t.url)) for t in tiles)
+    tiles = fetch_from_cache(get, tiles)
+    groups = partition_all(10, tiles)
+    for tg in groups:
+        missing = groupby(lambda t: t.img is None, tg)
+        for t in missing.get(False, []):
+            # reset cache for new and old tiles
+            set(t.url, t.img)
+            yield t
 
-    if __debug__:
-        tiles = list(tiles)
-        cached = (t for t in tiles if t.img is not None)
-        for t in cached:
-            logger.debug('cache hit for {}'.format(t.url))
-
-    missing = groupby(lambda t: t.img is None, tiles)
-    result = await downloader(missing.get(True, []), num_workers, **kw)
-
-    result.extend(missing.get(False, []))
-    # reset cache for new and old tiles
-    existing = (t for t in result if t.img is not None)
-    for t in existing:
-        set(t.url, t.img)
-
-    return result
+        result = downloader(missing.get(True, []), num_workers, **kw)
+        async for t in result:
+            # reset cache for new and old tiles
+            set(t.url, t.img)
+            yield t
 
 def redis_downloader(client, downloader=None, timeout=3600 * 24 * 7):
     """

@@ -39,7 +39,7 @@ import PIL.ImageDraw
 logger = logging.getLogger(__name__)
 
 
-def render_image(map, tiles):
+async def render_image(map, tiles):
     """
     Redner map image using map tile data.
 
@@ -54,7 +54,7 @@ def render_image(map, tiles):
     The PIL image object is returned.
 
     :param map: Map object.
-    :param tiles: Collection of tiles.
+    :param tiles: Asynchronous generator of map tiles.
     """
     if __debug__:
         logger.debug('combining tiles')
@@ -65,7 +65,7 @@ def render_image(map, tiles):
     image = PIL.Image.new('RGBA', tuple(map.size))
     error = _error_image(provider.tile_width, provider.tile_height)
 
-    for tile in tiles:
+    async for tile in tiles:
         img = _tile_image(tile.img) if tile.img else error
         image.paste(img, tile.offset)
 

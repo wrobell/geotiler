@@ -34,6 +34,9 @@ import urllib.request
 import logging
 from concurrent import futures
 from functools import partial, lru_cache
+from cytoolz.itertoolz import partition_all
+
+from ..util import log_tiles
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +71,7 @@ async def fetch_tiles(tiles, num_workers):
     """
     Download map tiles.
 
-    This is asyncio coroutine.
+    Asynchronous generator of map tiles is returned.
 
     A collection of tiles is returned. Each successfully downloaded tile
     has `Tile.img` attribute set. If there was an error while downloading
@@ -90,17 +93,15 @@ async def fetch_tiles(tiles, num_workers):
     pool = create_pool(num_workers)
     f = partial(loop.run_in_executor, pool, fetch_tile)
     tasks = (f(t) for t in tiles)
-    tiles = await asyncio.gather(*tasks, return_exceptions=True)
+    for tg in partition_all(num_workers, tasks):
+        tiles = await asyncio.gather(*tg)
+        log_tiles(log_tile_error, tiles)
+        for t in tiles:
+            yield t
 
     if __debug__:
         logger.debug('fetching tiles done')
 
-    # log missing tiles
-    for t in tiles:
-        if t.error:
-            logger.warning(FMT_DOWNLOAD_LOG(t.error))
-
-    return tiles
 
 @lru_cache(maxsize=2)
 def create_pool(num):
@@ -112,5 +113,10 @@ def create_pool(num):
     return futures.ThreadPoolExecutor(
         max_workers=num, thread_name_prefix='geotiler'
     )
+
+def log_tile_error(tile):
+    if tile.error:
+        logger.warning(FMT_DOWNLOAD_LOG(tile.error))
+    return tile
 
 # vim: sw=4:et:ai

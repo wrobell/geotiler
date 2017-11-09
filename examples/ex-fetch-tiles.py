@@ -35,12 +35,15 @@ logging.basicConfig(level=logging.DEBUG)
 import asyncio
 import geotiler
 
-async def fetch(mm):
-    tiles = await geotiler.fetch_tiles(mm)
-    in_error = (t for t in tiles if t.error)
-    for t in in_error:
-        print('tile {} error: {}'.format(t.url, t.error))
+def log_error(tile):
+    if tile.error:
+        print('tile {} error: {}'.format(tile.url, tile.error))
+    return tile
 
+async def fetch(mm):
+    tiles = geotiler.fetch_tiles(mm)
+    # process tile in error and then render all the tiles
+    tiles = (log_error(t) async for t in tiles)
     img = await geotiler.render_map_async(mm, tiles=tiles)
     return img
 

@@ -392,14 +392,15 @@ async def render_map_async(map, tiles=None, downloader=None, **kw):
     :param kw: Parameters passed to the downloader.
     """
     if not tiles:
-        tiles = await fetch_tiles(map, downloader, **kw)
-    return render_image(map, tiles)
+        tiles = fetch_tiles(map, downloader, **kw)
+        tiles = (t async for t in tiles)
+    return await render_image(map, tiles)
 
-async def fetch_tiles(map, downloader=None, **kw):
+def fetch_tiles(map, downloader=None, **kw):
     """
     Create and fetch map tiles.
 
-    This is asyncio coroutine.
+    Asynchronous generator of map tiles is returned.
 
     :param map: Map instance.
     :param downloader: Map tiles downloader.
@@ -415,8 +416,7 @@ async def fetch_tiles(map, downloader=None, **kw):
     offsets = _tile_offsets(map, offset)
     urls = (tile_url(c, map.zoom) for c in coords)
     tiles = (Tile(u, o, None, None) for u, o in zip(urls, offsets))
-    tiles = await downloader(tiles, map.provider.limit, **kw)
-    return tiles
+    return downloader(tiles, map.provider.limit, **kw)
 
 def _tile_coords(map, coord, offset):
     """
