@@ -87,24 +87,22 @@ def scroll_map(widget, pos):
     widget.centerOn(x, y)
 
 
-@asyncio.coroutine
-def read_gps(queue):
+async def read_gps(queue):
     """
     Read location from gpsd daemon and put it into positions queue.
 
     :param queue: Queue of GPS positions.
     """
-    reader, writer = yield from asyncio.open_connection(port=2947)
+    reader, writer = await asyncio.open_connection(port=2947)
     writer.write('?WATCH={"enable":true,"json":true}\n'.encode())
     while True:
-        line = yield from reader.readline()
+        line = await reader.readline()
         data = json.loads(line.decode())
         if 'lon' in data:
-            yield from queue.put((data['lon'], data['lat']))
+            await queue.put((data['lon'], data['lat']))
 
 
-@asyncio.coroutine
-def refresh_map(widget):
+async def refresh_map(widget):
     """
     Refresh map when map widget refresh event is set.
 
@@ -123,11 +121,11 @@ def refresh_map(widget):
     )
 
     while True:
-        yield from event.wait()
+        await event.wait()
         event.clear()
 
         logger.debug('fetching map image...')
-        img = yield from render_map(map)
+        img = await render_map(map)
         logger.debug('got map image')
 
         pixmap = QPixmap.fromImage(ImageQt(img))
@@ -135,8 +133,7 @@ def refresh_map(widget):
         scroll_map(widget, map.center)
 
 
-@asyncio.coroutine
-def locate(widget, queue):
+async def locate(widget, queue):
     """
     Read position from the queue and update map position.
 
@@ -146,7 +143,7 @@ def locate(widget, queue):
     :param queue: Queue of GPS positions.
     """
     while True:
-        pos = yield from queue.get()
+        pos = await queue.get()
         scroll_map(widget, pos)
 
 
