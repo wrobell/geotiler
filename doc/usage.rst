@@ -69,7 +69,7 @@ running concurrently
 The tasks communication is done via a queue holding current position.
 
 .. literalinclude:: ../examples/ex-async-gps.py
-   :lines: 51-89
+   :lines: 51-86
 
 Map Providers
 -------------

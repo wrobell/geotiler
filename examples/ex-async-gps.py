@@ -48,22 +48,19 @@ render_map_async = functools.partial(
     geotiler.render_map_async, downloader=downloader
 )
 
-@asyncio.coroutine
-def read_gps(queue):
+async def read_gps(queue):
     """
     Read location data from `gpsd` daemon.
     """
-    reader, writer = yield from asyncio.open_connection(port=2947)
+    reader, writer = await asyncio.open_connection(port=2947)
     writer.write(b'?WATCH={"enable":true,"json":true}\n')
     while True:
-        line = yield from reader.readline()
+        line = await reader.readline()
         data = json.loads(line.decode())
         if 'lon' in data:
-            yield from queue.put((data['lon'], data['lat']))
+            await queue.put((data['lon'], data['lat']))
         
-
-@asyncio.coroutine
-def show_map(queue, map):
+async def show_map(queue, map):
     """
     Save map centered at location to a file.
     """
@@ -71,7 +68,7 @@ def show_map(queue, map):
         pos = yield from queue.get()
 
         map.center = pos
-        img = yield from render_map_async(map)
+        img = await render_map_async(map)
         img.save('ex-async-gps.png', 'png')
 
 
