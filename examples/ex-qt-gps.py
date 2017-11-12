@@ -51,7 +51,7 @@ from PIL.ImageQt import ImageQt
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, \
     QGraphicsPixmapItem, QGraphicsEllipseItem
-from PyQt5.QtGui import QPixmap, QPen, QColor
+from PyQt5.QtGui import QImage, QPixmap, QPainter, QPen, QColor
 from quamash import QEventLoop
 
 import geotiler
@@ -119,18 +119,36 @@ async def refresh_map(widget):
     render_map = functools.partial(
         geotiler.render_map_async, downloader=downloader
     )
+    fetch_tiles = functools.partial(
+        geotiler.fetch_tiles, downloader=downloader
+    )
+
+    pixmap = QPixmap(*map.size)
 
     while True:
         await event.wait()
         event.clear()
 
         logger.debug('fetching map image...')
-        img = await render_map(map)
-        logger.debug('got map image')
 
+        img = await render_map(map)
         pixmap = QPixmap.fromImage(ImageQt(img))
-        widget.map_layer.setPixmap(pixmap)
+
+        # TODO: use `fetch_tiles` to update map as tiles arrive, but avoid
+        # `setPixmap`.
+        # tiles = fetch_tiles(map)
+        # async for tile in tiles:
+        #     painter = QPainter(pixmap)
+        #     img = QImage()
+        #     img.loadFromData(tile.img)
+        #     painter.drawImage(*tile.offset, img)
+        #     painter.end()
+        #     widget.map_layer.setPixmap(pixmap)
+
         scroll_map(widget, map.center)
+        widget.map_layer.setPixmap(pixmap)
+
+        logger.debug('got map image')
 
 
 async def locate(widget, queue):
