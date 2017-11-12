@@ -132,10 +132,10 @@ async def refresh_map(widget):
         logger.debug('fetching map image...')
 
         img = await render_map(map)
-        pixmap = QPixmap.fromImage(ImageQt(img))
+        pixmap.convertFromImage(ImageQt(img))
 
-        # TODO: use `fetch_tiles` to update map as tiles arrive, but avoid
-        # `setPixmap`.
+        # TODO: use `fetch_tiles` to update map as tiles arrive, but try to
+        # avoid `setPixmap` within the loop.
         # tiles = fetch_tiles(map)
         # async for tile in tiles:
         #     painter = QPainter(pixmap)
