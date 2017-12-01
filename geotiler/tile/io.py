@@ -50,8 +50,6 @@ PARAMS = {
     'raise_for_status': True,
 }
 
-FETCH_TIMEOUT = 1
-
 FMT_DOWNLOAD_LOG = 'Cannot download a tile due to error: {}'.format
 FMT_DOWNLOAD_ERROR = 'Unable to download {} (error: {})'.format
 
@@ -97,20 +95,11 @@ async def fetch_tiles(tiles, num_workers):
     # use `trust_env` to get proxy configuration via env variables
     async with aiohttp.ClientSession(**PARAMS) as session:
         f = partial(fetch_tile, session)
-        pending = [f(t) for t in tiles]
-        while pending:
-            done, pending = await asyncio.wait(pending, timeout=FETCH_TIMEOUT)
-
-            tiles = (t.result() for t in done)
-            tiles = log_tiles(log_tile_error, tiles)
-
-            if __debug__:
-                logger.debug('processed {} tiles, {} remaining'.format(
-                    len(done), len(pending))
-                )
-
-            for t in tiles:
-                yield t
+        tasks = [f(t) for t in tiles]
+        for task in asyncio.as_completed(tasks):
+            tile = await task  # no exception expected at this stage
+            log_tile_error(tile)
+            yield tile
 
     if __debug__:
         logger.debug('fetching tiles done')
