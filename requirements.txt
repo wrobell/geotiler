@@ -7,6 +7,7 @@ nose>=1.3.1
 redis>=2.9.1
 sphinx-rtd-theme>=0.1.6
 cytoolz>=0.8.2
+pytest>=3.3.0
 pytest-aiohttp>=0.2.0
 pytest-coverage>=2.5.1
 asynctest>=0.11.1
