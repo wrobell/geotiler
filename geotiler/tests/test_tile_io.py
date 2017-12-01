@@ -117,7 +117,7 @@ async def test_fetch_tiles(session):
 
     ctx_ac = mock.patch.object(asyncio, 'as_completed')
     ctx_ft = mock.patch.object(geotiler.tile.io, 'fetch_tile')
-    with mock_url_open(session, 'image'), ctx_ac as mock_as_completed, ctx_ft:
+    with ctx_ac as mock_as_completed, ctx_ft:
         mock_as_completed.return_value = tasks
         tiles = [t async for t in fetch_tiles(tiles, 2)]
 
