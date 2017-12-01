@@ -29,12 +29,10 @@
 Functions and coroutines to download map tiles.
 """
 
+import aiohttp
 import asyncio
-import urllib.request
 import logging
-from concurrent import futures
-from functools import partial, lru_cache
-from cytoolz.itertoolz import partition_all
+from functools import partial
 
 from ..util import log_tiles
 
@@ -44,26 +42,32 @@ HEADERS = {
     'User-Agent': 'GeoTiler/0.13.0',
 }
 
-FMT_DOWNLOAD_LOG = 'Cannot download a tile due to error: {}'.format
-FMT_DOWNLOAD_ERROR = 'Unable to download {} (HTTP status {})'.format
+# client session params
+PARAMS = {
+    'headers': HEADERS,
+    'trust_env': True,
+    'raise_for_status': True,
+}
 
-def fetch_tile(tile):
+FETCH_TIMEOUT = 0.5
+
+FMT_DOWNLOAD_LOG = 'Cannot download a tile due to error: {}'.format
+FMT_DOWNLOAD_ERROR = 'Unable to download {} (error: {})'.format
+
+async def fetch_tile(session, tile):
     """
     Fetch map tile.
 
     :param tile: Map tile.
     """
-    request = urllib.request.Request(tile.url)
-    for k, v in HEADERS.items():
-        request.add_header(k, v)
-
     try:
-        response = urllib.request.urlopen(request)
-    except urllib.error.HTTPError as ex:
-        error = ValueError(FMT_DOWNLOAD_ERROR(tile.url, ex.code))
+        async with session.get(tile.url) as response:
+            data = await response.read()
+    except aiohttp.ClientError as ex:
+        error = ValueError(FMT_DOWNLOAD_ERROR(tile.url, ex))
         tile = tile._replace(img=None, error=error)
     else:
-        tile = tile._replace(img=response.read(), error=None)
+        tile = tile._replace(img=data, error=None)
 
     return tile
 
@@ -86,33 +90,29 @@ async def fetch_tiles(tiles, num_workers):
 
     loop = asyncio.get_event_loop()
 
-    # TODO: is it possible to call `urllib.request` in real async mode
-    # without executor by creating appropriate opener? running in executor
-    # sucks, but thanks to `urllib.request` we get all the goodies like
-    # automatic proxy handling and various protocol support
-    pool = create_pool(num_workers)
-    f = partial(loop.run_in_executor, pool, fetch_tile)
-    tasks = (f(t) for t in tiles)
-    for tg in partition_all(num_workers, tasks):
-        tiles = await asyncio.gather(*tg)
-        log_tiles(log_tile_error, tiles)
-        for t in tiles:
-            yield t
+    # respect connection limits by defining custom connector
+    connector = aiohttp.BaseConnector(limit_per_host=num_workers)
+
+    # use `trust_env` to get proxy configuration via env variables
+    async with aiohttp.ClientSession(**PARAMS) as session:
+        f = partial(fetch_tile, session)
+        pending = [f(t) for t in tiles]
+        while pending:
+            done, pending = await asyncio.wait(pending, timeout=FETCH_TIMEOUT)
+
+            tiles = (t.result() for t in done)
+            tiles = log_tiles(log_tile_error, tiles)
+
+            if __debug__:
+                logger.debug('processed {} tiles, {} remaining'.format(
+                    len(done), len(pending))
+                )
+
+            for t in tiles:
+                yield t
 
     if __debug__:
         logger.debug('fetching tiles done')
-
-
-@lru_cache(maxsize=2)
-def create_pool(num):
-    """
-    Create thread pool executor with a number of workers.
-
-    :param num: Number of workers to create.
-    """
-    return futures.ThreadPoolExecutor(
-        max_workers=num, thread_name_prefix='geotiler'
-    )
 
 def log_tile_error(tile):
     if tile.error:
