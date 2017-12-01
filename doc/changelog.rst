@@ -6,6 +6,7 @@ Changelog
   before map rendering
 - use map provider download limit to honour map provider service connection
   limits
+- the :py:mod:`aiohttp` module is used again (with support for proxies)
 - Python 3.6 is required
 
 0.12.0
