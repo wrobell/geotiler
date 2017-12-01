@@ -30,85 +30,101 @@ Map tile downloading unit tests.
 """
 
 import asyncio
-import urllib.request
+import aiohttp
 from contextlib import contextmanager
 
+import geotiler.tile.io
 from geotiler.map import Tile
 from geotiler.tile.io import fetch_tile, fetch_tiles
 
+import asynctest
 from unittest import mock
 
-@contextmanager
-def mock_urlopen(data, status=200):
-    """
-    Mock `urlopen` function call.
+# http://pfertyk.me/2017/06/testing-asynchronous-context-managers-in-python/
+class ContextManagerMock(mock.MagicMock):
+    async def __aenter__(self):
+        return self.aenter
 
-    If status different than 200, then cause mock to raise `HTTPError`
+    async def __aexit__(self, *args):
+        pass
+
+@contextmanager
+def mock_url_open(session, data, error_msg=None):
+    """
+    Mock opening of an URL.
+
+    If error message set, then it is raised as `aiohttp.ClientError`
     exception.
 
+    :param session: Mock of `aiohttp` client session.
     :param data: Data to be assigned to HTTP response.
-    :param status: HTTP status.
+    :param error_msg: Error encountered when an exception is raised.
     """
-    response = mock.MagicMock()
-    response.read.return_value = data
-    response.status = status
+    ctx_mock = session.get.return_value.aenter
 
-    with mock.patch.object(urllib.request, 'urlopen') as f:
-        if status == 200:
-            f.return_value = response
-        else:
-            error = urllib.error.HTTPError(
-                'http://test', status, 'error message', {}, None
-            )
-            f.side_effect = error
-        yield f
+    if error_msg:
+        params = {'side_effect': aiohttp.ClientError(error_msg)}
+    else:
+        params = {'return_value': data}
 
-def test_fetch_tile():
+    ctx_mock.read = asynctest.CoroutineMock(**params)
+    yield session
+
+@asynctest.patch('aiohttp.ClientSession', new_callable=ContextManagerMock)
+async def test_fetch_tile(session):
     """
     Test fetching a map tile.
     """
     tile = Tile('http://a.b.c', None, None, None)
-    with mock_urlopen('image') as f:
-        tile = fetch_tile(tile)
-        assert 'image' == tile.img
-        assert tile.error is None
 
-def test_fetch_tile_error():
+    with mock_url_open(session, 'image'):
+        result = await fetch_tile(session, tile)
+
+        assert result is not tile  # copy of tile is returned
+        assert tile.url == result.url
+        assert 'image' == result.img
+        assert result.error is None
+
+@asynctest.patch('aiohttp.ClientSession', new_callable=ContextManagerMock)
+async def test_fetch_tile_error(session):
     """
     Test fetching a map tile with an error.
     """
     # assign something to `img` and `error` to see if they are overriden
     # properly in case of an error
     tile = Tile('http://a.b.c', 'a', 'b', 'c')
-    with mock_urlopen('image', status=400) as f:
-        tile = fetch_tile(tile)
+    with mock_url_open(session, 'image', error_msg='some error'):
+        tile = await fetch_tile(session, tile)
         assert tile.img is None
 
-        error = 'Unable to download http://a.b.c (HTTP status 400)'
+        error = 'Unable to download http://a.b.c (error: some error)'
         assert error == str(tile.error)
 
-def test_fetch_tiles():
+@asynctest.patch('aiohttp.ClientSession', new_callable=ContextManagerMock)
+async def test_fetch_tiles(session):
     """
     Test fetching map tiles.
     """
-    async def as_list(tiles):
-        return [t async for t in tiles]
-
     tiles = [
-        Tile('http://a.b.c/1', 'a', 'b', 'c'),
-        Tile('http://a.b.c/2', 'a', 'b', 'c'),
-        Tile('http://a.b.c/3', 'a', 'b', 'c'),
-        Tile('http://a.b.c/4', 'a', 'b', 'c'),
+        Tile('http://a.b.c/1', 'o', 'image', None),
+        Tile('http://a.b.c/2', 'o', 'image', None),
+        Tile('http://a.b.c/3', 'o', None, 'error'),
+        Tile('http://a.b.c/4', 'o', 'image', None),
     ]
-    with mock_urlopen('image') as f:
-        loop = asyncio.get_event_loop()
-        tiles = fetch_tiles(tiles, 2)
-        tiles = loop.run_until_complete(as_list(tiles))
+    tasks = [asyncio.Future() for t in tiles]
+    for task, tile in zip(tasks, tiles):
+        task.set_result(tile)
+
+    ctx_ac = mock.patch.object(asyncio, 'as_completed')
+    ctx_ft = mock.patch.object(geotiler.tile.io, 'fetch_tile')
+    with mock_url_open(session, 'image'), ctx_ac as mock_as_completed, ctx_ft:
+        mock_as_completed.return_value = tasks
+        tiles = [t async for t in fetch_tiles(tiles, 2)]
 
         img = [tile.img for tile in tiles]
-        assert ['image'] * 4 == img, tiles
+        assert ['image', 'image', None, 'image'] == img, tiles
 
         error = [tile.error for tile in tiles]
-        assert [None] * 4 == error, tiles
+        assert [None, None, 'error', None] == error, tiles
 
 # vim: sw=4:et:ai

@@ -35,7 +35,6 @@ import logging
 from functools import partial
 
 from geotiler import __version__
-from ..util import log_tiles
 
 logger = logging.getLogger(__name__)
 
@@ -90,23 +89,21 @@ async def fetch_tiles(tiles, num_workers):
     loop = asyncio.get_event_loop()
 
     # respect connection limits by defining custom connector
-    connector = aiohttp.BaseConnector(limit_per_host=num_workers)
+    connector = aiohttp.TCPConnector(limit_per_host=num_workers)
 
     # use `trust_env` to get proxy configuration via env variables
-    async with aiohttp.ClientSession(**PARAMS) as session:
+    async with aiohttp.ClientSession(connector=connector, **PARAMS) as session:
         f = partial(fetch_tile, session)
         tasks = [f(t) for t in tiles]
         for task in asyncio.as_completed(tasks):
             tile = await task  # no exception expected at this stage
-            log_tile_error(tile)
+
+            if tile.error:
+                logger.warning(FMT_DOWNLOAD_LOG(tile.error))
+
             yield tile
 
     if __debug__:
         logger.debug('fetching tiles done')
-
-def log_tile_error(tile):
-    if tile.error:
-        logger.warning(FMT_DOWNLOAD_LOG(tile.error))
-    return tile
 
 # vim: sw=4:et:ai
