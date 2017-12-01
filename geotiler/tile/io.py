@@ -49,7 +49,7 @@ PARAMS = {
     'raise_for_status': True,
 }
 
-FETCH_TIMEOUT = 0.5
+FETCH_TIMEOUT = 1
 
 FMT_DOWNLOAD_LOG = 'Cannot download a tile due to error: {}'.format
 FMT_DOWNLOAD_ERROR = 'Unable to download {} (error: {})'.format
