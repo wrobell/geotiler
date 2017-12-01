@@ -34,12 +34,13 @@ import asyncio
 import logging
 from functools import partial
 
+from geotiler import __version__
 from ..util import log_tiles
 
 logger = logging.getLogger(__name__)
 
 HEADERS = {
-    'User-Agent': 'GeoTiler/0.13.0',
+    'User-Agent': 'GeoTiler/{}'.format(__version__),
 }
 
 # client session params
