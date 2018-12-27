@@ -99,7 +99,7 @@ def redis_downloader(client, downloader=None, timeout=3600 * 24 * 7):
     """
     if downloader is None:
         downloader = fetch_tiles
-    set = lambda key, value: client.setex(key, value, timeout)
+    set = lambda key, value: client.setex(key, timeout, value)
     return partial(caching_downloader, client.get, set, downloader)
 
 

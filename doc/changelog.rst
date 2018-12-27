@@ -1,5 +1,9 @@
 Changelog
 =========
+0.14.0
+------
+- corrected use of Redis API in Redis cache
+
 0.13.0
 ------
 - implemented function `geotiler.fetch_tiles` to allow processing of tiles

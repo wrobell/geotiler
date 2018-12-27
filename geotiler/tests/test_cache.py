@@ -66,9 +66,9 @@ def test_redis_downloader_and_cache():
 
     args = sorted(v[0] for v in client.setex.call_args_list)
     assert 3 == len(args)
-    assert ('url1', 'c-img1', 10) == args[0]
-    assert ('url2', 'img', 10) == args[1]
-    assert ('url3', 'c-img3', 10) == args[2]
+    assert ('url1', 10, 'c-img1') == args[0]
+    assert ('url2', 10, 'img') == args[1]
+    assert ('url3', 10, 'c-img3') == args[2]
 
 
 # vim: sw=4:et:ai
