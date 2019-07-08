@@ -40,6 +40,7 @@ from .provider import DEFAULT_PROVIDER, find_provider
 from .geo import zoom_to
 from .tile.io import fetch_tiles as _fetch_tiles
 from .tile.img import render_image
+from .util import div_ceil
 
 logger = logging.getLogger(__name__)
 
@@ -428,8 +429,8 @@ def _tile_coords(map, coord, offset):
     """
     w, h = map.size
 
-    n = (w - offset[0]) // map.provider.tile_width + 1
-    m = (h - offset[1]) // map.provider.tile_height + 1
+    n = div_ceil(w - offset[0], map.provider.tile_width)
+    m = div_ceil(h - offset[1], map.provider.tile_height)
     cols = range(coord[0], coord[0] + n)
     rows = range(coord[1], coord[1] + m)
     return itertools.product(cols, rows)

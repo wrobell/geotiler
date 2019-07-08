@@ -26,17 +26,16 @@
 #
 
 """
-GeoTiler utility functions.
+Unit tests for GeoTiler utility functions.
 """
 
-def log_tiles(print, tiles):
-    tiles = (print(t) for t in tiles)
-    return tiles
+from ..util import div_ceil
 
-def div_ceil(n: int, m: int) -> int:
+def test_div_ceil():
     """
-    Calculate ceiling of `n` divided by `m`.
+    Test calculation of ceiling of a division.
     """
-    return (n + m - 1) // m
+    assert 2 == div_ceil(3, 2)
+    assert 3 == div_ceil(9, 3)
 
 # vim: sw=4:et:ai
