@@ -26,14 +26,19 @@
 #   License: BSD
 #
 
+import ast
 from setuptools import setup, find_packages
+
+VERSION = ast.parse(
+    next(l for l in open('geotiler/__init__.py') if l.startswith('__version__'))
+).body[0].value.s
 
 setup(
     name='geotiler',
     packages=find_packages('.'),
     include_package_data=True,
     scripts=('bin/geotiler-lint', 'bin/geotiler-route', 'bin/geotiler-fetch'),
-    version='0.14.0',
+    version=VERSION,
     description='GeoTiler - library to create maps using tiles'
         ' from a map provider',
     author='Artur Wroblewski',
