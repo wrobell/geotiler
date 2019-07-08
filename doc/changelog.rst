@@ -1,5 +1,10 @@
 Changelog
 =========
+0.14.1
+------
+- fixed calculation of number of required tiles to render a map; this also
+  improves performance of map rendering as less tiles is required
+
 0.14.0
 ------
 - corrected use of Redis API in Redis cache
