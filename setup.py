@@ -44,6 +44,10 @@ setup(
     author='Artur Wroblewski',
     author_email='wrobell@riseup.net',
     url='https://wrobell.dcmod.org/geotiler/',
+    project_urls={
+        'Code': 'https://github.com/wrobell/geotiler',
+        'Issue tracker': 'https://github.com/wrobell/geotiler/issues',
+    },
     setup_requires = ['setuptools_git >= 1.0'],
     install_requires=['Pillow', 'cytoolz >= 0.8.2', 'aiohttp >= 2.3.5'],
     classifiers=[
@@ -53,7 +57,9 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Development Status :: 4 - Beta',
     ],
-    license='GPL (includes BSD licensed code)'
+    long_description=open('README').read(),
+    long_description_content_type='text/x-rst',
+    license='GPL (includes BSD licensed code)',
 )
 
 # vim: sw=4:et:ai
