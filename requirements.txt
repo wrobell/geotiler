@@ -2,7 +2,3 @@ Pillow>=2.3.1
 aiohttp>=2.3.5
 redis>=2.9.1
 cytoolz>=0.8.2
-pytest>=3.3.0
-pytest-aiohttp>=0.2.0
-pytest-cov>=2.5.1
-asynctest>=0.11.1
