@@ -26,7 +26,7 @@ Requirements
 - `Pillow <https://pypi.python.org/pypi/Pillow/>`_ library
 - `cytoolz <https://pypi.python.org/pypi/cytoolz/>`_ library
 - `aiohttp <http://aiohttp.readthedocs.org/>`_ library
-- Python 3.6 or later
+- Python 3.7 or later
 
 Project Status
 --------------
