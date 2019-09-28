@@ -98,6 +98,9 @@ class MapProvider:
             logger.debug('tile url: {}'.format(obfuscate(url)))
         return url
 
+    def __str__(self):
+        return self.name
+
 
 def providers():
     """
