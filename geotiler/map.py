@@ -219,12 +219,7 @@ class Map:
 
     @zoom.setter
     def zoom(self, zoom):
-        c = zoom_to(self.origin, self._zoom, zoom)
-
-        map_origin, map_offset = calculateMapCenter(self.provider, c)
-        self.origin = map_origin
-        self.offset = map_offset
-        self._zoom = zoom
+        self._change_center_zoom(self.center, zoom)
 
 
     @property
@@ -343,8 +338,8 @@ class Map:
         yDistance = ytiles * math.pow(2, (MAX_ZOOM - self._zoom))
 
         # new point coordinate reflecting that distance
-        x = round(max_coord[0] + xDistance)
-        y = round(max_coord[1] + yDistance)
+        x = max_coord[0] + xDistance
+        y = max_coord[1] + yDistance
         coord = zoom_to((x, y), max_zoom, self._zoom)
 
         projection = self.provider.projection
@@ -506,7 +501,7 @@ def calculateMapExtent(provider, width, height, *args):
     BR = max(c[0] for c in coordinates), max(c[1] for c in coordinates)
 
     # multiplication factor between horizontal span and map width
-    hFactor = round((BR[0] - TL[0]) / (width / provider.tile_width), 16)
+    hFactor = (BR[0] - TL[0]) / (width / provider.tile_width)
 
     # multiplication factor expressed as base-2 logarithm, for zoom difference
     hZoomDiff = math.log(hFactor) / math.log(2)
@@ -515,7 +510,7 @@ def calculateMapExtent(provider, width, height, *args):
     hPossibleZoom = projection.zoom - math.ceil(hZoomDiff)
 
     # multiplication factor between vertical span and map height
-    vFactor = round((BR[1] - TL[1]) / (height / provider.tile_height), 16)
+    vFactor = (BR[1] - TL[1]) / (height / provider.tile_height)
 
     # multiplication factor expressed as base-2 logarithm, for zoom difference
     vZoomDiff = math.log(vFactor) / math.log(2)

@@ -26,10 +26,14 @@
 #
 
 import numpy as np
+from functools import partial
 from geotiler.map import Map, _find_top_left_tile, _tile_coords, _tile_offsets
 
 import pytest
 import unittest
+
+
+approx = partial(pytest.approx, abs=1e-6)
 
 
 class MapTestCase(unittest.TestCase):
@@ -107,9 +111,8 @@ class MapTestCase(unittest.TestCase):
 
         self.assertEqual((945, 541), map.size)
         self.assertEqual(17, map.zoom) # zoom has not changed
-        expected = 11.783073, 46.4798368, 11.7932010, 46.4838261
-        for v1, v2 in zip(expected, map.extent):
-            self.assertAlmostEqual(v1, v2, 6)
+        expected = 11.783067, 46.479833, 11.793206, 46.483829
+        assert approx(expected) == map.extent
 
         self.assertEqual((69827, 46376), map.origin)
         self.assertEqual((-238, -194), map.offset)
@@ -177,13 +180,12 @@ class MapTestCase(unittest.TestCase):
         self.assertEqual((472, 270), map.size)
         self.assertEqual(16, map.zoom)
 
-        expected = 11.780519, 46.481270, 11.790648, 46.485259
-        for v1, v2 in zip(expected, map.extent):
-            self.assertAlmostEqual(v1, v2, 6, map.extent)
+        expected = 11.783072, 46.479836, 11.793200, 46.483826
+        assert approx(expected) == map.extent
 
         self.assertEqual((34913, 23188), map.origin)
         self.assertEqual(16, map.zoom)
-        self.assertEqual((-128, 0), map.offset)
+        self.assertEqual((-247, -97), map.offset)
 
 
     def test_map_extent_change(self):
@@ -343,6 +345,26 @@ def test_map_create_center_zoom_size_numpy():
 
     assert (69827, 46376) == map.origin
     assert (-238, -194) == map.offset
+
+def test_map_zoom_change_same():
+    """
+    Test if extent and center of map holds after zoom reset to same value.
+    """
+    center = (11.788137, 46.481832)
+    zoom = 15
+    size = 512, 512
+    map = Map(center=center, zoom=zoom, size=size)
+
+    # test preconditions
+    assert approx((11.788158, 46.481846)) == map.center
+    assert approx((11.777172, 46.474280, 11.799144, 46.489410)) == map.extent
+
+    # reset zoom to the same value
+    map.zoom = 15
+
+    # the center and map extent have not changed
+    assert approx((11.788158, 46.481846)) == map.center
+    assert approx((11.777172, 46.474280, 11.799144, 46.489410)) == map.extent
 
 def test_map_create_error_size():
     """
