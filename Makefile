@@ -7,7 +7,7 @@ RSYNC=rsync -zcav \
 
 doc: .sphinx-stamp
 
-upload-doc:
+doc-upload:
 	$(RSYNC) build/doc/ dcmod.org:~/public_html/geotiler
 
 .sphinx-stamp: .map-stamp
