@@ -1,5 +1,12 @@
 Changelog
 =========
+0.14.2
+------
+- python 3.7 is required since now
+- keep center and extent of map unchanged when reseting zoom value to the
+  same value
+- remove some of the rounding of calculations to minimize calculation error
+
 0.14.1
 ------
 - fixed calculation of number of required tiles to render a map; this also
