@@ -7,7 +7,7 @@
 GeoTiler is a library to create maps using tiles from a map provider.
 
 .. note::
-   Version 0.20.0 of GeoTiler will change API. Please use
+   Version 0.20.0 of GeoTiler will change API. Please use::
 
         geotiler>=0.14.2,<0.20.0
 
