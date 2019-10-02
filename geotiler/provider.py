@@ -37,8 +37,7 @@ import logging
 import os.path
 import re
 
-from math import pi
-from .geo import MercatorProjection, deriveTransformation
+from .geo import WebMercator
 from .errors import GeoTilerError
 
 logger = logging.getLogger(__name__)
@@ -68,9 +67,7 @@ class MapProvider:
         attrs = ((norm(n), data[n]) for n in ATTRIBUTES if n in data)
         self.__dict__.update(attrs)
 
-        # the spherical mercator world tile covers (-π, -π) to (π, π)
-        t = deriveTransformation(-pi, pi, 0, 0, pi, pi, 1, 0, -pi, -pi, 0, 1)
-        self.projection = MercatorProjection(0, t)
+        self.projection = WebMercator(0)
         if self.subdomains:
             self.subdomain_cycler = itertools.cycle(self.subdomains)
         else:

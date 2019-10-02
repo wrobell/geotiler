@@ -71,9 +71,8 @@ class MapTestCase(unittest.TestCase):
 
         self.assertEqual((512, 512), map.size)
         self.assertEqual(17, map.zoom)
-        self.assertEqual(extent, map.extent)
-        self.assertAlmostEqual(11.788137, map.center[0], 6)
-        self.assertAlmostEqual(46.481832, map.center[1], 6)
+        assert extent == approx(map.extent)
+        assert (11.788137, 46.481832) == approx(map.center)
 
         self.assertEqual((69827, 46376), map.origin)
         self.assertEqual((-238, -194), map.offset)
@@ -89,9 +88,8 @@ class MapTestCase(unittest.TestCase):
 
         self.assertEqual((472, 270), map.size)
         self.assertEqual(17, map.zoom)
-        self.assertEqual(extent, map.extent)
-        self.assertAlmostEqual(11.788137, map.center[0], 6)
-        self.assertAlmostEqual(46.481832, map.center[1], 6)
+        assert extent == approx(map.extent)
+        assert (11.788137, 46.481832) == approx(map.center)
 
         self.assertEqual((69827, 46376), map.origin)
         self.assertEqual((-238, -194), map.offset)
@@ -319,10 +317,9 @@ def test_map_create_center_zoom_size():
     assert (512, 512) == map.size
     assert 17 == map.zoom
 
-    expected = 11.785390377044687, 46.4799402452901, 11.790883541107167, 46.48372275323265
-    assert expected == map.extent
-    assert abs(map.center[0] - 11.788137) < 1e-6
-    assert abs(map.center[1] - 46.481832) < 1e-6
+    expected = 11.785390, 46.479940, 11.790883, 46.483722
+    assert expected == approx(map.extent)
+    assert (11.788137, 46.481832) == approx(map.center)
 
     assert (69827, 46376) == map.origin
     assert (-238, -194) == map.offset
@@ -338,10 +335,9 @@ def test_map_create_center_zoom_size_numpy():
     assert np.all([512, 512] == map.size)
     assert 17 == map.zoom
 
-    expected = 11.785390377044687, 46.4799402452901, 11.790883541107167, 46.48372275323265
-    assert expected == map.extent
-    assert abs(map.center[0] - 11.788137) < 1e-6
-    assert abs(map.center[1] - 46.481832) < 1e-6
+    expected = 11.785390, 46.479940, 11.790883, 46.483722
+    assert expected == approx(map.extent)
+    assert (11.788137, 46.481832) == approx(map.center)
 
     assert (69827, 46376) == map.origin
     assert (-238, -194) == map.offset
