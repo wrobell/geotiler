@@ -38,6 +38,7 @@ from geotiler.map import Tile
 from geotiler.tile.io import fetch_tile, fetch_tiles
 
 import asynctest
+import pytest
 from unittest import mock
 
 # http://pfertyk.me/2017/06/testing-asynchronous-context-managers-in-python/
@@ -70,6 +71,7 @@ def mock_url_open(session, data, error_msg=None):
     ctx_mock.read = asynctest.CoroutineMock(**params)
     yield session
 
+@pytest.mark.asyncio
 @asynctest.patch('aiohttp.ClientSession', new_callable=ContextManagerMock)
 async def test_fetch_tile(session):
     """
@@ -85,6 +87,7 @@ async def test_fetch_tile(session):
         assert 'image' == result.img
         assert result.error is None
 
+@pytest.mark.asyncio
 @asynctest.patch('aiohttp.ClientSession', new_callable=ContextManagerMock)
 async def test_fetch_tile_error(session):
     """
@@ -100,6 +103,7 @@ async def test_fetch_tile_error(session):
         error = 'Unable to download http://a.b.c (error: some error)'
         assert error == str(tile.error)
 
+@pytest.mark.asyncio
 @asynctest.patch('aiohttp.ClientSession', new_callable=ContextManagerMock)
 async def test_fetch_tiles(session):
     """
