@@ -28,9 +28,17 @@
 import math
 
 class Projection:
+    """
+    Map projection.
+
+    :var zoom: Map zoom.
+    :var transformation: Coordinates transformation.
+    :var max_extent: Maximum extent of transformed map.
+    """
     def __init__(self, zoom):
         self.zoom = zoom
         self.transformation = Transformation(1, 0, 0, 0, 1, 0)
+        self.max_extent = (-180, -90, 180, 90)
 
     def project(self, point):
         raise NotImplementedError()
@@ -92,6 +100,9 @@ class WebMercator(Projection):
             0, 1,
         )
         self.transformation = t
+
+        max_lat = 85.051129
+        self.max_extent = (-180, -max_lat, 180, max_lat)
 
     def project(self, point):
         x, y = point
