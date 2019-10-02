@@ -1,5 +1,10 @@
 Changelog
 =========
+0.14.3
+------
+- show provider map name when requesting its string representation; this
+  also makes nicer string representation of map object
+
 0.14.2
 ------
 - python 3.7 is required since now
