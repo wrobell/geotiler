@@ -37,22 +37,17 @@ import geotiler.tile.io
 from geotiler.map import Tile
 from geotiler.tile.io import fetch_tile, fetch_tiles
 
-import asynctest
 import pytest
 from unittest import mock
-
-# http://pfertyk.me/2017/06/testing-asynchronous-context-managers-in-python/
-class ContextManagerMock(mock.MagicMock):
-    async def __aenter__(self):
-        return self.aenter
-
-    async def __aexit__(self, *args):
-        pass
 
 @contextmanager
 def mock_url_open(session, data, error_msg=None):
     """
     Mock opening of an URL.
+
+    The following call needs to be mocked::
+
+        ClientSession.get().__aenter__().read()
 
     If error message set, then it is raised as `aiohttp.ClientError`
     exception.
@@ -61,18 +56,19 @@ def mock_url_open(session, data, error_msg=None):
     :param data: Data to be assigned to HTTP response.
     :param error_msg: Error encountered when an exception is raised.
     """
-    ctx_mock = session.get.return_value.aenter
+    mock_get = session.get.return_value
+    mock_ctx = mock_get.__aenter__.return_value = mock.MagicMock()
 
     if error_msg:
         params = {'side_effect': aiohttp.ClientError(error_msg)}
     else:
         params = {'return_value': data}
 
-    ctx_mock.read = asynctest.CoroutineMock(**params)
+    mock_ctx.read = mock.AsyncMock(**params)
     yield session
 
 @pytest.mark.asyncio
-@asynctest.patch('aiohttp.ClientSession', new_callable=ContextManagerMock)
+@mock.patch('aiohttp.ClientSession')
 async def test_fetch_tile(session):
     """
     Test fetching a map tile.
@@ -88,7 +84,7 @@ async def test_fetch_tile(session):
         assert result.error is None
 
 @pytest.mark.asyncio
-@asynctest.patch('aiohttp.ClientSession', new_callable=ContextManagerMock)
+@mock.patch('aiohttp.ClientSession')
 async def test_fetch_tile_error(session):
     """
     Test fetching a map tile with an error.
@@ -104,7 +100,7 @@ async def test_fetch_tile_error(session):
         assert error == str(tile.error)
 
 @pytest.mark.asyncio
-@asynctest.patch('aiohttp.ClientSession', new_callable=ContextManagerMock)
+@mock.patch('aiohttp.ClientSession')
 async def test_fetch_tiles(session):
     """
     Test fetching map tiles.
