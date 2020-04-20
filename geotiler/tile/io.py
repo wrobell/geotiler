@@ -86,8 +86,6 @@ async def fetch_tiles(tiles, num_workers):
     if __debug__:
         logger.debug('fetching tiles...')
 
-    loop = asyncio.get_event_loop()
-
     # respect connection limits by defining custom connector
     connector = aiohttp.TCPConnector(limit_per_host=num_workers)
 
