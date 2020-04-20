@@ -98,7 +98,6 @@ class MapProvider:
     def __str__(self):
         return self.name
 
-
 def providers():
     """
     Get sorted list of all map providers identificators.
@@ -115,12 +114,13 @@ def find_provider(id):
 
     :param id: Map provider identificator.
     """
-    cp = read_config()
     data = read_provider_data(id)
 
     api_key_ref = data.get('api-key-ref')
     api_key = None
     if api_key_ref:
+        cp = read_config()
+
         # no api key for the api key reference, then raise fatal error; no
         # api key means no access
         if not cp.has_option('api-key', api_key_ref):
@@ -149,11 +149,11 @@ def read_config():
     """
     p = os.getenv('HOME', '')
     fn = os.path.join(p, '.config/geotiler/geotiler.ini')
+    if not os.path.exists(fn):
+        raise GeoTilerError('Configuration file {} not found'.format(fn))
+
     cp = configparser.ConfigParser()
-    if os.path.exists(fn):
-        cp.read(fn)
-    else:
-        logger.warning('configuration file {} does not exist'.format(fn))
+    cp.read(fn)
     return cp
 
 def read_provider_data(id):
