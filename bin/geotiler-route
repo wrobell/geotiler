@@ -28,7 +28,7 @@
 
 import argparse
 import bz2
-import cairocffi as cairo
+import cairo
 import functools
 import gzip
 import itertools

@@ -29,7 +29,7 @@
 Cairo example.
 """
 
-import cairocffi as cairo
+import cairo
 import logging
 import math
 
