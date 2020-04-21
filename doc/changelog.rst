@@ -1,5 +1,10 @@
 Changelog
 =========
+0.14.4
+------
+- raise error if a map provider requires API key and configuration file
+  does not exist
+
 0.14.3
 ------
 - show provider map name when requesting its string representation; this
