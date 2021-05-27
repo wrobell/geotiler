@@ -4,6 +4,7 @@ Changelog
 ------
 - allow to pass map provider id or map provider data to a map constructor
 - add tile width and height to the map provider data
+- Python 3.8 is required
 
 0.14.4
 ------
