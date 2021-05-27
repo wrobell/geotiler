@@ -7,4 +7,6 @@ python:
 install:
   - "pip install -r requirements-test.txt"
 
-script: pytest -vv
+script:
+  mypy geotiler
+  pytest -vv
