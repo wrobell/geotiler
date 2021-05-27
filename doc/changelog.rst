@@ -1,6 +1,6 @@
 Changelog
 =========
-0.14.4
+0.14.5
 ------
 - allow to pass map provider id or map provider data to a map constructor
 - add tile width and height to the map provider data
