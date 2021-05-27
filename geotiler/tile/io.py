@@ -38,7 +38,7 @@ from functools import partial
 logger = logging.getLogger(__name__)
 
 HEADERS = {
-    'User-Agent': 'GeoTiler/{}'.format(pkg_resources.get_distribution('atimer').version),
+    'User-Agent': 'GeoTiler/{}'.format(pkg_resources.get_distribution('geotiler').version),
 }
 
 # client session params
