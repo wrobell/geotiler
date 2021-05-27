@@ -25,11 +25,17 @@
 #   License: BSD
 #
 
-import pkg_resources
+"""
+Unit tests for GeoTiler utility functions.
+"""
 
-from .map import Map, render_map, render_map_async, fetch_tiles
-from .provider import find_provider, providers
+from ..util import div_ceil
 
-__version__ = pkg_resources.get_distribution('atimer').version
+def test_div_ceil():
+    """
+    Test calculation of ceiling of a division.
+    """
+    assert 2 == div_ceil(3, 2)
+    assert 3 == div_ceil(9, 3)
 
 # vim: sw=4:et:ai

@@ -1,7 +1,7 @@
 #
 # GeoTiler - library to create maps using tiles from a map provider
 #
-# Copyright (C) 2014-2016 by Artur Wroblewski <wrobell@riseup.net>
+# Copyright (C) 2014-2020 by Artur Wroblewski <wrobell@riseup.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,15 +34,31 @@ import itertools
 import math
 import numbers
 import logging
+from collections import namedtuple
 
 from .provider import DEFAULT_PROVIDER, find_provider, MapProvider
 from .geo import zoom_to
-from .tile.io import fetch_tiles
+from .tile.io import fetch_tiles as _fetch_tiles
 from .tile.img import render_image
+from .util import div_ceil
 
 logger = logging.getLogger(__name__)
 
 MAX_ZOOM = 25
+
+Tile = namedtuple('Tile', ['url', 'offset', 'img', 'error'])
+Tile.__doc__ = """
+Map tile.
+
+If a tile download succeeded, then `Tile.img` contain map tile image data.
+Otherwise, it is set to null and `Tile.error` is set to tile download
+error.
+
+:var url: Tile URL.
+:var offset: Tile offest in a map image.
+:var img: Tile image data.
+:var error: Tile error information.
+"""
 
 class Map:
     """
@@ -206,12 +222,7 @@ class Map:
 
     @zoom.setter
     def zoom(self, zoom):
-        c = zoom_to(self.origin, self._zoom, zoom)
-
-        map_origin, map_offset = calculateMapCenter(self.provider, c)
-        self.origin = map_origin
-        self.offset = map_offset
-        self._zoom = zoom
+        self._change_center_zoom(self.center, zoom)
 
 
     @property
@@ -330,8 +341,8 @@ class Map:
         yDistance = ytiles * math.pow(2, (MAX_ZOOM - self._zoom))
 
         # new point coordinate reflecting that distance
-        x = round(max_coord[0] + xDistance)
-        y = round(max_coord[1] + yDistance)
+        x = max_coord[0] + xDistance
+        y = max_coord[1] + yDistance
         coord = zoom_to((x, y), max_zoom, self._zoom)
 
         projection = self.provider.projection
@@ -340,9 +351,12 @@ class Map:
         return location
 
 
-def render_map(map, downloader=None, loop=None, **kw):
+def render_map(map, tiles=None, downloader=None, **kw):
     """
     Download map tiles and render map image.
+
+    If tiles are specified, then the provided tiles are used to render map.
+    Otherwise, map tiles are downloaded from map provider.
 
     If `downloader` is null, then default map tiles downloader is used
     (:py:func:`geotiler.tile.io.fetch_tiles`).
@@ -350,48 +364,58 @@ def render_map(map, downloader=None, loop=None, **kw):
     The function returns an image (instance of `PIL.Image` class).
 
     :param map: Map instance.
+    :param tiles: Optional map tiles.
     :param downloader: Map tiles downloader.
-    :param loop: Asyncio loop (used default one if `None`).
-    :param kw: Parameters passed to default downloader.
+    :param kw: Parameters passed to the downloader.
     """
-    task = render_map_async(map, downloader=downloader, loop=loop, **kw)
-    if loop is None:
-        loop = asyncio.get_event_loop()
+    task = render_map_async(map, downloader=downloader, **kw)
+    loop = asyncio.get_event_loop()
     return loop.run_until_complete(task)
 
-
-@asyncio.coroutine
-def render_map_async(map, downloader=None, **kw):
+async def render_map_async(map, tiles=None, downloader=None, **kw):
     """
     Asyncio coroutine to download map tiles asynchronously and render map
     image.
 
+    If tiles are specified, then the provided tiles are used to render map.
+    Otherwise, map tiles are downloaded from map provider.
+
     If `downloader` is null, then default map tiles downloader is used
     (:py:func:`geotiler.tile.io.fetch_tiles`).
 
     The function returns an image (instance of `PIL.Image` class).
 
     :param map: Map instance.
+    :param tiles: Optional map tiles.
     :param downloader: Map tiles downloader.
-    :param loop: Asyncio loop (used default one if `None`).
-    :param kw: Parameters passed to default downloader.
+    :param kw: Parameters passed to the downloader.
+    """
+    if not tiles:
+        tiles = fetch_tiles(map, downloader, **kw)
+        tiles = (t async for t in tiles)
+    return await render_image(map, tiles)
+
+def fetch_tiles(map, downloader=None, **kw):
+    """
+    Create and fetch map tiles.
+
+    Asynchronous generator of map tiles is returned.
+
+    :param map: Map instance.
+    :param downloader: Map tiles downloader.
+    :param kw: Parameters passed to the downloader.
     """
     if downloader is None:
-        downloader = fetch_tiles
+        downloader = _fetch_tiles
 
     tile_url = map.provider.tile_url
 
-    # NOTE: consider having origin tile at top-left tile instead of the
-    # center, then we could skip this step
     coord, offset = _find_top_left_tile(map)
-
     coords = _tile_coords(map, coord, offset)
-    urls = tuple(tile_url(c, map.zoom) for c in coords)
-    tile_data = yield from downloader(urls, **kw)
-
     offsets = _tile_offsets(map, offset)
-    return render_image(map, tile_data, offsets)
-
+    urls = (tile_url(c, map.zoom) for c in coords)
+    tiles = (Tile(u, o, None, None) for u, o in zip(urls, offsets))
+    return downloader(tiles, map.provider.limit, **kw)
 
 def _tile_coords(map, coord, offset):
     """
@@ -403,8 +427,8 @@ def _tile_coords(map, coord, offset):
     """
     w, h = map.size
 
-    n = (w - offset[0]) // map.provider.tile_width + 1
-    m = (h - offset[1]) // map.provider.tile_height + 1
+    n = div_ceil(w - offset[0], map.provider.tile_width)
+    m = div_ceil(h - offset[1], map.provider.tile_height)
     cols = range(coord[0], coord[0] + n)
     rows = range(coord[1], coord[1] + m)
     return itertools.product(cols, rows)
@@ -480,7 +504,7 @@ def calculateMapExtent(provider, width, height, *args):
     BR = max(c[0] for c in coordinates), max(c[1] for c in coordinates)
 
     # multiplication factor between horizontal span and map width
-    hFactor = round((BR[0] - TL[0]) / (width / provider.tile_width), 16)
+    hFactor = (BR[0] - TL[0]) / (width / provider.tile_width)
 
     # multiplication factor expressed as base-2 logarithm, for zoom difference
     hZoomDiff = math.log(hFactor) / math.log(2)
@@ -489,7 +513,7 @@ def calculateMapExtent(provider, width, height, *args):
     hPossibleZoom = projection.zoom - math.ceil(hZoomDiff)
 
     # multiplication factor between vertical span and map height
-    vFactor = round((BR[1] - TL[1]) / (height / provider.tile_height), 16)
+    vFactor = (BR[1] - TL[1]) / (height / provider.tile_height)
 
     # multiplication factor expressed as base-2 logarithm, for zoom difference
     vZoomDiff = math.log(vFactor) / math.log(2)

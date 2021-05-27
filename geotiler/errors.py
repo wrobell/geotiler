@@ -1,8 +1,7 @@
-#!/usr/bin/env python
 #
 # GeoTiler - library to create maps using tiles from a map provider
 #
-# Copyright (C) 2014-2016 by Artur Wroblewski <wrobell@riseup.net>
+# Copyright (C) 2014-2020 by Artur Wroblewski <wrobell@riseup.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,29 +25,9 @@
 #   License: BSD
 #
 
-from setuptools import setup, find_packages
-
-setup(
-    name='geotiler',
-    packages=find_packages('.'),
-    include_package_data=True,
-    scripts=('bin/geotiler-lint', 'bin/geotiler-route', 'bin/geotiler-fetch'),
-    version='0.11.0',
-    description='GeoTiler - library to create maps using tiles'
-        ' from a map provider',
-    author='Artur Wroblewski',
-    author_email='wrobell@riseup.net',
-    url='https://wrobell.dcmod.org/geotiler/',
-    setup_requires = ['setuptools_git >= 1.0'],
-    install_requires=['Pillow'],
-    classifiers=[
-        'Topic :: Scientific/Engineering :: GIS',
-        'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
-        'License :: OSI Approved :: BSD License',
-        'Programming Language :: Python :: 3',
-        'Development Status :: 4 - Beta',
-    ],
-    license='GPL (includes BSD licensed code)'
-)
+class GeoTilerError(Exception):
+    """
+    Basic GeoTiler error.
+    """
 
 # vim: sw=4:et:ai

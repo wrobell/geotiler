@@ -1,7 +1,7 @@
 #
 # GeoTiler - library to create maps using tiles from a map provider
 #
-# Copyright (C) 2014-2016 by Artur Wroblewski <wrobell@riseup.net>
+# Copyright (C) 2014-2020 by Artur Wroblewski <wrobell@riseup.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,55 +29,68 @@
 Tests for rendering map image using map tile data.
 """
 
+import asyncio
 import io
 import PIL.Image
 
+from geotiler.map import Tile
 import geotiler.tile.img as tile_img
 
-import unittest
 from unittest import mock
 
 
-class MapImageRenderTestCase(unittest.TestCase):
+def _run_render_image(map, tiles):
     """
-    Map image rendering tests.
+    Run coroutine rendering map image using the map tiles.
+
+    :param map: Map object.
+    :param tiles: Asynchronous generator of tiles.
     """
-    def test_render_error_tile(self):
-        """
-        Test rendering of error tile
-        """
-        tile_img._error_image.cache_clear()
-        img = tile_img._error_image(10, 10)
-        self.assertEqual((10, 10), img.size)
+    loop = asyncio.get_event_loop()
+    task = tile_img.render_image(map, tiles)
+    image = loop.run_until_complete(task)
+    return image
 
+async def _tile_generator(offsets, data):
+    """
+    Create asynchronous generator of map tiles.
+    """
+    for o, i in zip(offsets, data):
+        yield Tile(None, o, i, None)
 
-    def test_tile_image_png(self):
-        """
-        Test converting PNG data into PIL image object
-        """
-        tile = PIL.Image.new('RGBA', (10, 11))
-        f = io.BytesIO()
-        tile.save(f, format='png')
+def test_render_error_tile():
+    """
+    Test rendering of error tile.
+    """
+    tile_img._error_image.cache_clear()
+    img = tile_img._error_image(10, 10)
+    assert (10, 10) == img.size
 
-        img = tile_img._tile_image(f.getbuffer())
-        self.assertEquals((10, 11), img.size)
+def test_tile_image_png():
+    """
+    Test converting PNG data into PIL image object.
+    """
+    tile = PIL.Image.new('RGBA', (10, 11))
+    f = io.BytesIO()
+    tile.save(f, format='png')
 
+    img = tile_img._tile_image(f.getbuffer())
+    assert (10, 11) == img.size
 
-    def test_tile_image_jpg(self):
-        """
-        Test converting JPEG data into PIL image object
-        """
-        tile = PIL.Image.new('RGB', (12, 10))
-        f = io.BytesIO()
-        tile.save(f, format='jpeg')
+def test_tile_image_jpg():
+    """
+    Test converting JPEG data into PIL image object.
+    """
+    tile = PIL.Image.new('RGB', (12, 10))
+    f = io.BytesIO()
+    tile.save(f, format='jpeg')
 
-        img = tile_img._tile_image(f.getbuffer())
-        self.assertEquals((12, 10), img.size)
-
+    img = tile_img._tile_image(f.getbuffer())
+    assert (12, 10) == img.size
 
 def test_render_image():
     """
-    Test rendering map image
+    Test rendering map image.
     """
     tile = PIL.Image.new('RGBA', (10, 10))
     map = mock.MagicMock()
@@ -91,16 +104,15 @@ def test_render_image():
         tf.return_value = tile
         data = (tile, tile, tile, tile)
         offsets = ((0, 0), (10, 0), (20, 0), (0, 10))
-
-        image = tile_img.render_image(map, data, offsets)
-
+        tiles = _tile_generator(offsets, data)
+        image = _run_render_image(map, tiles)
         img_new.assert_called_once_with('RGBA', (30, 20))
         assert 4 == tf.call_count
         tf.assert_called_with(tile)
 
 def test_render_image_error():
     """
-    Test rendering map image with error tile
+    Test rendering map image with error tile.
     """
     tile = PIL.Image.new('RGBA', (10, 10))
     map = mock.MagicMock()
@@ -112,7 +124,8 @@ def test_render_image_error():
         tf.return_value = tile
         data = (tile, tile, None, tile, None, tile)
         offsets = ((0, 0), (10, 0), (20, 0), (0, 10), (10, 10), (20, 10))
-        image = tile_img.render_image(map, data, offsets)
+        tiles = _tile_generator(offsets, data)
+        image = _run_render_image(map, tiles)
         assert 4 == tf.call_count
         tf.assert_called_with(tile)
 

@@ -1,0 +1,8 @@
+{
+    "name": "ThunderForest OpenCycleMap",
+    "attribution": "Maps © Thunderforest\nhttp://www.thunderforest.com/\nData © OpenStreetMap contributors\nhttp://www.openstreetmap.org/copyright",
+    "url": "https://{subdomain}.tile.thunderforest.com/cycle/{z}/{x}/{y}.{ext}?apikey={api_key}",
+    "subdomains": ["a", "b", "c"],
+    "api-key-ref": "thunderforest",
+    "limit": 2
+}

@@ -1,7 +1,7 @@
 #
 # GeoTiler - library to create maps using tiles from a map provider
 #
-# Copyright (C) 2014-2016 by Artur Wroblewski <wrobell@riseup.net>
+# Copyright (C) 2014-2020 by Artur Wroblewski <wrobell@riseup.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,26 +29,29 @@
 Load and create map providers.
 """
 
+import configparser
 import glob
 import itertools
 import json
 import logging
 import os.path
+import re
 
-from math import pi
-from .geo import MercatorProjection, deriveTransformation
+from .geo import WebMercator
+from .errors import GeoTilerError
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_PROVIDER = 'osm'
+RE_URL_OBFUSCATE = re.compile('(?<=apikey=)[a-z0-9-]+|(?<=api-key=)[a-z0-9-]+', re.I)
 
 # the attributes inspired by poor-maps project tile source definition
 # https://github.com/otsaloma/poor-maps/tree/master/tilesources
 ATTRIBUTES = 'id', 'name', 'attribution', 'url', 'subdomains', 'extension', \
-    'limit'
+    'limit', 'api-key-ref'
 
 class MapProvider:
-    def __init__(self, data):
+    def __init__(self, data, api_key=None):
         self.id = None
         self.name = None
         self.attribution = None
@@ -56,13 +59,15 @@ class MapProvider:
         self.subdomains = tuple()
         self.extension = 'png'
         self.limit = 1
+        self.api_key_ref = None
+        self.api_key = api_key
 
-        attrs = ((n, data[n]) for n in ATTRIBUTES if n in data)
+        # change a-b-c to a_b_c to allow python attribute access
+        norm = lambda n: n.replace('-', '_')
+        attrs = ((norm(n), data[n]) for n in ATTRIBUTES if n in data)
         self.__dict__.update(attrs)
 
-        # the spherical mercator world tile covers (-π, -π) to (π, π)
-        t = deriveTransformation(-pi, pi, 0, 0, pi, pi, 1, 0, -pi, -pi, 0, 1)
-        self.projection = MercatorProjection(0, t)
+        self.projection = WebMercator(0)
         if self.subdomains:
             self.subdomain_cycler = itertools.cycle(self.subdomains)
         else:
@@ -83,12 +88,15 @@ class MapProvider:
             'y': tile_coord[1],
             'z': zoom,
             'ext': self.extension,
+            'api_key': self.api_key,
         }
         url = self.url.format(**params)
         if __debug__:
-            logger.debug('tile url: {}'.format(url))
+            logger.debug('tile url: {}'.format(obfuscate(url)))
         return url
 
+    def __str__(self):
+        return self.name
 
 def providers():
     """
@@ -106,13 +114,27 @@ def find_provider(id):
 
     :param id: Map provider identificator.
     """
-    fn = os.path.join(base_dir(), id + '.json')
+    data = read_provider_data(id)
+
+    api_key_ref = data.get('api-key-ref')
+    api_key = None
+    if api_key_ref:
+        cp = read_config()
+
+        # no api key for the api key reference, then raise fatal error; no
+        # api key means no access
+        if not cp.has_option('api-key', api_key_ref):
+            raise GeoTilerError('No API key for for reference "{}"'.format(api_key_ref))
+
+        api_key = cp.get('api-key', api_key_ref)
+
     if __debug__:
-        logger.debug('loading map provider "{}" from {}'.format(id, fn))
-    with open(fn, encoding='utf8') as f:
-        data = json.load(f)
-        provider = MapProvider(data)
-        return provider
+        logger.debug('map provider "{}" api key reference: {}'.format(
+            id, api_key_ref
+        ))
+
+    provider = MapProvider(data, api_key=api_key)
+    return provider
 
 def base_dir():
     """
@@ -120,5 +142,41 @@ def base_dir():
     """
     mod = __import__('geotiler')
     return os.path.join(mod.__path__[0], 'source')
+
+def read_config():
+    """
+    Read GeoTiler configuration file.
+    """
+    p = os.getenv('HOME', '')
+    fn = os.path.join(p, '.config/geotiler/geotiler.ini')
+    if not os.path.exists(fn):
+        raise GeoTilerError('Configuration file {} not found'.format(fn))
+
+    cp = configparser.ConfigParser()
+    cp.read(fn)
+    return cp
+
+def read_provider_data(id):
+    """
+    Read map provider data.
+
+    :param id: Map provider identificator.
+    """
+    fn = os.path.join(base_dir(), id + '.json')
+    if __debug__:
+        logger.debug('loading map provider "{}" from {}'.format(id, fn))
+
+    with open(fn, encoding='utf8') as f:
+        data = json.load(f)
+
+    return data
+
+def obfuscate(url):
+    """
+    Replace API key in a tile URL with "<apikey>" string.
+
+    :param url: Tile URL to obfuscate.
+    """
+    return RE_URL_OBFUSCATE.sub('<apikey>', url)
 
 # vim:et sts=4 sw=4:

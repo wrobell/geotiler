@@ -1,7 +1,7 @@
 #
 # GeoTiler - library to create maps using tiles from a map provider
 #
-# Copyright (C) 2014-2016 by Artur Wroblewski <wrobell@riseup.net>
+# Copyright (C) 2014-2020 by Artur Wroblewski <wrobell@riseup.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,106 +30,101 @@ Map tile downloading unit tests.
 """
 
 import asyncio
-import urllib.request
+import aiohttp
 from contextlib import contextmanager
-from functools import wraps
 
+import geotiler.tile.io
+from geotiler.map import Tile
 from geotiler.tile.io import fetch_tile, fetch_tiles
 
-import unittest
+import pytest
 from unittest import mock
 
-
-class MapTileDownloadingTestCase(unittest.TestCase):
+@contextmanager
+def mock_url_open(session, data, error_msg=None):
     """
-    Map tile downloading unit tests.
+    Mock opening of an URL.
+
+    The following call needs to be mocked::
+
+        ClientSession.get().__aenter__().read()
+
+    If error message set, then it is raised as `aiohttp.ClientError`
+    exception.
+
+    :param session: Mock of `aiohttp` client session.
+    :param data: Data to be assigned to HTTP response.
+    :param error_msg: Error encountered when an exception is raised.
     """
-    @contextmanager
-    def run_fetch_tile(self, status, *urls):
-        """
-        Mock `urllib.request.urlopen` call and run `fetch_tile` function.
+    mock_get = session.get.return_value
+    mock_ctx = mock_get.__aenter__.return_value = mock.MagicMock()
 
-        The `status` parameter is HTTP error code, but can be exception as
-        well. If exception, then it is raised during request.
+    if error_msg:
+        params = {'side_effect': aiohttp.ClientError(error_msg)}
+    else:
+        params = {'return_value': data}
 
-        :param status: HTTP error code (i.e. 200) or an exception.
-        :param urls: Collection of urls.
-        """
-        response = mock.MagicMock()
-        response.read.return_value = 'image'
-        response.status = status
+    mock_ctx.read = mock.AsyncMock(**params)
+    yield session
 
-        with mock.patch.object(urllib.request, 'Request') as _, \
-                mock.patch.object(urllib.request, 'urlopen') as f:
+@pytest.mark.asyncio
+@mock.patch('aiohttp.ClientSession')
+async def test_fetch_tile(session):
+    """
+    Test fetching a map tile.
+    """
+    tile = Tile('http://a.b.c', None, None, None)
 
-            if isinstance(status, Exception):
-                f.side_effect = status
-            else:
-                f.return_value = response
-            result = [fetch_tile(u) for u in urls]
-            yield result
+    with mock_url_open(session, 'image'):
+        result = await fetch_tile(session, tile)
 
+        assert result is not tile  # copy of tile is returned
+        assert tile.url == result.url
+        assert 'image' == result.img
+        assert result.error is None
 
-    @contextmanager
-    def run_fetch_tiles(self, *tile_url):
-        """
-        Mock `asyncio.gather` call for `fetch_tiles` coroutine and run the
-        coroutine.
+@pytest.mark.asyncio
+@mock.patch('aiohttp.ClientSession')
+async def test_fetch_tile_error(session):
+    """
+    Test fetching a map tile with an error.
+    """
+    # assign something to `img` and `error` to see if they are overriden
+    # properly in case of an error
+    tile = Tile('http://a.b.c', 'a', 'b', 'c')
+    with mock_url_open(session, 'image', error_msg='some error'):
+        tile = await fetch_tile(session, tile)
+        assert tile.img is None
 
-        The `tile_url` is pair of URL and tile data (tile data can be
-        replaced with an exception). Tile data is to be returned by the
-        'asyncio.gather` mock.
+        error = 'Unable to download http://a.b.c (error: some error)'
+        assert error == str(tile.error)
 
-        :param tile_url: Pair of URL and tile data.
-        """
-        @asyncio.coroutine
-        def mock_gather(*args, **kwargs):
-            return [code for url, code in tile_url]
+@pytest.mark.asyncio
+@mock.patch('aiohttp.ClientSession')
+async def test_fetch_tiles(session):
+    """
+    Test fetching map tiles.
+    """
+    tiles = [
+        Tile('http://a.b.c/1', 'o', 'image', None),
+        Tile('http://a.b.c/2', 'o', 'image', None),
+        Tile('http://a.b.c/3', 'o', None, 'error'),
+        Tile('http://a.b.c/4', 'o', 'image', None),
+    ]
+    tasks = [asyncio.Future() for t in tiles]
+    for task, tile in zip(tasks, tiles):
+        task.set_result(tile)
 
-        with mock.patch.object(asyncio, 'gather', mock_gather) as f:
-            urls = [url for url, code in tile_url]
-            task = fetch_tiles(urls)
-            loop = asyncio.get_event_loop()
-            result = loop.run_until_complete(task)
-            yield list(result)
+    ctx_ac = mock.patch.object(asyncio, 'as_completed')
+    ctx_ft = mock.patch.object(geotiler.tile.io, 'fetch_tile')
+    with ctx_ac as mock_as_completed, ctx_ft:
+        mock_as_completed.return_value = tasks
+        tiles = [t async for t in fetch_tiles(tiles, 2)]
 
+        img = [tile.img for tile in tiles]
+        assert ['image', 'image', None, 'image'] == img, tiles
 
-    def test_fetch_tile(self):
-        """
-        Test fetching of tiles
-        """
-        with self.run_fetch_tile(200, 'a', 'b') as result:
-            self.assertEqual(['image'] * 2, result)
-
-
-    def test_fetch_tile_error(self):
-        """
-        Test error when fetching tile
-
-        If HTTP error code is different than 200 for a tile, then we expect
-        ValueError to be raised.
-        """
-        try:
-            with self.run_fetch_tile(400, 'a', 'b') as result:
-                pass
-        except ValueError as ex:
-            self.assertTrue(str(ex).startswith('Unable to download'))
-
-
-    def test_fetching_tiles_error(self):
-        """
-        Test fetching tiles error
-
-        Check if None is returned for each non-downloaded tile.
-        """
-        params = (
-            ('a', 'image1'), ('b', OSError()), ('c', ValueError()),
-            ('d', 'image2')
-        )
-        with self.run_fetch_tiles(*params) as result:
-            self.assertEqual(4, len(result))
-            expected = ['image1', None, None, 'image2']
-            self.assertEqual(expected, result)
-
+        error = [tile.error for tile in tiles]
+        assert [None, None, 'error', None] == error, tiles
 
 # vim: sw=4:et:ai

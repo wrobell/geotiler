@@ -1,7 +1,7 @@
 #
 # GeoTiler - library to create maps using tiles from a map provider
 #
-# Copyright (C) 2014-2016 by Artur Wroblewski <wrobell@riseup.net>
+# Copyright (C) 2014-2020 by Artur Wroblewski <wrobell@riseup.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,58 +29,65 @@
 Caching strategies for GeoTiler.
 """
 
-import asyncio
 import logging
 from functools import partial
+from cytoolz.itertoolz import groupby, partition_all
 
+from .util import log_tiles
 from geotiler.tile.io import fetch_tiles
 
 logger = logging.getLogger(__name__)
 
-@asyncio.coroutine
-def caching_downloader(get, set, downloader, urls, **kw):
-    """
-    Create caching map tiles downloader.
+def log_tile_cache_hit(tile):
+    if tile.img:
+        logger.debug('cache hit for: {}'.format(tile.url))
+    return tile
 
-    This is asyncio coroutine.
+def fetch_from_cache(get, tiles):
+    tiles = (t._replace(img=get(t.url)) for t in tiles)
+    if __debug__:
+        tiles = log_tiles(log_tile_cache_hit, tiles)
+    return tiles
+
+async def caching_downloader(get, set, downloader, tiles, num_workers, **kw):
+    """
+    Download tiles from cache and missing tiles with the downloader.
+
+    Asynchronous generator of map tiles is returned.
 
     The code flow is
 
-    - caching downloader gets tiles from cache using URLs
-    - the original downloader is used to download missing tiles
-    - cache is updated with all existing tiles
+    - caching downloader gets tile data from cache using URLs
+    - the original downloader is used to download missing tile data
+    - cache is updated with all existing tile data
 
     The cache getter function (`get` parameter) should return `None` if
     tile data is not in cache for given URL.
 
-    The collection of tile data is returned for each input URL (or `None`
-    if tile data could not be obtained).
+    A collection of tiles is returned.
 
-    :param get: Function to get a tile from cache.
-    :param set: Function to put a tile in cache.
+    :param get: Function to get a tile data from cache.
+    :param set: Function to put a tile data in cache.
     :param downloader: Original tiles downloader (asyncio coroutine).
-    :param urls: Collection of URLs of tiles.
+    :param tiles: Collection tiles to fetch.
+    :param num_workers: Number of workers used to connect to a map provider
+        service.
     :param kw: Parameters passed to downloader coroutine.
     """
-    data = {u: get(u) for u in urls}
-    if __debug__:
-        items = (u for u, v in data.items() if v is not None)
-        for u in items:
-            logger.debug('cache hit for {}'.format(u))
+    tiles = fetch_from_cache(get, tiles)
+    groups = partition_all(10, tiles)
+    for tg in groups:
+        missing = groupby(lambda t: t.img is None, tg)
+        for t in missing.get(False, []):
+            # reset cache for new and old tiles
+            set(t.url, t.img)
+            yield t
 
-    # download missing tiles, keep the order of urls
-    missing = tuple(u for u in urls if data[u] is None)
-    result = yield from downloader(missing, **kw)
-    data.update(zip(missing, result))
-
-    # reset cache for new and old tiles
-    existing = ((u, t) for u, t in data.items() if t)
-    for u, t in existing:
-        set(u, t)
-
-    # keep the original order
-    return (data[u] for u in urls)
-
+        result = downloader(missing.get(True, []), num_workers, **kw)
+        async for t in result:
+            # reset cache for new and old tiles
+            set(t.url, t.img)
+            yield t
 
 def redis_downloader(client, downloader=None, timeout=3600 * 24 * 7):
     """
@@ -92,7 +99,7 @@ def redis_downloader(client, downloader=None, timeout=3600 * 24 * 7):
     """
     if downloader is None:
         downloader = fetch_tiles
-    set = lambda key, value: client.setex(key, value, timeout)
+    set = lambda key, value: client.setex(key, timeout, value)
     return partial(caching_downloader, client.get, set, downloader)
 
 

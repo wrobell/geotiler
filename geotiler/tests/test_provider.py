@@ -1,7 +1,7 @@
 #
 # GeoTiler - library to create maps using tiles from a map provider
 #
-# Copyright (C) 2014-2016 by Artur Wroblewski <wrobell@riseup.net>
+# Copyright (C) 2014-2020 by Artur Wroblewski <wrobell@riseup.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 #   License: BSD
 #
 
-from geotiler.provider import MapProvider, base_dir
+from geotiler.provider import MapProvider, base_dir, obfuscate
 
 from unittest import mock
 
@@ -50,6 +50,7 @@ def test_provider_init_default():
     assert () == provider.subdomains
     assert 'png' == provider.extension
     assert 1 == provider.limit
+    assert provider.api_key_ref is None
 
 def test_provider_init_default_override():
     """
@@ -63,6 +64,7 @@ def test_provider_init_default_override():
         'subdomains': ('a', 'b', 'c'),
         'extension': 'jpg',
         'limit': 2,
+        'api-key-ref': 'a-b-c',
     }
     provider = MapProvider(data)
 
@@ -75,6 +77,36 @@ def test_provider_init_default_override():
     assert ('a', 'b', 'c') == provider.subdomains
     assert 'jpg' == provider.extension
     assert 2 == provider.limit
+    assert 'a-b-c' == provider.api_key_ref
+
+def test_provider_tile_url():
+    """
+    Test map provider tile url formatting.
+    """
+    data = {
+        'name': 'OpenStreetMap',
+        'attribution': '© OpenStreetMap contributors\nhttp://www.openstreetmap.org/copyright',
+        'subdomains': ['a'],
+        'url': 'http://{subdomain}.tile.openstreetmap.org/{z}/{x}/{y}.{ext}',
+    }
+    provider = MapProvider(data)
+    url = provider.tile_url((1, 2), 15)
+    assert 'http://a.tile.openstreetmap.org/15/1/2.png' == url
+
+def test_provider_tile_url_api_key():
+    """
+    Test map provider tile url formatting with API key.
+    """
+    data = {
+        'name': 'OpenStreetMap',
+        'attribution': '© OpenStreetMap contributors\nhttp://www.openstreetmap.org/copyright',
+        'subdomains': ['a'],
+        'url': 'http://{subdomain}.tile.openstreetmap.org/{z}/{x}/{y}.{ext}?apikey={api_key}',
+        'api-key-ref': 'a-key-ref',
+    }
+    provider = MapProvider(data, api_key='a-key-ref')
+    url = provider.tile_url((1, 2), 15)
+    assert 'http://a.tile.openstreetmap.org/15/1/2.png?apikey=a-key-ref' == url
 
 def test_base_dir():
     """
@@ -82,5 +114,25 @@ def test_base_dir():
     """
     fn = base_dir()
     assert fn.endswith('/geotiler/source')
+
+def test_obfuscate_url():
+    """
+    Test obfuscation of API key in a tile URL.
+    """
+    # no api key, no change
+    url = obfuscate('http://a.tile.openstreetmap.org/15/1/2.png')
+    assert 'http://a.tile.openstreetmap.org/15/1/2.png' == url
+
+    url = obfuscate('http://a.tile.openstreetmap.org/15/1/2.png?apikey=a-key-ref')
+    assert 'http://a.tile.openstreetmap.org/15/1/2.png?apikey=<apikey>' == url
+
+    url = obfuscate('http://a.tile.openstreetmap.org/15/1/2.png?apikey=a-key-ref&a=1&b=2')
+    assert 'http://a.tile.openstreetmap.org/15/1/2.png?apikey=<apikey>&a=1&b=2' == url
+
+    url = obfuscate('http://a.tile.openstreetmap.org/15/1/2.png?api-key=a-key-ref')
+    assert 'http://a.tile.openstreetmap.org/15/1/2.png?api-key=<apikey>' == url
+
+    url = obfuscate('http://a.tile.openstreetmap.org/15/1/2.png?api-key=a-key-ref&a=1&b=2')
+    assert 'http://a.tile.openstreetmap.org/15/1/2.png?api-key=<apikey>&a=1&b=2' == url
 
 # vim:et sts=4 sw=4:

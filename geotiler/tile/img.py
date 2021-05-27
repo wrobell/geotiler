@@ -1,7 +1,7 @@
 #
 # GeoTiler - library to create maps using tiles from a map provider
 #
-# Copyright (C) 2014-2016 by Artur Wroblewski <wrobell@riseup.net>
+# Copyright (C) 2014-2020 by Artur Wroblewski <wrobell@riseup.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,8 +38,7 @@ import PIL.ImageDraw
 
 logger = logging.getLogger(__name__)
 
-
-def render_image(map, tile_data, offsets):
+async def render_image(map, tiles):
     """
     Redner map image using map tile data.
 
@@ -54,8 +53,7 @@ def render_image(map, tile_data, offsets):
     The PIL image object is returned.
 
     :param map: Map object.
-    :param tile_data: Collection of tile data.
-    :param offsets: Tile offset within map image for each tile data item.
+    :param tiles: Asynchronous generator of map tiles.
     """
     if __debug__:
         logger.debug('combining tiles')
@@ -66,12 +64,11 @@ def render_image(map, tile_data, offsets):
     image = PIL.Image.new('RGBA', tuple(map.size))
     error = _error_image(provider.tile_width, provider.tile_height)
 
-    for tile, offset in zip(tile_data, offsets):
-        img = _tile_image(tile) if tile else error
-        image.paste(img, offset)
+    async for tile in tiles:
+        img = _tile_image(tile.img) if tile.img else error
+        image.paste(img, tile.offset)
 
     return image
-
 
 @functools.lru_cache(maxsize=4)
 def _error_image(width, height):
@@ -90,7 +87,6 @@ def _error_image(width, height):
     tw, th = draw.textsize(msg)
     draw.text(((width - tw) // 2, (height - th) // 2), msg, 'red')
     return img
-
 
 def _tile_image(data):
     """

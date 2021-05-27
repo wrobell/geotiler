@@ -1,5 +1,47 @@
 Changelog
 =========
+0.14.4
+------
+- raise error if a map provider requires API key and configuration file
+  does not exist
+
+0.14.3
+------
+- show provider map name when requesting its string representation; this
+  also makes nicer string representation of map object
+
+0.14.2
+------
+- python 3.7 is required since now
+- keep center and extent of map unchanged when reseting zoom value to the
+  same value
+- remove some of the rounding of calculations to minimize calculation error
+
+0.14.1
+------
+- fixed calculation of number of required tiles to render a map; this also
+  improves performance of map rendering as less tiles is required
+
+0.14.0
+------
+- corrected use of Redis API in Redis cache
+
+0.13.0
+------
+- implemented function `geotiler.fetch_tiles` to allow processing of tiles
+  before map rendering
+- use map provider download limit to honour map provider service connection
+  limits
+- the :py:mod:`aiohttp` module is used again (with support for proxies)
+- Python 3.6 is required
+
+0.12.0
+------
+- there is no OSM cycle map anymore, just OpenCycleMap by Thunderforest;
+  therefore the osm-cycle map provider is replaced with thunderforest-cycle
+  one
+- added support for map provider api keys
+
 0.11.0
 ------
 - added support for stamen-terrain-background and stamen-terrain-lines map

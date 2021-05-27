@@ -69,29 +69,38 @@ running concurrently
 The tasks communication is done via a queue holding current position.
 
 .. literalinclude:: ../examples/ex-async-gps.py
-   :lines: 51-89
+   :lines: 51-86
 
 Map Providers
 -------------
 GeoTiler supports multiple map providers.
 
-The list of supported map providers is presented in the table below.
+The list of supported map providers is presented in the table below. The
+default map provider is OpenStreetMap.
 
-    =========================== =========================== ==================
-         Provider                  Provider Id                 License
-    =========================== =========================== ==================
-     OpenStreetMap               osm                         `Open Data Commons Open Database License <http://www.openstreetmap.org/copyright>`_
-     OpenStreetMap Cycle         osm-cycle                   as above
-     Stamen Toner                stamen-toner                `Creative Commons Attribution (CC BY 3.0) license <http://maps.stamen.com/>`_
-     Stamen Toner Lite           stamen-toner-lite           as above
-     Stamen Terrain              stamen-terrain              as above
-     Stamen Terrain Background   stamen-terrain-background   as above
-     Stamen Terrain Lines        stamen-terrain-lines        as above
-     Stamen Water Color          stamen-watercolor           as above
-     Modest Maps Blue Marble     bluemarble                  see `NASA guideline <http://www.nasa.gov/audience/formedia/features/MP_Photo_Guidelines.html>`_
-    =========================== =========================== ==================
+    =========================== =========================== ====================== ==================
+         Provider                  Provider Id                API Key Reference         License
+    =========================== =========================== ====================== ==================
+     OpenStreetMap               osm                                                `Open Data Commons Open Database License <http://www.openstreetmap.org/copyright>`_
+     Stamen Toner                stamen-toner                                       `Creative Commons Attribution (CC BY 3.0) license <http://maps.stamen.com/>`_
+     Stamen Toner Lite           stamen-toner-lite                                  as above
+     Stamen Terrain              stamen-terrain                                     as above
+     Stamen Terrain Background   stamen-terrain-background                          as above
+     Stamen Terrain Lines        stamen-terrain-lines                               as above
+     Stamen Water Color          stamen-watercolor                                  as above
+     Modest Maps Blue Marble     bluemarble                                         `NASA guideline <http://www.nasa.gov/audience/formedia/features/MP_Photo_Guidelines.html>`_
+     OpenCycleMap                thunderforest-cycle         thunderforest          `Thunderforest Terms and Conditions <https://www.thunderforest.com/terms/>`_
+    =========================== =========================== ====================== ==================
 
-The default map provider is OpenStreetMap.
+A map provider might require API key. To add an API key for a map provider,
+the `$HOME/.config/geotiler/geotiler.ini` file has to be created with API
+key reference pointing to an API key, for example::
+
+    [api-key]
+    thunderforest = <api-key>
+
+where `<api-key>` is usually a fixed size, alphanumeric hash value provided
+by map provider service.
 
 Identificators of GeoTiler map providers can be listed with
 :py:func:`geotiler.providers` function. Map provider identificator can be

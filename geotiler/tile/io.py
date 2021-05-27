@@ -1,7 +1,7 @@
 #
 # GeoTiler - library to create maps using tiles from a map provider
 #
-# Copyright (C) 2014-2016 by Artur Wroblewski <wrobell@riseup.net>
+# Copyright (C) 2014-2020 by Artur Wroblewski <wrobell@riseup.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,76 +29,78 @@
 Functions and coroutines to download map tiles.
 """
 
+import aiohttp
 import asyncio
-import urllib.request
 import logging
-
+import pkg_resources
 from functools import partial
 
 logger = logging.getLogger(__name__)
 
 HEADERS = {
-    'User-Agent': 'GeoTiler/0.11.0',
+    'User-Agent': 'GeoTiler/{}'.format(pkg_resources.get_distribution('atimer').version),
+}
+
+# client session params
+PARAMS = {
+    'headers': HEADERS,
+    'trust_env': True,
+    'raise_for_status': True,
 }
 
 FMT_DOWNLOAD_LOG = 'Cannot download a tile due to error: {}'.format
+FMT_DOWNLOAD_ERROR = 'Unable to download {} (error: {})'.format
 
-def fetch_tile(url):
+async def fetch_tile(session, tile):
     """
     Fetch map tile.
 
-    If response status is not HTTP OK (`200`), then `ValueError` exception
-    is raised.
-
-    :param url: URL of map tile.
+    :param tile: Map tile.
     """
-    request = urllib.request.Request(url)
-    for k, v in HEADERS.items():
-        request.add_header(k, v)
+    try:
+        async with session.get(tile.url) as response:
+            data = await response.read()
+    except aiohttp.ClientError as ex:
+        error = ValueError(FMT_DOWNLOAD_ERROR(tile.url, ex))
+        tile = tile._replace(img=None, error=error)
+    else:
+        tile = tile._replace(img=data, error=None)
 
-    response = urllib.request.urlopen(request)
-    if response.status != 200:
-        fmt = 'Unable to download {} (HTTP status {})'.format
-        raise ValueError(fmt(url, response.status))
+    return tile
 
-    return response.read()
-
-
-@asyncio.coroutine
-def fetch_tiles(urls, loop=None):
+async def fetch_tiles(tiles, num_workers):
     """
-    Download map tiles for the collection of URLs.
+    Download map tiles.
 
-    This is asyncio coroutine.
+    Asynchronous generator of map tiles is returned.
 
-    Tile data for each URL is returned. If there was an error while
-    downloading a tile, then None is returned for given URL.
+    A collection of tiles is returned. Each successfully downloaded tile
+    has `Tile.img` attribute set. If there was an error while downloading
+    a tile, then `Tile.img` is set to null and `Tile.error` to a value error.
 
-    :param urls: Collection of URLs.
+    :param tiles: Collection of tiles.
+    :param num_workers: Number of workers used to connect to a map provider
+        service.
     """
     if __debug__:
         logger.debug('fetching tiles...')
 
-    if loop is None:
-        loop = asyncio.get_event_loop()
+    # respect connection limits by defining custom connector
+    connector = aiohttp.TCPConnector(limit_per_host=num_workers)
 
-    # TODO: is it possible to call `urllib.request` in real async mode
-    # without executor by creating appropriate opener? running in executor
-    # sucks, but thanks to `urllib.request` we get all the goodies like
-    # automatic proxy handling and various protocol support
-    f = partial(loop.run_in_executor, None, fetch_tile)
-    tasks = (f(u) for u in urls)
-    data = yield from asyncio.gather(*tasks, loop=loop, return_exceptions=True)
+    # use `trust_env` to get proxy configuration via env variables
+    async with aiohttp.ClientSession(connector=connector, **PARAMS) as session:
+        f = partial(fetch_tile, session)
+        tasks = [f(t) for t in tiles]
+        for task in asyncio.as_completed(tasks):
+            tile = await task  # no exception expected at this stage
+
+            if tile.error:
+                logger.warning(FMT_DOWNLOAD_LOG(tile.error))
+
+            yield tile
 
     if __debug__:
         logger.debug('fetching tiles done')
-
-    # log missing tiles
-    in_error = (t for t in data if isinstance(t, Exception))
-    for t in in_error:
-        logger.warning(FMT_DOWNLOAD_LOG(t))
-
-    return (None if isinstance(t, Exception) else t for t in data)
-
 
 # vim: sw=4:et:ai

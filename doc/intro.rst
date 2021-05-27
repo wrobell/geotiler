@@ -9,6 +9,7 @@ GeoTiler features are
    way with other libraries, i.e. matplotlib, Cairo, Qt, etc.
 #. Supported multiple map tiles providers, i.e. OpenStreetMap, Stamen and
    Blue Marble.
+#. Allow to configure map providers API keys.
 #. Asynchronous and synchronous map tiles downloader.
 #. Map tiles caching with Redis and support for custom caching strategies.
 #. The library design supports extensibility. Implement custom map tiles
@@ -23,7 +24,9 @@ To install GeoTiler use `pip <http://www.pip-installer.org/>`_::
 Requirements
 
 - `Pillow <https://pypi.python.org/pypi/Pillow/>`_ library
-- Python 3.4 or later
+- `cytoolz <https://pypi.python.org/pypi/cytoolz/>`_ library
+- `aiohttp <http://aiohttp.readthedocs.org/>`_ library
+- Python 3.7 or later
 
 Project Status
 --------------

@@ -1,7 +1,7 @@
 #
 # GeoTiler - library to create maps using tiles from a map provider
 #
-# Copyright (C) 2014-2016 by Artur Wroblewski <wrobell@riseup.net>
+# Copyright (C) 2014-2020 by Artur Wroblewski <wrobell@riseup.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ from PIL.ImageQt import ImageQt
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, \
     QGraphicsPixmapItem, QGraphicsEllipseItem
-from PyQt5.QtGui import QPixmap, QPen, QColor
+from PyQt5.QtGui import QImage, QPixmap, QPainter, QPen, QColor
 from quamash import QEventLoop
 
 import geotiler
@@ -87,24 +87,22 @@ def scroll_map(widget, pos):
     widget.centerOn(x, y)
 
 
-@asyncio.coroutine
-def read_gps(queue):
+async def read_gps(queue):
     """
     Read location from gpsd daemon and put it into positions queue.
 
     :param queue: Queue of GPS positions.
     """
-    reader, writer = yield from asyncio.open_connection(port=2947)
+    reader, writer = await asyncio.open_connection(port=2947)
     writer.write('?WATCH={"enable":true,"json":true}\n'.encode())
     while True:
-        line = yield from reader.readline()
+        line = await reader.readline()
         data = json.loads(line.decode())
         if 'lon' in data:
-            yield from queue.put((data['lon'], data['lat']))
+            await queue.put((data['lon'], data['lat']))
 
 
-@asyncio.coroutine
-def refresh_map(widget):
+async def refresh_map(widget):
     """
     Refresh map when map widget refresh event is set.
 
@@ -121,22 +119,39 @@ def refresh_map(widget):
     render_map = functools.partial(
         geotiler.render_map_async, downloader=downloader
     )
+    fetch_tiles = functools.partial(
+        geotiler.fetch_tiles, downloader=downloader
+    )
+
+    pixmap = QPixmap(*map.size)
 
     while True:
-        yield from event.wait()
+        await event.wait()
         event.clear()
 
         logger.debug('fetching map image...')
-        img = yield from render_map(map)
+
+        img = await render_map(map)
+        pixmap.convertFromImage(ImageQt(img))
+
+        # TODO: use `fetch_tiles` to update map as tiles arrive, but try to
+        # avoid `setPixmap` within the loop.
+        # tiles = fetch_tiles(map)
+        # async for tile in tiles:
+        #     painter = QPainter(pixmap)
+        #     img = QImage()
+        #     img.loadFromData(tile.img)
+        #     painter.drawImage(*tile.offset, img)
+        #     painter.end()
+        #     widget.map_layer.setPixmap(pixmap)
+
+        scroll_map(widget, map.center)
+        widget.map_layer.setPixmap(pixmap)
+
         logger.debug('got map image')
 
-        pixmap = QPixmap.fromImage(ImageQt(img))
-        widget.map_layer.setPixmap(pixmap)
-        scroll_map(widget, map.center)
 
-
-@asyncio.coroutine
-def locate(widget, queue):
+async def locate(widget, queue):
     """
     Read position from the queue and update map position.
 
@@ -146,7 +161,7 @@ def locate(widget, queue):
     :param queue: Queue of GPS positions.
     """
     while True:
-        pos = yield from queue.get()
+        pos = await queue.get()
         scroll_map(widget, pos)
 
 
@@ -164,8 +179,9 @@ class MapWindow(QGraphicsView):
         self.position = map.center
 
         self.providers = deque([
-            'osm', 'osm-cycle', 'stamen-terrain', 'stamen-toner-lite', 'stamen-toner',
-            'stamen-watercolor', 'ms-aerial', 'ms-hybrid', 'ms-road', 'bluemarble',
+            'osm', 'stamen-terrain', 'stamen-toner-lite', 'stamen-toner',
+            'stamen-watercolor', 'ms-aerial', 'ms-hybrid', 'ms-road',
+            'bluemarble',
         ])
 
         self.refresh_map = asyncio.Event()
@@ -250,8 +266,7 @@ pos = (0, 0)
 if len(sys.argv) == 3:
     pos = float(sys.argv[1]), float(sys.argv[2])
 
-provider = geotiler.find_provider('osm')
-mm = geotiler.Map(size=size, center=pos, zoom=18, provider=provider)
+mm = geotiler.Map(size=size, center=pos, zoom=18)
 
 window = MapWindow(mm)
 window.show()

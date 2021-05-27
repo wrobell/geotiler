@@ -10,5 +10,12 @@ The code is based on Python port of Modest Maps project [1][2], which is
 licensed under BSD license. All subsequent changes are licensed under GPL
 v3 license.
 
-[1] http://modestmaps.com/
-[2] https://github.com/stamen/modestmaps-py
+- [1] http://modestmaps.com/
+- [2] https://github.com/stamen/modestmaps-py
+
+.. note::
+   Version 0.20.0 of GeoTiler will change API. Please use::
+
+        geotiler>=0.14.2,<0.20.0
+
+   as your dependency requirement if you need old API.

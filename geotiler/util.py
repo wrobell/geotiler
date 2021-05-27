@@ -25,11 +25,18 @@
 #   License: BSD
 #
 
-import pkg_resources
+"""
+GeoTiler utility functions.
+"""
 
-from .map import Map, render_map, render_map_async, fetch_tiles
-from .provider import find_provider, providers
+def log_tiles(print, tiles):
+    tiles = (print(t) for t in tiles)
+    return tiles
 
-__version__ = pkg_resources.get_distribution('atimer').version
+def div_ceil(n: int, m: int) -> int:
+    """
+    Calculate ceiling of `n` divided by `m`.
+    """
+    return (n + m - 1) // m
 
 # vim: sw=4:et:ai

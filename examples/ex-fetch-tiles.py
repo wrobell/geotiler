@@ -1,7 +1,7 @@
 #
 # GeoTiler - library to create maps using tiles from a map provider
 #
-# Copyright (C) 2014-2016 by Artur Wroblewski <wrobell@riseup.net>
+# Copyright (C) 2014-2020 by Artur Wroblewski <wrobell@riseup.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,7 +26,34 @@
 #
 
 """
-Map tiles providers unit tests.
+Example of downloading map tiles and then rendering them as a map.
 """
 
-# vim:et sts=4 sw=4:
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
+import asyncio
+import geotiler
+
+def log_error(tile):
+    if tile.error:
+        print('tile {} error: {}'.format(tile.url, tile.error))
+    return tile
+
+async def fetch(mm):
+    tiles = geotiler.fetch_tiles(mm)
+    # process tile in error and then render all the tiles
+    tiles = (log_error(t) async for t in tiles)
+    img = await geotiler.render_map_async(mm, tiles=tiles)
+    return img
+
+
+bbox = 11.78560, 46.48083, 11.79067, 46.48283
+mm = geotiler.Map(extent=bbox, zoom=18)
+
+loop = asyncio.get_event_loop()
+
+img = loop.run_until_complete(fetch(mm))
+img.save('ex-fetch-tiles.png', 'png')
+
+# vim: sw=4:et:ai
