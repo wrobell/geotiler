@@ -31,7 +31,7 @@ Caching strategies for GeoTiler.
 
 import logging
 from functools import partial
-from cytoolz.itertoolz import groupby, partition_all
+from cytoolz.itertoolz import groupby, partition_all  # type: ignore
 
 from .util import log_tiles
 from geotiler.tile.io import fetch_tiles

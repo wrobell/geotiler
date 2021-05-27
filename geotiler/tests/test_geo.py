@@ -124,6 +124,6 @@ def test_zoom():
     assert (2, 0) == coord
 
     coord = zoom_to((1, 0), 2, 1)
-    assert (0.5, 0), coord
+    assert (0.5, 0) == coord
 
 # vim: sw=4:et:ai

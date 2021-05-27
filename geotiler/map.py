@@ -34,6 +34,7 @@ import itertools
 import math
 import numbers
 import logging
+import typing as tp
 from collections import namedtuple
 
 from .provider import DEFAULT_PROVIDER, find_provider, MapProvider
@@ -67,7 +68,8 @@ class Map:
     The extent, zoom, center and image size can be changed at any time with
     appropriate properties.
 
-    :var provider: Map tiles provider identificator (default `osm`).
+    :var provider: Map tiles provider identificator (default `osm`) or
+        object.
     :var _zoom: Map zoom attribute accessed via `zoom` property.
     :var _size: Map image size accessed via `size` property.
     :var origin: Tile coordinates at map zoom level of base tile.
@@ -75,8 +77,8 @@ class Map:
     """
     def __init__(
         self, extent=None, center=None, zoom=None, size=None,
-        provider=DEFAULT_PROVIDER
-    ):
+        provider: tp.Union[str, MapProvider]=DEFAULT_PROVIDER
+    ) -> None:
         """
         Create map.
 
@@ -103,6 +105,7 @@ class Map:
             self.provider = provider
         else:
             self.provider = find_provider(provider)
+
         self.origin = None
         self.offset = None
 

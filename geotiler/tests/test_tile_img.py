@@ -31,7 +31,7 @@ Tests for rendering map image using map tile data.
 
 import asyncio
 import io
-import PIL.Image
+import PIL.Image  # type: ignore
 
 from geotiler.map import Tile
 import geotiler.tile.img as tile_img

@@ -33,8 +33,8 @@ import io
 import functools
 import logging
 
-import PIL.Image
-import PIL.ImageDraw
+import PIL.Image  # type: ignore
+import PIL.ImageDraw  # type: ignore
 
 logger = logging.getLogger(__name__)
 
