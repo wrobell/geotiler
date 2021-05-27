@@ -32,14 +32,13 @@ Functions and coroutines to download map tiles.
 import aiohttp
 import asyncio
 import logging
+import pkg_resources
 from functools import partial
-
-from geotiler import __version__
 
 logger = logging.getLogger(__name__)
 
 HEADERS = {
-    'User-Agent': 'GeoTiler/{}'.format(__version__),
+    'User-Agent': 'GeoTiler/{}'.format(pkg_resources.get_distribution('atimer').version),
 }
 
 # client session params

@@ -25,9 +25,11 @@
 #   License: BSD
 #
 
-__version__ = '0.14.4'
+import pkg_resources
 
 from .map import Map, render_map, render_map_async, fetch_tiles
 from .provider import find_provider, providers
+
+__version__ = pkg_resources.get_distribution('atimer').version
 
 # vim: sw=4:et:ai
