@@ -1,7 +1,0 @@
--r requirements.txt
-
-pytest-aiohttp>=0.2.0
-pytest-cov>=2.6.0
-pytest-timeout
-pytest>=3.6.0
-
