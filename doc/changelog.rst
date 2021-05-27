@@ -2,6 +2,11 @@ Changelog
 =========
 0.14.4
 ------
+- allow to pass map provider id or map provider data to a map constructor
+- add tile width and height to the map provider data
+
+0.14.4
+------
 - raise error if a map provider requires API key and configuration file
   does not exist
 
