@@ -36,6 +36,7 @@ import json
 import logging
 import os.path
 import re
+import typing as tp
 
 from .geo import WebMercator
 from .errors import GeoTilerError
@@ -48,19 +49,21 @@ RE_URL_OBFUSCATE = re.compile('(?<=apikey=)[a-z0-9-]+|(?<=api-key=)[a-z0-9-]+', 
 # the attributes inspired by poor-maps project tile source definition
 # https://github.com/otsaloma/poor-maps/tree/master/tilesources
 ATTRIBUTES = 'id', 'name', 'attribution', 'url', 'subdomains', 'extension', \
-    'limit', 'api-key-ref'
+    'limit', 'api-key-ref', 'tile-width', 'tile-height'
 
 class MapProvider:
-    def __init__(self, data, api_key=None):
+    def __init__(self, data: tp.Dict, api_key: tp.Optional[str]=None) -> None:
         self.id = None
         self.name = None
         self.attribution = None
         self.url = None
-        self.subdomains = tuple()
+        self.subdomains: tp.Tuple[str, ...] = tuple()
         self.extension = 'png'
         self.limit = 1
         self.api_key_ref = None
         self.api_key = api_key
+        self.tile_width = 256
+        self.tile_height = 256
 
         # change a-b-c to a_b_c to allow python attribute access
         norm = lambda n: n.replace('-', '_')
@@ -72,14 +75,6 @@ class MapProvider:
             self.subdomain_cycler = itertools.cycle(self.subdomains)
         else:
             self.subdomain_cycler = itertools.cycle(('', ))
-
-    @property
-    def tile_width(self):
-        return 256
-
-    @property
-    def tile_height(self):
-        return 256
 
     def tile_url(self, tile_coord, zoom):
         params = {
@@ -136,14 +131,14 @@ def find_provider(id):
     provider = MapProvider(data, api_key=api_key)
     return provider
 
-def base_dir():
+def base_dir() -> str:
     """
     Get map provider data base directory.
     """
     mod = __import__('geotiler')
     return os.path.join(mod.__path__[0], 'source')
 
-def read_config():
+def read_config() -> configparser.ConfigParser:
     """
     Read GeoTiler configuration file.
     """
@@ -156,7 +151,7 @@ def read_config():
     cp.read(fn)
     return cp
 
-def read_provider_data(id):
+def read_provider_data(id: str) -> tp.Dict:
     """
     Read map provider data.
 
@@ -171,7 +166,7 @@ def read_provider_data(id):
 
     return data
 
-def obfuscate(url):
+def obfuscate(url: str) -> str:
     """
     Replace API key in a tile URL with "<apikey>" string.
 

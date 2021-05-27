@@ -65,6 +65,8 @@ def test_provider_init_default_override():
         'extension': 'jpg',
         'limit': 2,
         'api-key-ref': 'a-b-c',
+        'tile-width': 513,
+        'tile-height': 514,
     }
     provider = MapProvider(data)
 
@@ -78,6 +80,8 @@ def test_provider_init_default_override():
     assert 'jpg' == provider.extension
     assert 2 == provider.limit
     assert 'a-b-c' == provider.api_key_ref
+    assert 513 == provider.tile_width
+    assert 514 == provider.tile_height
 
 def test_provider_tile_url():
     """
