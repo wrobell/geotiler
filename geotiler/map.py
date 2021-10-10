@@ -371,9 +371,8 @@ def render_map(map, tiles=None, downloader=None, **kw):
     :param downloader: Map tiles downloader.
     :param kw: Parameters passed to the downloader.
     """
-    task = render_map_async(map, downloader=downloader, **kw)
     loop = asyncio.get_event_loop()
-    return loop.run_until_complete(task)
+    return loop.run_until_complete(render_map_async(map, downloader=downloader, **kw))
 
 async def render_map_async(map, tiles=None, downloader=None, **kw):
     """
