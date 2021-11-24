@@ -1,5 +1,9 @@
 Changelog
 =========
+0.14.6
+------
+- add missing `pkg_resources` dependency to the build system metadata
+
 0.14.5
 ------
 - allow to pass map provider id or map provider data to a map constructor
