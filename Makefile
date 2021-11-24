@@ -1,4 +1,5 @@
-RSYNC=rsync -zcav \
+export PYTHONPATH=.
+RSYNC=rsync -zzcav \
 	--exclude=\*~ --exclude=.\* \
 	--delete-excluded --delete-after \
 	--no-owner --no-group \
