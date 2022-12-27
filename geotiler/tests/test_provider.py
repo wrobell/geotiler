@@ -37,7 +37,7 @@ def test_provider_init_default():
     data = {
         'name': 'OpenStreetMap',
         'attribution': '© OpenStreetMap contributors\nhttp://www.openstreetmap.org/copyright',
-        'url': 'http://{subdomain}.tile.openstreetmap.org/{z}/{x}/{y}.{ext}',
+        'url': 'http://tile.openstreetmap.org/{z}/{x}/{y}.{ext}',
     }
     provider = MapProvider(data)
 
@@ -45,9 +45,8 @@ def test_provider_init_default():
     expected = '© OpenStreetMap contributors' \
         + '\nhttp://www.openstreetmap.org/copyright'
     assert expected == provider.attribution
-    expected = 'http://{subdomain}.tile.openstreetmap.org/{z}/{x}/{y}.{ext}'
+    expected = 'http://tile.openstreetmap.org/{z}/{x}/{y}.{ext}'
     assert expected == provider.url
-    assert () == provider.subdomains
     assert 'png' == provider.extension
     assert 1 == provider.limit
     assert provider.api_key_ref is None
@@ -60,8 +59,7 @@ def test_provider_init_default_override():
     data = {
         'name': 'OpenStreetMap',
         'attribution': '© OpenStreetMap contributors\nhttp://www.openstreetmap.org/copyright',
-        'url': 'http://{subdomain}.tile.openstreetmap.org/{z}/{x}/{y}.{ext}',
-        'subdomains': ('a', 'b', 'c'),
+        'url': 'http://tile.openstreetmap.org/{z}/{x}/{y}.{ext}',
         'extension': 'jpg',
         'limit': 2,
         'api-key-ref': 'a-b-c',
@@ -74,9 +72,8 @@ def test_provider_init_default_override():
     expected = '© OpenStreetMap contributors' \
         + '\nhttp://www.openstreetmap.org/copyright'
     assert expected == provider.attribution
-    expected = 'http://{subdomain}.tile.openstreetmap.org/{z}/{x}/{y}.{ext}'
+    expected = 'http://tile.openstreetmap.org/{z}/{x}/{y}.{ext}'
     assert expected == provider.url
-    assert ('a', 'b', 'c') == provider.subdomains
     assert 'jpg' == provider.extension
     assert 2 == provider.limit
     assert 'a-b-c' == provider.api_key_ref
@@ -90,12 +87,11 @@ def test_provider_tile_url():
     data = {
         'name': 'OpenStreetMap',
         'attribution': '© OpenStreetMap contributors\nhttp://www.openstreetmap.org/copyright',
-        'subdomains': ['a'],
-        'url': 'http://{subdomain}.tile.openstreetmap.org/{z}/{x}/{y}.{ext}',
+        'url': 'http://tile.openstreetmap.org/{z}/{x}/{y}.{ext}',
     }
     provider = MapProvider(data)
     url = provider.tile_url((1, 2), 15)
-    assert 'http://a.tile.openstreetmap.org/15/1/2.png' == url
+    assert 'http://tile.openstreetmap.org/15/1/2.png' == url
 
 def test_provider_tile_url_api_key():
     """
@@ -104,13 +100,12 @@ def test_provider_tile_url_api_key():
     data = {
         'name': 'OpenStreetMap',
         'attribution': '© OpenStreetMap contributors\nhttp://www.openstreetmap.org/copyright',
-        'subdomains': ['a'],
-        'url': 'http://{subdomain}.tile.openstreetmap.org/{z}/{x}/{y}.{ext}?apikey={api_key}',
+        'url': 'http://tile.openstreetmap.org/{z}/{x}/{y}.{ext}?apikey={api_key}',
         'api-key-ref': 'a-key-ref',
     }
     provider = MapProvider(data, api_key='a-key-ref')
     url = provider.tile_url((1, 2), 15)
-    assert 'http://a.tile.openstreetmap.org/15/1/2.png?apikey=a-key-ref' == url
+    assert 'http://tile.openstreetmap.org/15/1/2.png?apikey=a-key-ref' == url
 
 def test_base_dir():
     """
@@ -124,19 +119,19 @@ def test_obfuscate_url():
     Test obfuscation of API key in a tile URL.
     """
     # no api key, no change
-    url = obfuscate('http://a.tile.openstreetmap.org/15/1/2.png')
-    assert 'http://a.tile.openstreetmap.org/15/1/2.png' == url
+    url = obfuscate('http://tile.openstreetmap.org/15/1/2.png')
+    assert 'http://tile.openstreetmap.org/15/1/2.png' == url
 
-    url = obfuscate('http://a.tile.openstreetmap.org/15/1/2.png?apikey=a-key-ref')
-    assert 'http://a.tile.openstreetmap.org/15/1/2.png?apikey=<apikey>' == url
+    url = obfuscate('http://tile.openstreetmap.org/15/1/2.png?apikey=a-key-ref')
+    assert 'http://tile.openstreetmap.org/15/1/2.png?apikey=<apikey>' == url
 
-    url = obfuscate('http://a.tile.openstreetmap.org/15/1/2.png?apikey=a-key-ref&a=1&b=2')
-    assert 'http://a.tile.openstreetmap.org/15/1/2.png?apikey=<apikey>&a=1&b=2' == url
+    url = obfuscate('http://tile.openstreetmap.org/15/1/2.png?apikey=a-key-ref&a=1&b=2')
+    assert 'http://tile.openstreetmap.org/15/1/2.png?apikey=<apikey>&a=1&b=2' == url
 
-    url = obfuscate('http://a.tile.openstreetmap.org/15/1/2.png?api-key=a-key-ref')
-    assert 'http://a.tile.openstreetmap.org/15/1/2.png?api-key=<apikey>' == url
+    url = obfuscate('http://tile.openstreetmap.org/15/1/2.png?api-key=a-key-ref')
+    assert 'http://tile.openstreetmap.org/15/1/2.png?api-key=<apikey>' == url
 
-    url = obfuscate('http://a.tile.openstreetmap.org/15/1/2.png?api-key=a-key-ref&a=1&b=2')
-    assert 'http://a.tile.openstreetmap.org/15/1/2.png?api-key=<apikey>&a=1&b=2' == url
+    url = obfuscate('http://tile.openstreetmap.org/15/1/2.png?api-key=a-key-ref&a=1&b=2')
+    assert 'http://tile.openstreetmap.org/15/1/2.png?api-key=<apikey>&a=1&b=2' == url
 
 # vim:et sts=4 sw=4:
