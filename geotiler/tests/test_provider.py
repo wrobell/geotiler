@@ -60,7 +60,8 @@ def test_provider_init_default_override():
     data = {
         'name': 'OpenStreetMap',
         'attribution': '© OpenStreetMap contributors\nhttp://www.openstreetmap.org/copyright',
-        'url': 'http://tile.openstreetmap.org/{z}/{x}/{y}.{ext}',
+        'url': 'http://{subdomain}.tile.openstreetmap.org/{z}/{x}/{y}.{ext}',
+        'subdomains': ('a', 'b', 'c'),
         'extension': 'jpg',
         'limit': 2,
         'api-key-ref': 'a-b-c',
@@ -73,8 +74,9 @@ def test_provider_init_default_override():
     expected = '© OpenStreetMap contributors' \
         + '\nhttp://www.openstreetmap.org/copyright'
     assert expected == provider.attribution
-    expected = 'http://tile.openstreetmap.org/{z}/{x}/{y}.{ext}'
+    expected = 'http://{subdomain}.tile.openstreetmap.org/{z}/{x}/{y}.{ext}'
     assert expected == provider.url
+    assert ('a', 'b', 'c') == provider.subdomains
     assert 'jpg' == provider.extension
     assert 2 == provider.limit
     assert 'a-b-c' == provider.api_key_ref
