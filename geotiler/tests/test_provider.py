@@ -37,7 +37,7 @@ def test_provider_init_default():
     data = {
         'name': 'OpenStreetMap',
         'attribution': '© OpenStreetMap contributors\nhttp://www.openstreetmap.org/copyright',
-        'url': 'http://tile.openstreetmap.org/{z}/{x}/{y}.{ext}',
+        'url': 'http://{subdomain}.tile.openstreetmap.org/{z}/{x}/{y}.{ext}'
     }
     provider = MapProvider(data)
 
@@ -45,8 +45,9 @@ def test_provider_init_default():
     expected = '© OpenStreetMap contributors' \
         + '\nhttp://www.openstreetmap.org/copyright'
     assert expected == provider.attribution
-    expected = 'http://tile.openstreetmap.org/{z}/{x}/{y}.{ext}'
+    expected = 'http://{subdomain}.tile.openstreetmap.org/{z}/{x}/{y}.{ext}'
     assert expected == provider.url
+    assert () == provider.subdomains
     assert 'png' == provider.extension
     assert 1 == provider.limit
     assert provider.api_key_ref is None
