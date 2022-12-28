@@ -90,11 +90,12 @@ def test_provider_tile_url():
     data = {
         'name': 'OpenStreetMap',
         'attribution': '© OpenStreetMap contributors\nhttp://www.openstreetmap.org/copyright',
-        'url': 'http://tile.openstreetmap.org/{z}/{x}/{y}.{ext}',
+        'subdomains': ['a'],
+        'url': 'http://{subdomain}.tile.openstreetmap.org/{z}/{x}/{y}.{ext}',
     }
     provider = MapProvider(data)
     url = provider.tile_url((1, 2), 15)
-    assert 'http://tile.openstreetmap.org/15/1/2.png' == url
+    assert 'http://a.tile.openstreetmap.org/15/1/2.png' == url
 
 def test_provider_tile_url_api_key():
     """
