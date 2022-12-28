@@ -37,7 +37,7 @@ def test_provider_init_default():
     data = {
         'name': 'OpenStreetMap',
         'attribution': '© OpenStreetMap contributors\nhttp://www.openstreetmap.org/copyright',
-        'url': 'http://{subdomain}.tile.openstreetmap.org/{z}/{x}/{y}.{ext}'
+        'url': 'http://{subdomain}.tile.openstreetmap.org/{z}/{x}/{y}.{ext}',
     }
     provider = MapProvider(data)
 
