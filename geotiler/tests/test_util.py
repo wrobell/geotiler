@@ -31,14 +31,14 @@ Unit tests for GeoTiler utility functions.
 
 from ..util import div_ceil, obfuscate
 
-def test_div_ceil():
+def test_div_ceil() -> None:
     """
     Test calculation of ceiling of a division.
     """
     assert 2 == div_ceil(3, 2)
     assert 3 == div_ceil(9, 3)
 
-def test_obfuscate_url():
+def test_obfuscate_url() -> None:
     """
     Test obfuscation of API key in a tile URL.
     """

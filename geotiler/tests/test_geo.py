@@ -39,7 +39,7 @@ def web_mercator():
     return wm
 
 
-def test_transformation_identity():
+def test_transformation_identity() -> None:
     """
     Test identity transformation.
     """
@@ -54,7 +54,7 @@ def test_transformation_identity():
     assert 1.0 == pt[0]
     assert 1.0 == pt[1]
 
-def test_transformation_0_1_0():
+def test_transformation_0_1_0() -> None:
     """
     Test transformation for (0, 1, 0, ...).
     """
@@ -69,7 +69,7 @@ def test_transformation_0_1_0():
     assert 0.0 == ptt[0]
     assert 1.0 == ptt[1]
 
-def test_transformation_1_0_1():
+def test_transformation_1_0_1() -> None:
     """
     Test transformation for (1, 0, 1, ...).
     """
@@ -84,7 +84,7 @@ def test_transformation_1_0_1():
     assert 0.0 == ptt[0]
     assert 0.0 == ptt[1]
 
-def test_web_mercator_rev_geocode_at_zero(web_mercator):
+def test_web_mercator_rev_geocode_at_zero(web_mercator) -> None:
     """
     Test Web Mercator projection reverse geocode at (0, 0) position.
     """
@@ -92,7 +92,7 @@ def test_web_mercator_rev_geocode_at_zero(web_mercator):
     assert 0.0 == approx(coord[0])
     assert 0.0 == approx(coord[1])
 
-def test_web_mercator_geocode_at_zero(web_mercator):
+def test_web_mercator_geocode_at_zero(web_mercator) -> None:
     """
     Test Web Mercator projection geocode at (0, 0) position.
     """
@@ -100,7 +100,7 @@ def test_web_mercator_geocode_at_zero(web_mercator):
     assert 0.0 == approx(pt[0])
     assert 0.0 == approx(pt[1])
 
-def test_web_mercator_rev_geocode(web_mercator):
+def test_web_mercator_rev_geocode(web_mercator) -> None:
     """
     Test Web Mercator projection reverse geocode at a position.
     """
@@ -108,7 +108,7 @@ def test_web_mercator_rev_geocode(web_mercator):
     assert -2.129 == approx(coord[0])
     assert 0.696 == approx(coord[1])
 
-def test_web_mercator_geocode(web_mercator):
+def test_web_mercator_geocode(web_mercator) -> None:
     """
     Test Web Mercator projection geocode at a position.
     """
@@ -116,7 +116,7 @@ def test_web_mercator_geocode(web_mercator):
     assert -121.983 == approx(pt[0])
     assert 37.001 == approx(pt[1])
 
-def test_zoom():
+def test_zoom() -> None:
     """
     Test zooming tile coordinates.
     """
