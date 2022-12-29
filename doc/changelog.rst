@@ -1,5 +1,10 @@
 Changelog
 =========
+0.14.7
+------
+- do not use `a, b, c` subdomains for osm map provider as osm does not
+  support them anymore
+
 0.14.6
 ------
 - add missing `pkg_resources` dependency to the build system metadata
