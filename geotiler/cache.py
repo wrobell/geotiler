@@ -33,14 +33,14 @@ import logging
 from functools import partial
 from cytoolz.itertoolz import groupby, partition_all  # type: ignore
 
-from .util import log_tiles
-from geotiler.tile.io import fetch_tiles
+from .util import log_tiles, obfuscate
+from .tile.io import fetch_tiles
 
 logger = logging.getLogger(__name__)
 
 def log_tile_cache_hit(tile):
     if tile.img:
-        logger.debug('cache hit for: {}'.format(tile.url))
+        logger.debug('cache hit for: {}'.format(obfuscate(tile.url)))
     return tile
 
 def fetch_from_cache(get, tiles):

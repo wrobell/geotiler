@@ -35,6 +35,8 @@ import logging
 import pkg_resources
 from functools import partial
 
+from ..util import obfuscate
+
 logger = logging.getLogger(__name__)
 
 HEADERS = {
@@ -61,7 +63,7 @@ async def fetch_tile(session, tile):
         async with session.get(tile.url) as response:
             data = await response.read()
     except aiohttp.ClientError as ex:
-        error = ValueError(FMT_DOWNLOAD_ERROR(tile.url, ex))
+        error = ValueError(FMT_DOWNLOAD_ERROR(obfuscate(tile.url), ex))
         tile = tile._replace(img=None, error=error)
     else:
         tile = tile._replace(img=data, error=None)

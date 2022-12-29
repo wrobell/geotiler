@@ -35,16 +35,15 @@ import itertools
 import json
 import logging
 import os.path
-import re
 import typing as tp
 
 from .geo import WebMercator
 from .errors import GeoTilerError
+from .util import obfuscate
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_PROVIDER = 'osm'
-RE_URL_OBFUSCATE = re.compile('(?<=apikey=)[a-z0-9-]+|(?<=api-key=)[a-z0-9-]+', re.I)
 
 # the attributes inspired by poor-maps project tile source definition
 # https://github.com/otsaloma/poor-maps/tree/master/tilesources
@@ -165,13 +164,5 @@ def read_provider_data(id: str) -> tp.Dict:
         data = json.load(f)
 
     return data
-
-def obfuscate(url: str) -> str:
-    """
-    Replace API key in a tile URL with "<apikey>" string.
-
-    :param url: Tile URL to obfuscate.
-    """
-    return RE_URL_OBFUSCATE.sub('<apikey>', url)
 
 # vim:et sts=4 sw=4:

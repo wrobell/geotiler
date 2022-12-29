@@ -29,6 +29,18 @@
 GeoTiler utility functions.
 """
 
+import re
+
+RE_URL_OBFUSCATE = re.compile('(?<=apikey=)[a-z0-9-]+|(?<=api-key=)[a-z0-9-]+', re.I)
+
+def obfuscate(url: str) -> str:
+    """
+    Replace API key in a tile URL with "<apikey>" string.
+
+    :param url: Tile URL to obfuscate.
+    """
+    return RE_URL_OBFUSCATE.sub('<apikey>', url)
+
 def log_tiles(print, tiles):
     tiles = (print(t) for t in tiles)
     return tiles

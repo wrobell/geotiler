@@ -25,7 +25,7 @@
 #   License: BSD
 #
 
-from geotiler.provider import MapProvider, base_dir, obfuscate
+from geotiler.provider import MapProvider, base_dir
 
 from unittest import mock
 
@@ -117,25 +117,5 @@ def test_base_dir():
     """
     fn = base_dir()
     assert fn.endswith('/geotiler/source')
-
-def test_obfuscate_url():
-    """
-    Test obfuscation of API key in a tile URL.
-    """
-    # no api key, no change
-    url = obfuscate('http://tile.openstreetmap.org/15/1/2.png')
-    assert 'http://tile.openstreetmap.org/15/1/2.png' == url
-
-    url = obfuscate('http://tile.openstreetmap.org/15/1/2.png?apikey=a-key-ref')
-    assert 'http://tile.openstreetmap.org/15/1/2.png?apikey=<apikey>' == url
-
-    url = obfuscate('http://tile.openstreetmap.org/15/1/2.png?apikey=a-key-ref&a=1&b=2')
-    assert 'http://tile.openstreetmap.org/15/1/2.png?apikey=<apikey>&a=1&b=2' == url
-
-    url = obfuscate('http://tile.openstreetmap.org/15/1/2.png?api-key=a-key-ref')
-    assert 'http://tile.openstreetmap.org/15/1/2.png?api-key=<apikey>' == url
-
-    url = obfuscate('http://tile.openstreetmap.org/15/1/2.png?api-key=a-key-ref&a=1&b=2')
-    assert 'http://tile.openstreetmap.org/15/1/2.png?api-key=<apikey>&a=1&b=2' == url
 
 # vim:et sts=4 sw=4:
