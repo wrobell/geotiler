@@ -25,11 +25,11 @@
 #   License: BSD
 #
 
-import pkg_resources
+from importlib.metadata import version
 
 from .map import Map, render_map, render_map_async, fetch_tiles
 from .provider import find_provider, providers
 
-__version__ = pkg_resources.get_distribution('geotiler').version
+__version__ = version('geotiler')
 
 # vim: sw=4:et:ai
