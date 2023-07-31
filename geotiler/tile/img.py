@@ -84,8 +84,12 @@ def _error_image(width, height):
     img = PIL.Image.new('RGBA', (width, height))
     draw = PIL.ImageDraw.Draw(img)
     msg = 'Error downloading map tile.'
-    tw, th = draw.textsize(msg)
-    draw.text(((width - tw) // 2, (height - th) // 2), msg, 'red')
+    x0 = width / 2
+    y0 = height / 2
+    bb_l, bb_t, bb_r, bb_b = draw.textbbox((int(x0), int(y0)), msg)
+    x = x0 + (bb_r - bb_l) / 2
+    y = y0 + (bb_b - bb_t) / 2
+    draw.text((int(x), int(y)), msg, 'red')
     return img
 
 def _tile_image(data):
