@@ -1,5 +1,10 @@
 Changelog
 =========
+0.15.0
+------
+- update to new pillow library api
+- python 3.9 or later is required
+
 0.14.7
 ------
 - do not use `a, b, c` subdomains for osm map provider as osm does not
