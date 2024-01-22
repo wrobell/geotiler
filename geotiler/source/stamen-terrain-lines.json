@@ -1,6 +1,6 @@
 {
     "name": "Stamen Terrain Lines",
-    "attribution": "Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under ODbL.",
-    "url": "http://{subdomain}.tile.stamen.com/terrain-lines/{z}/{x}/{y}.{ext}",
-    "subdomains": ["a", "b", "c", "d"]
+    "attribution": "© Stamen Design, © Stadia Maps, © OpenMapTiles, © OpenStreetMap",
+    "url": "https://tiles.stadiamaps.com/tiles/stamen_terrain_lines/{z}/{x}/{y}.{ext}?api_key={api_key}",
+    "api-key-ref": "stadiamaps"
 }

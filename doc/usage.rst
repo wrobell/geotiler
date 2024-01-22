@@ -82,12 +82,12 @@ default map provider is OpenStreetMap.
          Provider                  Provider Id                API Key Reference         License
     =========================== =========================== ====================== ==================
      OpenStreetMap               osm                                                `Open Data Commons Open Database License <http://www.openstreetmap.org/copyright>`_
-     Stamen Toner                stamen-toner                                       `Creative Commons Attribution (CC BY 3.0) license <http://maps.stamen.com/>`_
-     Stamen Toner Lite           stamen-toner-lite                                  as above
-     Stamen Terrain              stamen-terrain                                     as above
-     Stamen Terrain Background   stamen-terrain-background                          as above
-     Stamen Terrain Lines        stamen-terrain-lines                               as above
-     Stamen Water Color          stamen-watercolor                                  as above
+     Stamen Toner                stamen-toner                stadiamaps             `Creative Commons Attribution (CC BY 3.0) license <http://maps.stamen.com/>`_
+     Stamen Toner Lite           stamen-toner-lite           stadiamaps             `Stadia Maps Required Attribution <https://docs.stadiamaps.com/attribution/>`_
+     Stamen Terrain              stamen-terrain              stadiamaps             `Stadia Maps Required Attribution <https://docs.stadiamaps.com/attribution/>`_
+     Stamen Terrain Background   stamen-terrain-background   stadiamaps             `Stadia Maps Required Attribution <https://docs.stadiamaps.com/attribution/>`_
+     Stamen Terrain Lines        stamen-terrain-lines        stadiamaps             `Stadia Maps Required Attribution <https://docs.stadiamaps.com/attribution/>`_
+     Stamen Water Color          stamen-watercolor           stadiamaps             `Stadia Maps Required Attribution <https://docs.stadiamaps.com/attribution/>`_
      Modest Maps Blue Marble     bluemarble                                         `NASA guideline <http://www.nasa.gov/audience/formedia/features/MP_Photo_Guidelines.html>`_
      OpenCycleMap                thunderforest-cycle         thunderforest          `Thunderforest Terms and Conditions <https://www.thunderforest.com/terms/>`_
     =========================== =========================== ====================== ==================

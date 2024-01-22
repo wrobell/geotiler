@@ -1,5 +1,9 @@
 Changelog
 =========
+0.15.1
+------
+- move stamen map tiles definitions to stadia maps
+
 0.15.0
 ------
 - update to new pillow library api
